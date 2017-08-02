@@ -5,6 +5,7 @@ Thumbs.db
 
 
 # игнорируемые файлы проекта
+*.jpg
 *.pyc
 *.exe
 # settings*.ini
@@ -19,5 +20,6 @@ Thumbs.db
 
 # нужные файлы в запрещённых директориях
 !settings_sample.ini
+#!/Разработка CMExtend/Диапазон сообщений Win.txt
 
 

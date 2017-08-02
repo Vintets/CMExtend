@@ -1,0 +1,107 @@
+#name "Swap_command"
+// Author: Vint
+// Version: 0.0.2 (01.08.2017)
+// Скрипт для Clickermann v4.11 003
+#include "logger.cms"
+
+
+//                              Настройки
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// показывать окно лога. Глубина 0, 1, 2
+$log = 1
+
+// главный файл настроек
+$main_ini = "settings_cme.ini"
+
+//##############################################################################
+
+// ====== Подпрограммы =========================================================
+SUB(log_show) //===  показ лога  ===============================================
+    IF($log > 0)
+        LOGSHOW(1, $_xmax-440, 28)            // отображение окна лога  (335)
+        WNDSIZE(WNDFIND("Лог", 1), 441, 260)  // изменения размеров окна лога 260/800
+    END_IF
+END_SUB
+
+SUB(wait_completion) //===  ожидание завершения  ===============================
+    WHILE(INT(INIREAD($main_ini, "completion", "clickermann")) = 0)
+        WAITMS(20)
+    END_CYC
+END_SUB
+
+SUB(getHWND_CMExtend) //===  получаем hwnd CMExtend  ===========================
+    $hwnd_CME = wndFind("Мой GUI")
+    IF($hwnd_CME = 0)
+        LOGWRITE("Окно не найдено")
+        HINTPOPUP("Окно не найдено", "Мой GUI")
+        HALT
+    END_IF
+    IF($log > 0)
+        LOGWRITE("CMExtend hwnd: ", $hwnd_CME)
+        HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "Мой GUI")
+    END_IF
+END_SUB
+
+SUB(test_555) //===  test_555  =================================================
+    PostMessage($hwnd_CME, 0x555, 5, 10)
+    waitms(200)
+END_SUB
+
+#define MY_GET_PIDCM:0xC400
+SUB(GET_PIDCM) //===  получить PID Clickermann-а  ==============================
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(20)
+    PostMessage($hwnd_CME, MY_GET_PIDCM, 0, 0)
+    wait_completion()
+    $pid_CM = INT(INIREAD($main_ini, "CMPID", "clickermann"))
+    IF($log > 0)
+        LOGWRITE("Clickermann pid: ", $pid_CM)
+        HINTPOPUP(STRCONCAT("Clickermann hwnd: ", $pid_CM), "Мой GUI")
+    END_IF
+END_SUB
+
+#define MY_SETREGION:0xC401
+SUB(SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  ===========================
+    PostMessage($hwnd_CME, MY_SETREGION, $x1+$y1*65536, $x2+$y2*65536)
+    waitms(100)
+END_SUB
+
+#define MY_GREYSCALE:0xC402
+SUB(GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  ===========================
+    PostMessage($hwnd_CME, MY_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
+    waitms(100)
+END_SUB
+
+SUB(test_888888) //===  test_555  ==============================================
+    
+END_SUB
+
+
+// =============================================================================
+//##############################################################################
+
+
+
+WAITMS(300)
+LOGCLEAR
+log_show()
+getHWND_CMExtend()
+
+GETSCREEN
+$x1 = 123
+$y1 = 456
+$x2 = 1600
+$y2 = 1200
+
+$timer1 = $_ms
+
+//test_555()
+GET_PIDCM()
+//SETREGION($x1, $y1, $x2, $y2)
+//GREYSCALE($x1, $y1, $x2, $y2)
+
+print_timeaction("тест 1", $_ms - $timer1)
+
+
+HALT
