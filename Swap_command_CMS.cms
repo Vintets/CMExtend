@@ -1,6 +1,6 @@
 #name "Swap_command"
 // Author: Vint
-// Version: 0.0.2 (01.08.2017)
+// Version: 0.0.3 (02.08.2017)
 // Скрипт для Clickermann v4.11 003
 #include "logger.cms"
 
@@ -9,10 +9,35 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // показывать окно лога. Глубина 0, 1, 2
-$log = 1
+$log = 2
 
 // главный файл настроек
 $main_ini = "settings_cme.ini"
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// ====== Описание параметров ==================================================
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~001~ Заголовки и текст окон (расширенные)
+
+// параметр $AI_title в функциях работы с окнами. Эти установки могут быть использованы, чтобы отличить окна по следующим свойствам:
+
+//TITLE - Заголовок окна
+//CLASS - Внутреннее название класса окна
+//REGEXPTITLE -Заголовок окна с использованием регулярных выражений
+//REGEXPCLASS - Название класса окна с использованием регулярных выражений
+//LAST - Последнее окно, использованное в предыдущей команде
+//ACTIVE - Текущее активное окно
+//X \ Y \ W \ H - Координаты и размер окна
+//INSTANCE - Номер экземпляра окна, если несколько окон соответствуют критерию поиска (отсчёт начинается с 1).
+// [СВОЙСТВО1:Значение1; СВОЙСТВО2:Значение2; СВОЙСТВО3:Значение3]
+// если "Значение" должно содержать символ ";", он должен быть продублирован
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~
+
 
 //##############################################################################
 
@@ -43,33 +68,54 @@ SUB(getHWND_CMExtend) //===  получаем hwnd CMExtend  ===========================
     END_IF
 END_SUB
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 SUB(test_555) //===  test_555  =================================================
-    PostMessage($hwnd_CME, 0x555, 5, 10)
+    PostMessage($hwnd_CME, 0x555, 5, "[CLASS:Button; TEXT:OK]")
     waitms(200)
 END_SUB
 
-#define MY_GET_PIDCM:0xC400
-SUB(GET_PIDCM) //===  получить PID Clickermann-а  ==============================
+#define AI_WinGetHandle:0xC400
+SUB(CME_WinGetHandle, $AI_title) //===  получить дескриптор окна (hWnd)  =======
+    //~001~ Заголовки и текст окон (расширенные)
     INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
     WAITMS(20)
-    PostMessage($hwnd_CME, MY_GET_PIDCM, 0, 0)
+    PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
-    $pid_CM = INT(INIREAD($main_ini, "CMPID", "clickermann"))
-    IF($log > 0)
-        LOGWRITE("Clickermann pid: ", $pid_CM)
-        HINTPOPUP(STRCONCAT("Clickermann hwnd: ", $pid_CM), "Мой GUI")
+    $return = INT(INIREAD($main_ini, "return", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("CME_WinGetHandle:  ", $return)
     END_IF
 END_SUB
 
-#define MY_SETREGION:0xC401
-SUB(SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  ===========================
-    PostMessage($hwnd_CME, MY_SETREGION, $x1+$y1*65536, $x2+$y2*65536)
+#define AI_GET_:0xC400
+SUB(CME_) //===  получить   ==========================
+    
+END_SUB
+
+#define AI_GET_PIDCM:0xC40F
+SUB(CME_GET_PIDCM) //===  получить PID Clickermann-а  ==========================
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(20)
+    PostMessage($hwnd_CME, AI_GET_PIDCM, 0, 0)
+    wait_completion()
+    $pid_CM = INT(INIREAD($main_ini, "CMPID", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("Clickermann pid: ", $pid_CM)
+        //HINTPOPUP(STRCONCAT("Clickermann hwnd: ", $pid_CM), "Мой GUI")
+    END_IF
+END_SUB
+
+#define AI_SETREGION:0xC450
+SUB(CME_SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  =======================
+    PostMessage($hwnd_CME, AI_SETREGION, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
 END_SUB
 
-#define MY_GREYSCALE:0xC402
-SUB(GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  ===========================
-    PostMessage($hwnd_CME, MY_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
+#define AI_GREYSCALE:0xC451
+SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  =======================
+    PostMessage($hwnd_CME, AI_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
 END_SUB
 
@@ -97,11 +143,15 @@ $y2 = 1200
 $timer1 = $_ms
 
 //test_555()
-GET_PIDCM()
-//SETREGION($x1, $y1, $x2, $y2)
-//GREYSCALE($x1, $y1, $x2, $y2)
+//CME_GET_PIDCM()
+CME_WinGetHandle("[CLASS:Notepad]")
+//CME_WINEXISTS("[CLASS:Notepad]")
+//CME_SETREGION($x1, $y1, $x2, $y2)
+//CME_GREYSCALE($x1, $y1, $x2, $y2)
 
 print_timeaction("тест 1", $_ms - $timer1)
 
 
 HALT
+
+

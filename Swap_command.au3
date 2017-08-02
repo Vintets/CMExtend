@@ -38,14 +38,15 @@ EndFunc   ;==>Example1
 
 Func _RegisterMyCommand()
     GUIRegisterMsg(0x555, '_COMMAND_555')
-    GUIRegisterMsg(0xC400, '_COMMAND_GET_PIDCM')
-    GUIRegisterMsg(0xC401, '_COMMAND_SETREGION')
-    GUIRegisterMsg(0xC402, '_COMMAND_GREYSCALE')
+    GUIRegisterMsg(0xC400, '_COMMAND_AI_WinGetHandle')
+    GUIRegisterMsg(0xC40F, '_COMMAND_AI_GET_PIDCM')
+    GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
+    GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
 
     ; Если регистрировать по имени. CM не может слать имя :-((
-    ;$Code_MY_SETREGION = _WinAPI_RegisterWindowMessage('MY_SETREGION')
-    ;ConsoleWrite('MY_SETREGION  ' & $Code_MY_SETREGION & @CRLF)
-    ;GUIRegisterMsg('MY_SETREGION', '_COMMAND_SETREGION')
+    ;$Code_AI_SETREGION = _WinAPI_RegisterWindowMessage('AI_SETREGION')
+    ;ConsoleWrite('AI_SETREGION  ' & $Code_AI_SETREGION & @CRLF)
+    ;GUIRegisterMsg('AI_SETREGION', '_COMMAND_SETREGION')
 EndFunc   ;==>_RegisterMyCommand
 
 Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
@@ -71,7 +72,26 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     Return $GUI_RUNDEFMSG
 EndFunc   ;==>_COMMAND_555
 
-Func _COMMAND_GET_PIDCM($hWnd, $iMsg, $iwParam, $ilParam)
+Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $freturn = -1, $ftitle = ''
+
+    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
+    If $ftitle <> '' Then
+        $freturn = WinGetHandle($ftitle)
+        If @error or $freturn = '' Then
+            $freturn = -1
+        Else
+            ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
+        EndIf
+    EndIf
+    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
+    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+EndFunc   ;==>_COMMAND_AI_WinGetHandle
+
+
+
+Func _COMMAND_AI_GET_PIDCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
     ConsoleWrite($hWnd & '  ' & _
@@ -82,9 +102,9 @@ Func _COMMAND_GET_PIDCM($hWnd, $iMsg, $iwParam, $ilParam)
     _IsWinCM()
     IniWrite($fileini, 'clickermann', 'CMPID', $iPidCM)  ; Записываем в ini $iPidCM
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
-EndFunc   ;==>_COMMAND_GET_PIDCM
+EndFunc   ;==>_COMMAND_AI_GET_PIDCM
 
-Func _COMMAND_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
+Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
     $x1 = BitAND($iwParam, 0xFFFF) ; младшее слово
@@ -98,9 +118,9 @@ Func _COMMAND_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 '(' & $x1 & ', ' & $y1 & ', ' & $x2 & ', ' & $y2 & ')' & _
                 @CRLF)
-EndFunc   ;==>_COMMAND_SETREGION
+EndFunc   ;==>_COMMAND_AI_SETREGION
 
-Func _COMMAND_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
+Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $fx1, $fy1, $fx2, $fy2
 
@@ -116,7 +136,7 @@ Func _COMMAND_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
 ;~     _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
-EndFunc   ;==>_COMMAND_GREYSCALE
+EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
 Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     GUIDelete($hGUImain)
