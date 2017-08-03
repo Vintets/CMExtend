@@ -83,9 +83,37 @@ SUB(CME_WinGetHandle, $AI_title) //===  получить дескриптор окна (hWnd)  =======
     WAITMS(20)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
-    $return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
     IF($log > 1)
-        LOGWRITE("CME_WinGetHandle:  ", $return)
+        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
+    END_IF
+END_SUB
+
+#define AI_WinGetProcess:0xC401
+SUB(CME_WinGetProcess, $AI_title) //===  получить PID окна  ====================
+    //~001~ Заголовки и текст окон (расширенные)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    WAITMS(20)
+    PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("CME_WinGetProcess.  PID:  ", $CME_return)
+    END_IF
+END_SUB
+
+#define AI_WinGetProcessCM:0xC402
+SUB(CME_WinGetProcessCM) //===  получить PID Clickermann-а  ====================
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(20)
+    PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "CMPID", "clickermann"))
+    $pid_CM = $CME_return
+    IF($log > 1)
+        LOGWRITE("Clickermann pid: ", $pid_CM)
+        //HINTPOPUP(STRCONCAT("Clickermann PID: ", $CME_return), "PID")
     END_IF
 END_SUB
 
@@ -94,18 +122,12 @@ SUB(CME_) //===  получить   ==========================
     
 END_SUB
 
-#define AI_GET_PIDCM:0xC40F
-SUB(CME_GET_PIDCM) //===  получить PID Clickermann-а  ==========================
-    INIWRITE($main_ini, "completion", "0", "clickermann")
-    WAITMS(20)
-    PostMessage($hwnd_CME, AI_GET_PIDCM, 0, 0)
-    wait_completion()
-    $pid_CM = INT(INIREAD($main_ini, "CMPID", "clickermann"))
-    IF($log > 1)
-        LOGWRITE("Clickermann pid: ", $pid_CM)
-        //HINTPOPUP(STRCONCAT("Clickermann hwnd: ", $pid_CM), "Мой GUI")
-    END_IF
+#define AI_GET_:0xC400
+SUB(CME_) //===  получить   ==========================
+    
 END_SUB
+
+
 
 #define AI_SETREGION:0xC450
 SUB(CME_SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  =======================
@@ -118,11 +140,6 @@ SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  =======================
     PostMessage($hwnd_CME, AI_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
 END_SUB
-
-SUB(test_888888) //===  test_555  ==============================================
-    
-END_SUB
-
 
 // =============================================================================
 //##############################################################################
@@ -143,8 +160,13 @@ $y2 = 1200
 $timer1 = $_ms
 
 //test_555()
-//CME_GET_PIDCM()
-CME_WinGetHandle("[CLASS:Notepad]")
+//CME_WinGetHandle("[ACTIVE]")          // активное окно
+//CME_WinGetHandle("[CLASS:Notepad]")  // класс блокнот
+//CME_WinGetProcess("[CLASS:Notepad]")
+CME_WinGetProcess(3280352)
+CME_WinGetProcessCM()
+
+
 //CME_WINEXISTS("[CLASS:Notepad]")
 //CME_SETREGION($x1, $y1, $x2, $y2)
 //CME_GREYSCALE($x1, $y1, $x2, $y2)
@@ -153,5 +175,20 @@ print_timeaction("тест 1", $_ms - $timer1)
 
 
 HALT
+
+
+// Получает дескриптор указанного окна
+// CME_WinGetHandle("title")
+
+// Получает идентификатор процесса (Process ID, PID), связанного с указанным окном
+// CME_WinGetProcess("title")
+
+// Получает идентификатор процесса (PID) окна Clickermann
+// CME_WinGetProcessCM()
+
+
+
+
+
 
 

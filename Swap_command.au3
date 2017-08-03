@@ -39,7 +39,9 @@ EndFunc   ;==>Example1
 Func _RegisterMyCommand()
     GUIRegisterMsg(0x555, '_COMMAND_555')
     GUIRegisterMsg(0xC400, '_COMMAND_AI_WinGetHandle')
-    GUIRegisterMsg(0xC40F, '_COMMAND_AI_GET_PIDCM')
+    GUIRegisterMsg(0xC401, '_COMMAND_AI_WinGetProcess')
+    GUIRegisterMsg(0xC402, '_COMMAND_AI_WinGetProcessCM')
+    
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
 
@@ -89,9 +91,28 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetHandle
 
+Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $freturn = -1, $ftitle = '', $fhwnd
 
+    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
+    If $ftitle <> '' Then
+        $fhwnd = HWnd(Int($ftitle))
+        If Not @error Then
+            $ftitle = $fhwnd
+        EndIf
+        $freturn = WinGetProcess($ftitle)
+        If @error or $freturn = '' Then
+            $freturn = -1
+        Else
+            ConsoleWrite('WinGetProcess   PID = ' & $freturn & @CRLF)
+        EndIf
+    EndIf
+    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
+    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+EndFunc   ;==>_COMMAND_AI_WinGetProcess
 
-Func _COMMAND_AI_GET_PIDCM($hWnd, $iMsg, $iwParam, $ilParam)
+Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
     ConsoleWrite($hWnd & '  ' & _
@@ -102,7 +123,9 @@ Func _COMMAND_AI_GET_PIDCM($hWnd, $iMsg, $iwParam, $ilParam)
     _IsWinCM()
     IniWrite($fileini, 'clickermann', 'CMPID', $iPidCM)  ; Записываем в ini $iPidCM
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
-EndFunc   ;==>_COMMAND_AI_GET_PIDCM
+EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
+
+
 
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
@@ -136,6 +159,7 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
 ;~     _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
 Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
