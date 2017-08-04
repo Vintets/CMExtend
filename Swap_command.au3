@@ -42,6 +42,7 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC401, '_COMMAND_AI_GetDesktopWindow')
     GUIRegisterMsg(0xC402, '_COMMAND_AI_WinGetProcess')
     GUIRegisterMsg(0xC403, '_COMMAND_AI_WinGetProcessCM')
+    GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
     
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
@@ -56,7 +57,11 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $hWndFrom, $iIDFrom, $iCode
 
-    ConsoleWrite($hWnd & '  ' & Hex(Int($iMsg), 4) & '  ' & $iwParam & '  ' & $ilParam & @CRLF)
+    ConsoleWrite($hWnd & '  ' & _
+                Hex(Int($iMsg), 4) & ' (555)  ' & _
+                $iwParam & '  ' & _
+                $ilParam & _
+                @CRLF)
     $hWndFrom = $ilParam
     $iLW = BitAND($iwParam, 0xFFFF) ; младшее слово
     $iHW = BitShift($iwParam, 16) ; старшее слово
@@ -128,15 +133,47 @@ EndFunc   ;==>_COMMAND_AI_WinGetProcess
 Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
-    ConsoleWrite($hWnd & '  ' & _
-                Hex(Int($iMsg), 4) & ' (GET_PIDCM)  ' & _
-                $iwParam & '  ' & _
-                $ilParam & _
-                @CRLF)
     _IsWinCM()
     IniWrite($fileini, 'clickermann', 'return', $iPidCM)  ; return
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
+
+Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $freturn = -1, $ftitle = '', $ftext = ''
+    Local $fEXIST, $fSHOW, $fENABLE, $fACTIVE, $fMINIMIZE, $fMAXIMIZE
+
+    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
+    $ftext = IniRead($fileini, 'clickermann', 'text', '')
+    If $ftitle <> '' Then
+        $fhwnd = HWnd(Int($ftitle))
+        If Not @error Then
+            $ftitle = $fhwnd
+        EndIf
+        $freturn = WinGetState($ftitle, $ftext)
+        If @error or $freturn = '' Then
+            $freturn = -1
+        Else
+            ConsoleWrite('WinGetState   hWnd = ' & $freturn & @CRLF)
+        EndIf
+    EndIf
+    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
+    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    $fEXIST = BitAND($freturn, 1)
+    $fSHOW = BitAND($freturn, 2)
+    $fENABLE = BitAND($freturn, 4)
+    $fACTIVE = BitAND($freturn, 8)
+    $fMINIMIZE = BitAND($freturn, 16)
+    $fMAXIMIZE = BitAND($freturn, 32)
+;~     If BitAND($freturn, 1) Then $fEXIST = 1
+    ConsoleWrite('EXIST = ' & $fEXIST & @CRLF)
+    ConsoleWrite('SHOW = ' & $fSHOW & @CRLF)
+    ConsoleWrite('ENABLE = ' & $fENABLE & @CRLF)
+    ConsoleWrite('ACTIVE = ' & $fACTIVE & @CRLF)
+    ConsoleWrite('MINIMIZE = ' & $fMINIMIZE & @CRLF)
+    ConsoleWrite('MAXIMIZE = ' & $fMAXIMIZE & @CRLF)
+EndFunc   ;==>_COMMAND_AI_WinGetState
+
 
 
 

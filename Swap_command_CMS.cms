@@ -64,6 +64,7 @@ SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
     END_IF
     IF($log > 0)
         LOGWRITE("CMExtend hwnd: ", $hwnd_CME)
+        LOGWRITE("")
         HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "Мой GUI")
     END_IF
 END_SUB
@@ -93,7 +94,7 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     END_IF
 END_SUB
 
-//--- получить дескриптор (hWnd) окна рабочего стола --------------------------- 
+//--- получить дескриптор (hWnd) окна рабочего стола ---------------------------
 #define AI_GetDesktopWindow:0xC401
 SUB(CME_GetDesktopWindow)
     INIWRITE($main_ini, "completion", "0", "clickermann")
@@ -138,10 +139,72 @@ SUB(CME_WinGetProcessCM)
     END_IF
 END_SUB
 
-//--- получить -----------------------------------------------------------------
-#define AI_:0xC400
-SUB(CME_) 
-    
+//--- получить состояние указанного окна. --------------------------------------
+#define AI_WinGetState:0xC404
+SUB(CME_WinGetState, $AI_title, $AI_text)
+    //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
+    // ответ:
+    // $CME_return  - состояние побитово
+    //		1 = существует
+    //		2 = отображается
+    //		4 = доступно
+    //		8 = активно
+    //	 16 = свёрнуто
+    //	 32 = развёрнуто
+    // и раздельно:
+    //		$fEXIST - существует
+    //		$fSHOW - отображается
+    //		$fENABLE - доступно
+    //		$fACTIVE - активно
+    //		$fMINIMIZE - свёрнуто
+    //		$fMAXIMIZE - развёрнуто на весь экран
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
+    WAITMS(20)
+    PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $fstate = $CME_return
+    $fEXIST = 0
+    $fSHOW = 0
+    $fENABLE = 0
+    $fACTIVE = 0
+    $fMINIMIZE = 0
+    $fMAXIMIZE = 0
+    IF($fstate > 31)
+        $fMAXIMIZE = 1
+        $fstate = $fstate - 32
+    END_IF
+    IF($fstate > 15)
+        $fMINIMIZE = 1
+        $fstate = $fstate - 16
+    END_IF
+    IF($fstate > 7)
+        $fACTIVE = 1
+        $fstate = $fstate - 8
+    END_IF
+    IF($fstate > 3)
+        $fENABLE = 1
+        $fstate = $fstate - 4
+    END_IF
+    IF($fstate > 1)
+        $fSHOW = 1
+        $fstate = $fstate - 2
+    END_IF
+    IF($fstate > 0)
+        $fEXIST = 1
+    END_IF
+    IF($log > 1)
+        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
+        LOGWRITE("существует               - ", $fEXIST)
+        LOGWRITE("отображается             - ", $fSHOW)
+        LOGWRITE("доступно                 - ", $fENABLE)
+        LOGWRITE("активно                  - ", $fACTIVE)
+        LOGWRITE("свёрнуто                 - ", $fMINIMIZE)
+        LOGWRITE("развёрнуто на весь экран - ", $fMAXIMIZE)
+    END_IF
 END_SUB
 
 //--- получить -------------------------
@@ -159,7 +222,7 @@ SUB(CME_SETREGION, $x1, $y1, $x2, $y2)
 END_SUB
 
 //--- преобразовать область в GREYSCALE ----------------------------------------
-#define AI_GREYSCALE:0xC451                                    
+#define AI_GREYSCALE:0xC451
 SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2)
     PostMessage($hwnd_CME, AI_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
@@ -184,11 +247,14 @@ $y2 = 1200
 $timer1 = $_ms
 
 //test_555()
-//CME_WinGetHandle("[ACTIVE]")          // активное окно
-//CME_WinGetHandle("[CLASS:Notepad]")  // класс блокнот
+//CME_WinGetHandle("[ACTIVE]", "")          // активное окно
+//CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
 //CME_GetDesktopWindow()
-//CME_WinGetProcess("[CLASS:Notepad]")
+//CME_WinGetProcess("[CLASS:Notepad]", "")
+
 //CME_WinGetProcessCM()
+CME_WinGetState("[ACTIVE]", "")
+//CME_WinGetState("[CLASS:Notepad]", "")
 
 
 //CME_WINEXISTS("[CLASS:Notepad]")
@@ -204,21 +270,40 @@ HALT
 // 0xC400
 // Получает дескриптор указанного окна
 // CME_WinGetHandle("title", "text")
+// $CME_return  - hWnd
 
 // 0xC401
 // Получает дескриптор окна рабочего стола
 // CME_GetDesktopWindow()
+// $CME_return  - hWnd
 
 // 0xC402
 // Получает идентификатор процесса (Process ID, PID), связанного с указанным окном
 // CME_WinGetProcess("title", "text")
+// $CME_return  - PID
 
 // 0xC403
 // Получает идентификатор процесса (PID) окна Clickermann
 // CME_WinGetProcessCM()
+// $CME_return  - PID
+// $pid_CM      - PID
 
-
-
-
+// 0xC404
+// Получает состояние указанного окна
+// CME_WinGetState("title", "text")
+// $CME_return  - состояние побитово
+//		1 = существует
+//		2 = отображается
+//		4 = доступно
+//		8 = активно
+//	 16 = свёрнуто
+//	 32 = развёрнуто
+// и раздельно:
+//		$fEXIST - существует
+//		$fSHOW - отображается
+//		$fENABLE - доступно
+//		$fACTIVE - активно
+//		$fMINIMIZE - свёрнуто
+//		$fMAXIMIZE - развёрнуто на весь экран
 
 
