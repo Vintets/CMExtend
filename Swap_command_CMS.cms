@@ -146,19 +146,19 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     // $AI_text - текст окна или пустая строка""
     // ответ:
     // $CME_return  - состояние побитово
-    //		1 = существует
-    //		2 = отображается
-    //		4 = доступно
-    //		8 = активно
-    //	 16 = свёрнуто
-    //	 32 = развёрнуто
+    //    1 = существует
+    //    2 = отображается
+    //    4 = доступно
+    //    8 = активно
+    //   16 = свёрнуто
+    //   32 = развёрнуто
     // и раздельно:
-    //		$fEXIST - существует
-    //		$fSHOW - отображается
-    //		$fENABLE - доступно
-    //		$fACTIVE - активно
-    //		$fMINIMIZE - свёрнуто
-    //		$fMAXIMIZE - развёрнуто на весь экран
+    //    $fEXIST - существует
+    //    $fSHOW - отображается
+    //    $fENABLE - доступно
+    //    $fACTIVE - активно
+    //    $fMINIMIZE - свёрнуто
+    //    $fMAXIMIZE - развёрнуто на весь экран
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
@@ -207,11 +207,28 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     END_IF
 END_SUB
 
+//--- Поверх всех окон ---------------------------------------------------------
+#define AI_WinSetOnTop:0xC407
+SUB(CME_WinSetOnTop, $AI_hwnd, $fpar1)
+    // hwnd окна
+    // 1 - включить, 0 - выключить
+    PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $fpar1)
+END_SUB
+
+//--- Устанавливает прозрачность окна ------------------------------------------
+#define AI_WinSetTrans:0xC408
+SUB(CME_WinSetTrans, $AI_hwnd, $fpar1)
+    // hwnd окна
+    // прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
+    PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $fpar1)
+END_SUB
+
 //--- получить -------------------------
 #define AI_:0xC400
 SUB(CME_)
     
 END_SUB
+
 
 
 //--- SETREGION ----------------------------------------------------------------
@@ -248,13 +265,15 @@ $timer1 = $_ms
 
 //test_555()
 //CME_WinGetHandle("[ACTIVE]", "")          // активное окно
-//CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
+CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
 //CME_GetDesktopWindow()
 //CME_WinGetProcess("[CLASS:Notepad]", "")
 
 //CME_WinGetProcessCM()
-CME_WinGetState("[ACTIVE]", "")
 //CME_WinGetState("[CLASS:Notepad]", "")
+//CME_WinSetOnTop($CME_return, 1)
+CME_WinSetTrans($CME_return, 128)
+
 
 
 //CME_WINEXISTS("[CLASS:Notepad]")
@@ -292,18 +311,25 @@ HALT
 // Получает состояние указанного окна
 // CME_WinGetState("title", "text")
 // $CME_return  - состояние побитово
-//		1 = существует
-//		2 = отображается
-//		4 = доступно
-//		8 = активно
-//	 16 = свёрнуто
-//	 32 = развёрнуто
+//    1 = существует
+//    2 = отображается
+//    4 = доступно
+//    8 = активно
+//   16 = свёрнуто
+//   32 = развёрнуто
 // и раздельно:
-//		$fEXIST - существует
-//		$fSHOW - отображается
-//		$fENABLE - доступно
-//		$fACTIVE - активно
-//		$fMINIMIZE - свёрнуто
-//		$fMAXIMIZE - развёрнуто на весь экран
+//    $fEXIST - существует
+//    $fSHOW - отображается
+//    $fENABLE - доступно
+//    $fACTIVE - активно
+//    $fMINIMIZE - свёрнуто
+//    $fMAXIMIZE - развёрнуто на весь экран
 
+// 0xC407
+// Поверх всех окон
+// CME_WinSetOnTop(hwnd, 1/0)
+
+// 0xC408
+// Устанавливает прозрачность окна
+// CME_WinSetTrans(hwnd, transporency)
 

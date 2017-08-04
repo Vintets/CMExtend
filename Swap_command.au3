@@ -43,6 +43,8 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC402, '_COMMAND_AI_WinGetProcess')
     GUIRegisterMsg(0xC403, '_COMMAND_AI_WinGetProcessCM')
     GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
+    GUIRegisterMsg(0xC407, '_COMMAND_AI_WinSetOnTop')
+    GUIRegisterMsg(0xC408, '_COMMAND_AI_WinSetTrans')
     
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
@@ -140,8 +142,8 @@ EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
 
 Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $ftext = ''
-    Local $fEXIST, $fSHOW, $fENABLE, $fACTIVE, $fMINIMIZE, $fMAXIMIZE
+    Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
+    ;Local $fEXIST, $fSHOW, $fENABLE, $fACTIVE, $fMINIMIZE, $fMAXIMIZE
 
     $ftitle = IniRead($fileini, 'clickermann', 'title', '')
     $ftext = IniRead($fileini, 'clickermann', 'text', '')
@@ -155,24 +157,38 @@ Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
             $freturn = -1
         Else
             ConsoleWrite('WinGetState   hWnd = ' & $freturn & @CRLF)
+            ConsoleWrite('EXIST = ' & BitAND($freturn, 1) & @CRLF)
+            ConsoleWrite('SHOW = ' & BitAND($freturn, 2) & @CRLF)
+            ConsoleWrite('ENABLE = ' & BitAND($freturn, 4) & @CRLF)
+            ConsoleWrite('ACTIVE = ' & BitAND($freturn, 8) & @CRLF)
+            ConsoleWrite('MINIMIZE = ' & BitAND($freturn, 16) & @CRLF)
+            ConsoleWrite('MAXIMIZE = ' & BitAND($freturn, 32) & @CRLF)
         EndIf
     EndIf
     IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
-    $fEXIST = BitAND($freturn, 1)
-    $fSHOW = BitAND($freturn, 2)
-    $fENABLE = BitAND($freturn, 4)
-    $fACTIVE = BitAND($freturn, 8)
-    $fMINIMIZE = BitAND($freturn, 16)
-    $fMAXIMIZE = BitAND($freturn, 32)
-;~     If BitAND($freturn, 1) Then $fEXIST = 1
-    ConsoleWrite('EXIST = ' & $fEXIST & @CRLF)
-    ConsoleWrite('SHOW = ' & $fSHOW & @CRLF)
-    ConsoleWrite('ENABLE = ' & $fENABLE & @CRLF)
-    ConsoleWrite('ACTIVE = ' & $fACTIVE & @CRLF)
-    ConsoleWrite('MINIMIZE = ' & $fMINIMIZE & @CRLF)
-    ConsoleWrite('MAXIMIZE = ' & $fMAXIMIZE & @CRLF)
 EndFunc   ;==>_COMMAND_AI_WinGetState
+
+Func _COMMAND_AI_WinSetOnTop($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $fhwnd
+
+    $fhwnd = HWnd($iwParam)
+    If Not @error Then
+        WinSetOnTop($fhwnd, '', $ilParam)
+    EndIf
+EndFunc   ;==>_COMMAND_AI_WinSetOnTop
+
+Func _COMMAND_AI_WinSetTrans($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $fhwnd
+
+    $fhwnd = HWnd($iwParam)
+    If Not @error Then
+        $res = WinSetTrans($fhwnd, '', $ilParam)
+        ConsoleWrite($res & @CRLF)
+    EndIf
+EndFunc   ;==>_COMMAND_AI_WinSetTrans
 
 
 
