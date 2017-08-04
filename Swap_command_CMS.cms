@@ -40,22 +40,22 @@ $main_ini = "settings_cme.ini"
 
 
 //##############################################################################
-
 // ====== Подпрограммы =========================================================
-SUB(log_show) //===  показ лога  ===============================================
+
+SUB(log_show) //--- показ лога -------------------------------------------------
     IF($log > 0)
         LOGSHOW(1, $_xmax-440, 28)            // отображение окна лога  (335)
         WNDSIZE(WNDFIND("Лог", 1), 441, 260)  // изменения размеров окна лога 260/800
     END_IF
 END_SUB
 
-SUB(wait_completion) //===  ожидание завершения  ===============================
+SUB(wait_completion) //--- ожидание завершения ---------------------------------
     WHILE(INT(INIREAD($main_ini, "completion", "clickermann")) = 0)
         WAITMS(20)
     END_CYC
 END_SUB
 
-SUB(getHWND_CMExtend) //===  получаем hwnd CMExtend  ===========================
+SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
     $hwnd_CME = wndFind("Мой GUI")
     IF($hwnd_CME = 0)
         LOGWRITE("Окно не найдено")
@@ -70,16 +70,19 @@ END_SUB
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SUB(test_555) //===  test_555  =================================================
+//--- test_555 -----------------------------------------------------------------
+SUB(test_555)
     PostMessage($hwnd_CME, 0x555, 5, "[CLASS:Button; TEXT:OK]")
     waitms(200)
 END_SUB
 
+//--- получить дескриптор окна (hWnd) ------------------------------------------
 #define AI_WinGetHandle:0xC400
-SUB(CME_WinGetHandle, $AI_title) //===  получить дескриптор окна (hWnd)  =======
+SUB(CME_WinGetHandle, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
     WAITMS(20)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
@@ -89,8 +92,9 @@ SUB(CME_WinGetHandle, $AI_title) //===  получить дескриптор окна (hWnd)  =======
     END_IF
 END_SUB
 
+//--- получить дескриптор (hWnd) окна рабочего стола --------------------------- 
 #define AI_GetDesktopWindow:0xC401
-SUB(CME_GetDesktopWindow) //===  получить дескриптор окна рабочего стола (hWnd) 
+SUB(CME_GetDesktopWindow)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     WAITMS(20)
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
@@ -101,11 +105,13 @@ SUB(CME_GetDesktopWindow) //===  получить дескриптор окна рабочего стола (hWnd)
     END_IF
 END_SUB
 
+//--- получить PID окна --------------------------------------------------------
 #define AI_WinGetProcess:0xC402
-SUB(CME_WinGetProcess, $AI_title) //===  получить PID окна  ====================
+SUB(CME_WinGetProcess, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
     WAITMS(20)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
     wait_completion()
@@ -115,8 +121,9 @@ SUB(CME_WinGetProcess, $AI_title) //===  получить PID окна  ====================
     END_IF
 END_SUB
 
+//--- получить PID Clickermann-а -----------------------------------------------
 #define AI_WinGetProcessCM:0xC403
-SUB(CME_WinGetProcessCM) //===  получить PID Clickermann-а  ====================
+SUB(CME_WinGetProcessCM)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     WAITMS(20)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
@@ -129,26 +136,29 @@ SUB(CME_WinGetProcessCM) //===  получить PID Clickermann-а  ====================
     END_IF
 END_SUB
 
+//--- получить -----------------------------------------------------------------
 #define AI_:0xC400
-SUB(CME_) //===  получить   ==========================
+SUB(CME_) 
     
 END_SUB
 
+//--- получить -------------------------
 #define AI_:0xC400
-SUB(CME_) //===  получить   ==========================
+SUB(CME_)
     
 END_SUB
 
 
-
+//--- SETREGION ----------------------------------------------------------------
 #define AI_SETREGION:0xC450
-SUB(CME_SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  =======================
+SUB(CME_SETREGION, $x1, $y1, $x2, $y2)
     PostMessage($hwnd_CME, AI_SETREGION, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
 END_SUB
 
-#define AI_GREYSCALE:0xC451
-SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  =======================
+//--- преобразовать область в GREYSCALE ----------------------------------------
+#define AI_GREYSCALE:0xC451                                    
+SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2)
     PostMessage($hwnd_CME, AI_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
     waitms(100)
 END_SUB
@@ -191,7 +201,7 @@ HALT
 
 // 0xC400
 // Получает дескриптор указанного окна
-// CME_WinGetHandle("title")
+// CME_WinGetHandle("title", "text")
 
 // 0xC401
 // Получает дескриптор окна рабочего стола
@@ -199,12 +209,11 @@ HALT
 
 // 0xC402
 // Получает идентификатор процесса (Process ID, PID), связанного с указанным окном
-// CME_WinGetProcess("title")
+// CME_WinGetProcess("title", "text")
 
 // 0xC403
 // Получает идентификатор процесса (PID) окна Clickermann
 // CME_WinGetProcessCM()
-
 
 
 

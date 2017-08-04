@@ -77,11 +77,12 @@ EndFunc   ;==>_COMMAND_555
 
 Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = ''
+    Local $freturn = -1, $ftitle = '', $ftext = ''
 
     $ftitle = IniRead($fileini, 'clickermann', 'title', '')
+    $ftext = IniRead($fileini, 'clickermann', 'text', '')
     If $ftitle <> '' Then
-        $freturn = WinGetHandle($ftitle)
+        $freturn = WinGetHandle($ftitle, $ftext)
         If @error or $freturn = '' Then
             $freturn = -1
         Else
@@ -104,15 +105,16 @@ EndFunc   ;==>_COMMAND_AI_GetDesktopWindow
 
 Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $fhwnd
+    Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
 
     $ftitle = IniRead($fileini, 'clickermann', 'title', '')
+    $ftext = IniRead($fileini, 'clickermann', 'text', '')
     If $ftitle <> '' Then
         $fhwnd = HWnd(Int($ftitle))
         If Not @error Then
             $ftitle = $fhwnd
         EndIf
-        $freturn = WinGetProcess($ftitle)
+        $freturn = WinGetProcess($ftitle, $ftext)
         If @error or $freturn = '' Then
             $freturn = -1
         Else
