@@ -134,7 +134,7 @@ Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & _
                 @CRLF)
     _IsWinCM()
-    IniWrite($fileini, 'clickermann', 'CMPID', $iPidCM)  ; Записываем в ini $iPidCM
+    IniWrite($fileini, 'clickermann', 'return', $iPidCM)  ; return
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
 

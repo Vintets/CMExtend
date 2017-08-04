@@ -80,6 +80,7 @@ END_SUB
 #define AI_WinGetHandle:0xC400
 SUB(CME_WinGetHandle, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
@@ -109,6 +110,7 @@ END_SUB
 #define AI_WinGetProcess:0xC402
 SUB(CME_WinGetProcess, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
@@ -128,7 +130,7 @@ SUB(CME_WinGetProcessCM)
     WAITMS(20)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "CMPID", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
     $pid_CM = $CME_return
     IF($log > 1)
         LOGWRITE("Clickermann pid: ", $pid_CM)
