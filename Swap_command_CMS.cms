@@ -1,6 +1,6 @@
 #name "Swap_command"
 // Author: Vint
-// Version: 0.0.4 (03.08.2017)
+// Version: 0.0.5 (10.08.2017)
 // —крипт дл€ Clickermann v4.11 003
 #include "logger.cms"
 
@@ -47,6 +47,21 @@ SUB(log_show) //--- показ лога -------------------------------------------------
         LOGSHOW(1, $_xmax-440, 28)            // отображение окна лога  (335)
         WNDSIZE(WNDFIND("Ћог", 1), 441, 260)  // изменени€ размеров окна лога 260/800
     END_IF
+END_SUB
+
+STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. ¬ыход $HEX =
+SUB(toHEX, $DEC)
+    $HEX = ""
+    WHILE($DEC > 0)
+        $cel = INT($DEC/16)
+        $ost = $DEC - $cel*16
+        IF($ost > 9)
+            $ost = $arr16[$ost - 10]
+        END_IF
+        $HEX = STRCONCAT($ost, $HEX)
+        $DEC = $cel
+    END_CYC
+    //LOGWRITE($HEX)
 END_SUB
 
 SUB(wait_completion) //--- ожидание завершени€ ---------------------------------
@@ -241,8 +256,10 @@ END_SUB
 //--- преобразовать область в GREYSCALE ----------------------------------------
 #define AI_GREYSCALE:0xC451
 SUB(CME_GREYSCALE, $x1, $y1, $x2, $y2)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(10)
     PostMessage($hwnd_CME, AI_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
-    waitms(100)
+    wait_completion()
 END_SUB
 
 // =============================================================================
@@ -255,33 +272,63 @@ LOGCLEAR
 log_show()
 getHWND_CMExtend()
 
-GETSCREEN
-$x1 = 123
-$y1 = 456
-$x2 = 1600
-$y2 = 1200
 
+//$x1 = 123
+//$y1 = 456
+//$x2 = 1600
+//$y2 = 1200
+
+// 100х100
+$x1 = 750
+$y1 = 426
+$x2 = 849
+$y2 = 525
+
+
+GETSCREEN
 $timer1 = $_ms
 
 //test_555()
 //CME_WinGetHandle("[ACTIVE]", "")          // активное окно
-CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
+//CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
 //CME_GetDesktopWindow()
 //CME_WinGetProcess("[CLASS:Notepad]", "")
 
 //CME_WinGetProcessCM()
 //CME_WinGetState("[CLASS:Notepad]", "")
 //CME_WinSetOnTop($CME_return, 1)
-CME_WinSetTrans($CME_return, 128)
+//CME_WinSetTrans($CME_return, 128)
 
 
 
 //CME_WINEXISTS("[CLASS:Notepad]")
 //CME_SETREGION($x1, $y1, $x2, $y2)
-//CME_GREYSCALE($x1, $y1, $x2, $y2)
+
+//$pid = 4936
+//READMEM($pid, "004E20FC", 4)  // читаем адрес начала буфера в указателе
+//$startbuf = $_return1
+//LOGWRITE("$startbuf = ", $startbuf)
+
+//$x1 = 194
+//$y1 = 347
+//$c = PXL($x1, $y1)
+//LOGWRITE($c, "  RGB  ", COLORR($c), " ", COLORG($c), " ", COLORB($c))
+//$startbufrd = $_return1 + ($y1*($_xmax+1)*4) + ($x1*4)
+//toHEX($startbufrd)
+//READMEM($pid, $HEX, 4)
+//$read = $_return1
+//LOGWRITE($read, "  RGB  ", COLORB($read), " ", COLORG($read), " ", COLORR($read))
+//$gray_canal = INT((0.299*COLORR($c)) + (0.587*COLORG($c)) + (0.114*COLORB($c)))
+//$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
+//LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)
+//CME_GREYSCALE($x1, $y1, $x1, $y1)
+
+CME_GREYSCALE($x1, $y1, $x2, $y2)
+
+
 
 print_timeaction("тест 1", $_ms - $timer1)
-
+SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
 
 HALT
 
@@ -332,4 +379,3 @@ HALT
 // 0xC408
 // ”станавливает прозрачность окна
 // CME_WinSetTrans(hwnd, transporency)
-
