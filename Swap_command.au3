@@ -12,6 +12,7 @@ Global $Available = False
 
 
 _IsWinCM()
+;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
 Example1()
 
 Func Example1()
@@ -260,14 +261,76 @@ Func _GetWin($type, $data)
     Return $hWndt
 EndFunc   ;==>_GetWin
 
-Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+Func _COLORMODE_GREYSCALE_DEF($fx1, $fy1, $fx2, $fy2)
     Local $hProcess, $iAddress = 0x004E20FC
-    Local $iRead, $iWrite, $startbuf, $startbufwr, $addrWr
-    Local $color, $R, $G, $B
-    Local $bf = DllStructCreate('DWORD')
-    Local $bfWr = DllStructCreate('DWORD')
-    Local $clr = DllStructCreate('DWORD')
+    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrWr
+    Local $color=0, $R, $G, $B
+    Local $lenstrX = $fx2 - $fx1
+    Local $tBf = DllStructCreate('DWORD')
+    Local $tClrStruct = DllStructCreate('DWORD')
 
+    ;Local $hTimer = TimerInit()
+    If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        Return
+    EndIf
+    _IsWinCM()
+    If $Available = False Then Return
+
+    $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        ;MsgBox(16+4096, 'Ошибка', 'Не удалось открыть память тестовой программы')
+        Return
+    EndIf
+
+    ; Читаем адрес начала буфера в указателе
+    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    $startbuf = DllStructGetData($tBf, 1)
+    ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
+
+    $startBufRd = $startbuf + ($fy1 * @DesktopWidth * 4) + ($fx1*4)
+    For $y = 0 To $fy2 - $fy1
+        ;$startBufRd = $startbuf + (($fy1+$y) * @DesktopWidth * 4) + ($fx1*4)
+        For $x = 0 To $lenstrX
+            $addrRd = $startBufRd + $x*4
+            _WinAPI_ReadProcessMemory($hProcess, $addrRd, DllStructGetPtr($tClrStruct), 4, $iRead)
+            $color = DllStructGetData($tClrStruct, 1)
+            $B = BitAND($color, 0xFF)
+            $G = BitAND(BitShift($color, 8), 0xFF)
+            $R = BitAND(BitShift($color, 16), 0xFF)
+;~             $G = BitShift(BitAND($color, 0xFF00), 8)
+;~             $R = BitShift(BitAND($color, 0xFF0000), 16)
+            ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+            ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+            $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
+            $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+            ;$color = BitShift($gray_canal, -16) + BitShift($gray_canal, -8) + $gray_canal
+            DllStructSetData($tClrStruct, 1, $color)
+            _WinAPI_WriteProcessMemory($hProcess, $addrRd, DllStructGetPtr($tClrStruct), 4, $iWrite)
+            ;ConsoleWrite('$gray  ' & $color & '  ' & $gray_canal & @CRLF)
+            ;$startBufRd += 3
+        Next
+        $startBufRd += @DesktopWidth * 4
+    Next
+
+    If ProcessExists($iPidCM) Then
+        _WinAPI_CloseHandle($hProcess); Открытый процесс необходимо закрывать
+    EndIf
+    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+EndFunc   ;==>_COLORMODE_GREYSCALE_DEF
+
+Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+    Local Const $iAddress = 0x004E20FC
+    Local $hProcess
+    Local $iRead, $iWrite, $startbuf, $startBufRd
+    Local $color, $R, $G, $B, $A
+    Local Const $lenXBite = ($fx2 - $fx1 + 1) * 4
+    Local Const $tagSTRUCT = 'byte[' & $lenXBite &']'
+    Local $tClrStruct = DllStructCreate($tagSTRUCT)
+    Local $tBf = DllStructCreate('DWORD')
+
+    ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
@@ -283,35 +346,38 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     EndIf
 
     ; Читаем адрес начала буфера в указателе
-    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($bf), 4, $iRead)
-    $startbuf = DllStructGetData($bf, 1)
-    ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
+    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    $startbuf = DllStructGetData($tBf, 1)
+    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
-    $startbufwr = $startbuf + ($fy1 * @DesktopWidth * 4) + ($fx1*4)
+    $startBufRd = $startbuf + ($fy1 * @DesktopWidth * 4) + ($fx1*4)
     For $y = 0 To $fy2 - $fy1
-        ;$startbufwr = $startbuf + (($fy1+$y) * @DesktopWidth * 4) + ($fx1*4)
-        For $x = 0 To $fx2 - $fx1
-            $addrWr = $startbufwr + $x*4
-            _WinAPI_ReadProcessMemory($hProcess, $addrWr, DllStructGetPtr($clr), 4, $iRead)
-            $color = DllStructGetData($clr, 1)
-            $B = BitAND($color, 0xFF)
-            $G = BitShift(BitAND($color, 0xFF00), 8)
-            $R = BitShift(BitAND($color, 0xFF0000), 16)
-            ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
-            ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+        _WinAPI_ReadProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite, $iRead)
+
+        For $x = 1 To $lenXBite Step 4
+            $B = DllStructGetData($tClrStruct, 1, $x)
+            $G = DllStructGetData($tClrStruct, 1, $x+1)
+            $R = DllStructGetData($tClrStruct, 1, $x+2)
+            ;$A = DllStructGetData($tClrStruct, 1, $x+3)
+            ;ConsoleWrite(DllStructGetSize($tClrStruct) &'  Read  ' & $iRead & ' B,   ' & _
+            ;            'RGBA  ' & _
+            ;            $R & '  ' & $G & '  ' & $B & '  ' & $A & @CRLF)
             $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
-            $color = BitShift($gray_canal, -16) + BitShift($gray_canal, -8) + $gray_canal
-            ;ConsoleWrite('$gray  ' & $color & '  ' & $gray_canal & @CRLF)
-            DllStructSetData($clr, 1, $color)
-            _WinAPI_WriteProcessMemory($hProcess, $addrWr, DllStructGetPtr($clr), 4, $iWrite)
-            ;$startbufwr += 3
+            DllStructSetData($tClrStruct, 1, $gray_canal, $x)
+            DllStructSetData($tClrStruct, 1, $gray_canal, $x+1)
+            DllStructSetData($tClrStruct, 1, $gray_canal, $x+2)
+            _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite, $iWrite)
+            ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
         Next
-        $startbufwr += @DesktopWidth * 4
+        ;ExitLoop(1)
+        ;Binary('0x' & '4D5A00000000')
+        $startBufRd += @DesktopWidth * 4
     Next
 
     If ProcessExists($iPidCM) Then
         _WinAPI_CloseHandle($hProcess); Открытый процесс необходимо закрывать
     EndIf
+    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE
 
 ;~ WM_User = 0x400 (1024)
