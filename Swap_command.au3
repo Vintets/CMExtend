@@ -1,8 +1,36 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=cmex.ico
+#AutoIt3Wrapper_Compression=4
+#AutoIt3Wrapper_Res_Comment=Swap_command
+#AutoIt3Wrapper_Res_Fileversion=0.0.3
+#AutoIt3Wrapper_Res_LegalCopyright=Vint
+#AutoIt3Wrapper_Res_Language=1049
+#AutoIt3Wrapper_Res_requestedExecutionLevel=None
+#AutoIt3Wrapper_Res_Field=Version|0.0.3
+#AutoIt3Wrapper_Res_Field=Build|2017.08.11
+#AutoIt3Wrapper_Res_Field=Coded by|Vint
+#AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
+#AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+
+;===============================================================================
+;
+; Description:      Swap_command
+; Version:          0.0.3
+; Requirement(s):   Autoit 3.3.8.1
+; Author(s):        Vint
+;
+;===============================================================================
+
+#Region    ************ Includes ************
 #include <GUIConstantsEx.au3>
 #include <WindowsConstants.au3>
 #include <Constants.au3>
 #include <WindowsConstants.au3>
 #include <WinAPI.au3>
+#EndRegion ************ Includes ************
+
+#RequireAdmin
 
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
@@ -261,7 +289,7 @@ Func _GetWin($type, $data)
     Return $hWndt
 EndFunc   ;==>_GetWin
 
-Func _COLORMODE_GREYSCALE_DEF($fx1, $fy1, $fx2, $fy2)
+Func _COLORMODE_GREYSCALE_OLD($fx1, $fy1, $fx2, $fy2)
     Local $hProcess, $iAddress = 0x004E20FC
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrWr
     Local $color=0, $R, $G, $B

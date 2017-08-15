@@ -401,4 +401,3 @@ HALT
 //$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
 //LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)
 
-
