@@ -304,7 +304,9 @@ $timer1 = $_ms
 
 //CME_WINEXISTS("[CLASS:Notepad]")
 //CME_SETREGION($x1, $y1, $x2, $y2)
-//CME_GREYSCALE($x1, $y1, $x2, $y2)
+CME_GREYSCALE($x1, $y1, $x2, $y2)
+//CME_GREYSCALE(0, 0, $_xmax, $_ymax)
+//SCREENSHOT
 
 
 
@@ -400,4 +402,3 @@ HALT
 //$gray_canal = INT((0.299*COLORR($c)) + (0.587*COLORG($c)) + (0.114*COLORB($c)))
 //$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
 //LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)
-

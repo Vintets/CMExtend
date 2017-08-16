@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.3
+#AutoIt3Wrapper_Res_Fileversion=0.0.4
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.3
-#AutoIt3Wrapper_Res_Field=Build|2017.08.11
+#AutoIt3Wrapper_Res_Field=Version|0.0.4
+#AutoIt3Wrapper_Res_Field=Build|2017.08.16
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -16,7 +16,7 @@
 ;===============================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.3
+; Version:          0.0.4
 ; Requirement(s):   Autoit 3.3.8.1
 ; Author(s):        Vint
 ;
@@ -40,8 +40,13 @@ Global $Available = False
 
 
 _IsWinCM()
-;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
 Example1()
+
+;~ Local $hTimer = TimerInit()
+;~ _COLORMODE_GREYSCALE_OLD2(750, 426, 849, 525)
+;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
+;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+
 
 Func Example1()
     Local $Msg, $Code_MY_SETREGION
@@ -289,7 +294,7 @@ Func _GetWin($type, $data)
     Return $hWndt
 EndFunc   ;==>_GetWin
 
-Func _COLORMODE_GREYSCALE_OLD($fx1, $fy1, $fx2, $fy2)
+Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $hProcess, $iAddress = 0x004E20FC
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrWr
     Local $color=0, $R, $G, $B
@@ -348,7 +353,7 @@ Func _COLORMODE_GREYSCALE_OLD($fx1, $fy1, $fx2, $fy2)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_DEF
 
-Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
     Local Const $iAddress = 0x004E20FC
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
@@ -394,23 +399,80 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
             DllStructSetData($tClrStruct, 1, $gray_canal, $x)
             DllStructSetData($tClrStruct, 1, $gray_canal, $x+1)
             DllStructSetData($tClrStruct, 1, $gray_canal, $x+2)
-            _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite, $iWrite)
-            ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
         Next
-        ;ExitLoop(1)
-        ;Binary('0x' & '4D5A00000000')
+        _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite, $iWrite)
+        ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
         $startBufRd += @DesktopWidth * 4
     Next
 
     If ProcessExists($iPidCM) Then
-        _WinAPI_CloseHandle($hProcess); Открытый процесс необходимо закрывать
+        _WinAPI_CloseHandle($hProcess)
     EndIf
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE
+
+Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+    Local Const $iAddress = 0x004E20FC
+    Local $hProcess
+    Local $iRead, $iWrite, $startbuf, $startBufRd
+    Local $color, $R, $G, $B, $A
+    Local Const $lenXBite = ($fx2 - $fx1 + 1)
+    Local Const $tagSTRUCT = 'DWORD[' & $lenXBite &']'
+    Local $tClrStruct = DllStructCreate($tagSTRUCT)
+    Local $tBf = DllStructCreate('DWORD')
+
+    ;Local $hTimer = TimerInit()
+    If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        Return
+    EndIf
+    ;_IsWinCM()
+    If $Available = False Then Return
+
+    $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
+    ; Читаем адрес начала буфера в указателе
+    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    $startbuf = DllStructGetData($tBf, 1)
+    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
+
+    $startBufRd = $startbuf + ($fy1 * @DesktopWidth * 4) + ($fx1*4)
+    For $y = 0 To $fy2 - $fy1
+        _WinAPI_ReadProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite*4, $iRead)
+
+        For $x = 1 To $lenXBite
+            $color = DllStructGetData($tClrStruct, 1, $x)
+            $B = BitAND($color, 0xFF)
+            $G = BitAND(BitShift($color, 8), 0xFF)
+            $R = BitAND(BitShift($color, 16), 0xFF)
+            ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+            ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+
+            $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
+            $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+            DllStructSetData($tClrStruct, 1, $color, $x)
+        Next
+        _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite*4, $iWrite)
+        ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
+        $startBufRd += @DesktopWidth * 4
+    Next
+
+    If ProcessExists($iPidCM) Then
+        _WinAPI_CloseHandle($hProcess)
+    EndIf
+    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+EndFunc   ;==>_COLORMODE_GREYSCALE_TEST
 
 ;~ WM_User = 0x400 (1024)
 ;~ Стандартные сообщения до WM_User-1.     от              0   до  0x03FF (1023)
 ;~ Локальные сообщения от WM_User          от  0x0400  (1024)  до  0x7FFF (32767)
 ;~ Глобальные сообщения                    от  0xC000 (49152)  до  0xFFFF (65535)
 
+
+;ExitLoop(1)
+;Binary('0x' & '4D5A00000000')
 
