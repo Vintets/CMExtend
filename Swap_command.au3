@@ -43,7 +43,7 @@ _IsWinCM()
 Example1()
 
 ;~ Local $hTimer = TimerInit()
-;~ _COLORMODE_GREYSCALE_OLD3(750, 426, 849, 525)
+;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
 ;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 
@@ -305,7 +305,7 @@ EndFunc   ;==>_OpenProcess
 
 Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $hProcess, $iAddress = 0x004E20FC
-    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrWr
+    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color=0, $R, $G, $B
     Local $lenstrX = $fx2 - $fx1
     Local $tBf = DllStructCreate('DWORD')
@@ -460,7 +460,6 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
             $R = BitAND(BitShift($color, 16), 0xFF)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
-
             $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
             $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
             DllStructSetData($tClrStruct, 1, $color, $x)
@@ -476,21 +475,24 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD3
 
-Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
     Local Const $iAddress = 0x004E20FC
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
-    Local $color, $R, $G, $B, $A
-    Local $DesktopWidthSize = @DesktopWidth * 4
-    Local Const $lenXPxl = ($fx2 - $fx1 + 1)
-    Local Const $lenXBite = $lenXPxl * 4
-    Local Const $tagSTRUCT = 'DWORD[' & $lenXPxl &']'
-    Local $tClrStruct = DllStructCreate($tagSTRUCT)
-    Local $pClrStruct = DllStructGetPtr($tClrStruct)
+    Local $color, $R, $G, $B, $A, $lenPxl
+    Local Const $DesktopWidthSize = @DesktopWidth * 4
+    Local $lenXPxl = ($fx2 - $fx1 + 1)
+    Local $lenXBite = $lenXPxl * 4
+    Local $tagSTRUCT = 'DWORD[' & $lenXPxl &']'
+    
+    
+    Local $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
 
     ;Local $hTimer = TimerInit()
-    If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
+    If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
+            ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
+            $fx2 < $fx1 Or $fy2 < $fy1 Then
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
@@ -513,11 +515,104 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
     $startBufRd = $startbuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
-    For $y = 0 To $fy2 - $fy1
+    If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
+        $lenPxl = @DesktopWidth * @DesktopHeight
+        $lenXBite = $lenPxl * 4
+        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
         DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+        For $x = 1 To $lenPxl
+            $color = DllStructGetData($tClrStruct, 1, $x)
+            $B = BitAND($color, 0xFF)
+            $G = BitAND(BitShift($color, 8), 0xFF)
+            $R = BitAND(BitShift($color, 16), 0xFF)
+            ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+            ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+            $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
+            $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+            DllStructSetData($tClrStruct, 1, $color, $x)
+        Next
+        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    Else
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
+        For $y = 0 To $fy2 - $fy1
+            DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                    'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
 
-        For $x = 1 To $lenXPxl
+            For $x = 1 To $lenXPxl
+                $color = DllStructGetData($tClrStruct, 1, $x)
+                $B = BitAND($color, 0xFF)
+                $G = BitAND(BitShift($color, 8), 0xFF)
+                $R = BitAND(BitShift($color, 16), 0xFF)
+                ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+                ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+
+                $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
+                $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+                DllStructSetData($tClrStruct, 1, $color, $x)
+            Next
+            DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                    'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+            $startBufRd += $DesktopWidthSize
+        Next
+    EndIf
+
+    If ProcessExists($iPidCM) Then
+        DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
+    EndIf
+    DllClose($ah_Handle)
+    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+EndFunc   ;==>_COLORMODE_GREYSCALE_OLD4
+
+Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+    Local Const $iAddress = 0x004E20FC
+    Local $ah_Handle, $hProcess
+    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
+    Local $color, $R, $G, $B, $A
+    Local Const $DesktopWidthSize = @DesktopWidth * 4
+    Local $lenXPxl = ($fx2 - $fx1 + 1)
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $tBf = DllStructCreate('DWORD')
+
+    ;Local $hTimer = TimerInit()
+    If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
+            ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
+            $fx2 < $fx1 Or $fy2 < $fy1 Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        Return
+    EndIf
+    ;_IsWinCM()
+    If $Available = False Then Return
+
+    $ah_Handle = DllOpen('kernel32.dll')
+
+    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
+    ; Читаем адрес начала буфера в указателе
+    DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+            'ptr', $iAddress, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+    $startbuf = DllStructGetData($tBf, 1)
+    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
+
+    $startBufRd = $startbuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
+    If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
+        $lenPxl = @DesktopWidth * @DesktopHeight
+        $lenXBite = $lenPxl * 4
+        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
+        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+        For $x = 1 To $lenPxl
             $color = DllStructGetData($tClrStruct, 1, $x)
             $B = BitAND($color, 0xFF)
             $G = BitAND(BitShift($color, 8), 0xFF)
@@ -531,15 +626,39 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
         Next
         DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
-        $startBufRd += $DesktopWidthSize
-    Next
+    Else
+        $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
+        $lenXBite = $lenPxl * 4
+        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
+        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+        For $y = 0 To $fy2 - $fy1
+            $yFull = $y * @DesktopWidth
+            For $x = 1 To $lenXPxl
+                $addrRd = $yFull + $x
+                $color = DllStructGetData($tClrStruct, 1, $addrRd)
+                $B = BitAND($color, 0xFF)
+                $G = BitAND(BitShift($color, 8), 0xFF)
+                $R = BitAND(BitShift($color, 16), 0xFF)
+                ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+                ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+                $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
+                $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+                DllStructSetData($tClrStruct, 1, $color, $addrRd)
+            Next
+        Next
+        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    EndIf
 
     If ProcessExists($iPidCM) Then
         DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
     DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_4
+EndFunc   ;==>_COLORMODE_GREYSCALE_5
 
 
 
