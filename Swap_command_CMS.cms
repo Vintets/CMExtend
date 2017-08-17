@@ -1,6 +1,6 @@
 #name "Swap_command"
 // Author: Vint
-// Version: 0.0.5 (10.08.2017)
+// Version: 0.0.6 (17.08.2017)
 // Скрипт для Clickermann v4.11 003
 #include "logger.cms"
 
@@ -73,8 +73,8 @@ END_SUB
 SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
     $hwnd_CME = wndFind("Мой GUI")
     IF($hwnd_CME = 0)
-        LOGWRITE("Окно не найдено")
-        HINTPOPUP("Окно не найдено", "Мой GUI")
+        LOGWRITE("Окно CMExtend не найдено")
+        HINTPOPUP("Окно CMExtend не найдено", "Мой GUI")
         HALT
     END_IF
     IF($log > 0)
@@ -285,6 +285,12 @@ $y1 = 426
 $x2 = 849
 $y2 = 525
 
+// Full Screen
+//$x1 = 0
+//$y1 = 0
+//$x2 = $_xmax
+//$y2 = $_ymax
+
 
 GETSCREEN
 $timer1 = $_ms
@@ -305,13 +311,17 @@ $timer1 = $_ms
 //CME_WINEXISTS("[CLASS:Notepad]")
 //CME_SETREGION($x1, $y1, $x2, $y2)
 CME_GREYSCALE($x1, $y1, $x2, $y2)
-//CME_GREYSCALE(0, 0, $_xmax, $_ymax)
-//SCREENSHOT
 
 
 
 print_timeaction("тест 1", $_ms - $timer1)
-SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
+
+IF(($x2 = $_xmax) & ($y2 = $_ymax))
+    SCREENSHOT
+ELSE
+    SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
+END_IF
+
 
 HALT
 
