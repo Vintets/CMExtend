@@ -71,16 +71,16 @@ SUB(wait_completion) //--- ожидание завершения ---------------------------------
 END_SUB
 
 SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
-    $hwnd_CME = wndFind("Мой GUI")
+    $hwnd_CME = wndFind("CMExtend v")
     IF($hwnd_CME = 0)
         LOGWRITE("Окно CMExtend не найдено")
-        HINTPOPUP("Окно CMExtend не найдено", "Мой GUI")
+        HINTPOPUP("Окно CMExtend не найдено", "CMExtend")
         HALT
     END_IF
     IF($log > 0)
         LOGWRITE("CMExtend hwnd: ", $hwnd_CME)
         LOGWRITE("")
-        HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "Мой GUI")
+        HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "CMExtend")
     END_IF
 END_SUB
 
@@ -88,7 +88,7 @@ END_SUB
 
 //--- test_555 -----------------------------------------------------------------
 SUB(test_555)
-    PostMessage($hwnd_CME, 0x555, 5, "[CLASS:Button; TEXT:OK]")
+    PostMessage($hwnd_CME, 0x555, 4096+4096*65536, 1920+1080*65536)
     waitms(200)
 END_SUB
 
@@ -100,7 +100,7 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
     $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
@@ -113,7 +113,7 @@ END_SUB
 #define AI_GetDesktopWindow:0xC401
 SUB(CME_GetDesktopWindow)
     INIWRITE($main_ini, "completion", "0", "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
     wait_completion()
     $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
@@ -130,7 +130,7 @@ SUB(CME_WinGetProcess, $AI_title, $AI_text)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
     wait_completion()
     $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
@@ -143,7 +143,7 @@ END_SUB
 #define AI_WinGetProcessCM:0xC403
 SUB(CME_WinGetProcessCM)
     INIWRITE($main_ini, "completion", "0", "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
     wait_completion()
     $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
@@ -177,7 +177,7 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     INIWRITE($main_ini, "completion", "0", "clickermann")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
     wait_completion()
     $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
@@ -257,8 +257,18 @@ END_SUB
 #define AI_GREYSCALE:0xC451
 SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     INIWRITE($main_ini, "completion", "0", "clickermann")
-    WAITMS(10)
+    WAITMS(5)
     PostMessage($hwnd_CME, AI_GREYSCALE, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
+    wait_completion()
+END_SUB
+
+//--- применить к области DRAMCONTRAST -----------------------------------------
+#define AI_DRAMCONTRAST:0xC452
+SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
+    CME_SETREGION($AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_DRAMCONTRAST, $AI_mid, $AI_k)
     wait_completion()
 END_SUB
 
@@ -285,6 +295,12 @@ $y1 = 426
 $x2 = 849
 $y2 = 525
 
+//
+$x1 = 650
+$y1 = 350
+$x2 = 900
+$y2 = 550
+
 // Full Screen
 //$x1 = 0
 //$y1 = 0
@@ -310,7 +326,9 @@ $timer1 = $_ms
 
 //CME_WINEXISTS("[CLASS:Notepad]")
 //CME_SETREGION($x1, $y1, $x2, $y2)
-CME_GREYSCALE($x1, $y1, $x2, $y2)
+//CME_GREYSCALE($x1, $y1, $x2, $y2)
+CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
+//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
 
 
 
@@ -386,7 +404,9 @@ HALT
 // Преобразовать область в GREYSCALE
 // CME_GREYSCALE($x1, $y1, $x2, $y2)
 
-
+// 0xC452
+// применить к области DRAMCONTRAST
+// CME_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid, $k)
 
 
 

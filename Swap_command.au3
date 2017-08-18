@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.5
+#AutoIt3Wrapper_Res_Fileversion=0.0.6
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.5
-#AutoIt3Wrapper_Res_Field=Build|2017.08.17
+#AutoIt3Wrapper_Res_Field=Version|0.0.6
+#AutoIt3Wrapper_Res_Field=Build|2017.08.18
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -16,7 +16,7 @@
 ;===============================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.5
+; Version:          0.0.6
 ; Requirement(s):   Autoit 3.3.8.1
 ; Author(s):        Vint
 ;
@@ -32,11 +32,13 @@
 
 #RequireAdmin
 
+Global $CMExtendVersion = '0.0.6'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $Available = False
+Global $iAddressCM = 0x004E20FC
 
 
 _IsWinCM()
@@ -50,7 +52,7 @@ Example1()
 
 Func Example1()
     Local $Msg, $Code_MY_SETREGION
-    $hGUImain = GUICreate('Мой GUI', 100, 50, 20, 20, $WS_OVERLAPPEDWINDOW + $WS_POPUP)
+    $hGUImain = GUICreate('CMExtend v' & $CMExtendVersion, 100, 50, 20, 20, $WS_OVERLAPPEDWINDOW + $WS_POPUP)
     GUISetState(@SW_SHOW)
     GUISetState(@SW_MINIMIZE)
 
@@ -83,6 +85,7 @@ Func _RegisterMyCommand()
     
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
+    GUIRegisterMsg(0xC452, '_COMMAND_AI_DRAMCONTRAST')
 
     ; Если регистрировать по имени. CM не может слать имя :-((
     ;$Code_AI_SETREGION = _WinAPI_RegisterWindowMessage('AI_SETREGION')
@@ -263,6 +266,20 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
+Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $mid_contr = BitAND($iwParam, 0xFFFFFFFF), $k_contr = BitAND($ilParam, 0xFFFFFFFF)
+
+    ConsoleWrite($hWnd & '  ' & _
+                Hex(Int($iMsg), 4) & ' (DRAMCONTRAST)  ' & _
+                $iwParam & '  ' & _
+                $ilParam & '    ' & _
+                'mid_contr = ' & $mid_contr & ',    k_contr = ' & $k_contr & _
+                @CRLF)
+    _COLORMODE_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
+    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
+
 Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     GUIDelete($hGUImain)
     Exit
@@ -304,7 +321,6 @@ EndFunc   ;==>_OpenProcess
 
 
 Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
-    Local $hProcess, $iAddress = 0x004E20FC
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color=0, $R, $G, $B
     Local $lenstrX = $fx2 - $fx1
@@ -327,7 +343,7 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
     EndIf
 
     ; Читаем адрес начала буфера в указателе
-    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
@@ -363,7 +379,6 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD1
 
 Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
-    Local Const $iAddress = 0x004E20FC
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
@@ -388,7 +403,7 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
     EndIf
 
     ; Читаем адрес начала буфера в указателе
-    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
@@ -421,7 +436,6 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD2
 
 Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
-    Local Const $iAddress = 0x004E20FC
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
@@ -445,7 +459,7 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
     EndIf
 
     ; Читаем адрес начала буфера в указателе
-    _WinAPI_ReadProcessMemory($hProcess, $iAddress, DllStructGetPtr($tBf), 4, $iRead)
+    _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
@@ -476,7 +490,6 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD3
 
 Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
-    Local Const $iAddress = 0x004E20FC
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A, $lenPxl
@@ -510,7 +523,7 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
 
     ; Читаем адрес начала буфера в указателе
     DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $iAddress, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
@@ -569,7 +582,6 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD4
 
 Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
-    Local Const $iAddress = 0x004E20FC
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
@@ -599,7 +611,7 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
 
     ; Читаем адрес начала буфера в указателе
     DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $iAddress, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
 
@@ -620,8 +632,11 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
+            #Region    ************ Обработка ************
             $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
             $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+            #EndRegion ************ Обработка ************
+
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
         DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
@@ -644,8 +659,12 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
                 $R = BitAND(BitShift($color, 16), 0xFF)
                 ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
                 ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+
+                #Region    ************ Обработка ************
                 $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
                 $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+                #EndRegion ************ Обработка ************
+
                 DllStructSetData($tClrStruct, 1, $color, $addrRd)
             Next
         Next
@@ -660,6 +679,194 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_5
 
+Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
+    Local $ah_Handle, $hProcess
+    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
+    Local $color, $R, $G, $B, $A
+    Local Const $DesktopWidthSize = @DesktopWidth * 4
+    Local $lenXPxl = ($fx2 - $fx1 + 1)
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $tBf = DllStructCreate('DWORD')
+
+    ;Local $hTimer = TimerInit()
+    If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
+            ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
+            $fx2 < $fx1 Or $fy2 < $fy1 Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        Return
+    EndIf
+    ;_IsWinCM()
+    If $Available = False Then Return
+
+    $ah_Handle = DllOpen('kernel32.dll')
+
+    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
+    ConsoleWrite('(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')   ' & _
+                'mid_contr = ' & $fmid_contr & ',  k_contr = ' & $fk_contr & @CRLF)
+
+    ; Читаем адрес начала буфера в указателе
+    DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+    $startbuf = DllStructGetData($tBf, 1)
+    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
+
+    $startBufRd = $startbuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
+    If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
+        $lenPxl = @DesktopWidth * @DesktopHeight
+        $lenXBite = $lenPxl * 4
+        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
+        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+        For $x = 1 To $lenPxl
+            $color = DllStructGetData($tClrStruct, 1, $x)
+            $B = BitAND($color, 0xFF)
+            $G = BitAND(BitShift($color, 8), 0xFF)
+            $R = BitAND(BitShift($color, 16), 0xFF)
+            ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+            ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+
+            #Region    ************ Обработка ************
+            If (($R + $G + $B) / 3) > $fmid_contr Then
+                $R = $R + $fk_contr
+                $G = $G + $fk_contr
+                $B = $B + $fk_contr
+                If $R < $fmid_contr Then
+                    $R = $fmid_contr
+                EndIf
+                If $G < $fmid_contr Then
+                    $G = $fmid_contr
+                EndIf
+                If $B < $fmid_contr Then
+                    $B = $fmid_contr
+                EndIf
+                If $R > 255 Then
+                    $R = 255
+                EndIf
+                If $G > 255 Then
+                    $G = 255
+                EndIf
+                If $B > 255 Then
+                    $B = 255
+                EndIf
+            Else
+                $R = $R - $fk_contr
+                $G = $G - $fk_contr
+                $B = $B - $fk_contr
+                If $R > $fmid_contr Then
+                    $R = $fmid_contr
+                EndIf
+                If $G > $fmid_contr Then
+                    $G = $fmid_contr
+                EndIf
+                If $B > $fmid_contr Then
+                    $B = $fmid_contr
+                EndIf
+                If $R < 0 Then
+                    $R = 0
+                EndIf
+                If $G < 0 Then
+                    $G = 0
+                EndIf
+                If $B < 0 Then
+                    $B = 0
+                EndIf
+            EndIf
+            $color = $R*65536 + $G*256 + $B
+            #EndRegion ************ Обработка ************
+
+            DllStructSetData($tClrStruct, 1, $color, $x)
+        Next
+        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    Else
+        $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
+        $lenXBite = $lenPxl * 4
+        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+        $tClrStruct = DllStructCreate($tagSTRUCT)
+        $pClrStruct = DllStructGetPtr($tClrStruct)
+        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+        For $y = 0 To $fy2 - $fy1
+            $yFull = $y * @DesktopWidth
+            For $x = 1 To $lenXPxl
+                $addrRd = $yFull + $x
+                $color = DllStructGetData($tClrStruct, 1, $addrRd)
+                $B = BitAND($color, 0xFF)
+                $G = BitAND(BitShift($color, 8), 0xFF)
+                $R = BitAND(BitShift($color, 16), 0xFF)
+                ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
+                ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
+
+                #Region    ************ Обработка ************
+                If (($R + $G + $B) / 3) > $fmid_contr Then
+                    $R = $R + $fk_contr
+                    $G = $G + $fk_contr
+                    $B = $B + $fk_contr
+                    If $R < $fmid_contr Then
+                        $R = $fmid_contr
+                    EndIf
+                    If $G < $fmid_contr Then
+                        $G = $fmid_contr
+                    EndIf
+                    If $B < $fmid_contr Then
+                        $B = $fmid_contr
+                    EndIf
+                    If $R > 255 Then
+                        $R = 255
+                    EndIf
+                    If $G > 255 Then
+                        $G = 255
+                    EndIf
+                    If $B > 255 Then
+                        $B = 255
+                    EndIf
+                Else
+                    $R = $R - $fk_contr
+                    $G = $G - $fk_contr
+                    $B = $B - $fk_contr
+                    If $R > $fmid_contr Then
+                        $R = $fmid_contr
+                    EndIf
+                    If $G > $fmid_contr Then
+                        $G = $fmid_contr
+                    EndIf
+                    If $B > $fmid_contr Then
+                        $B = $fmid_contr
+                    EndIf
+                    If $R < 0 Then
+                        $R = 0
+                    EndIf
+                    If $G < 0 Then
+                        $G = 0
+                    EndIf
+                    If $B < 0 Then
+                        $B = 0
+                    EndIf
+                EndIf
+                $color = $R*65536 + $G*256 + $B
+                #EndRegion ************ Обработка ************
+
+                DllStructSetData($tClrStruct, 1, $color, $addrRd)
+            Next
+        Next
+        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    EndIf
+
+    If ProcessExists($iPidCM) Then
+        DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
+    EndIf
+    DllClose($ah_Handle)
+    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+EndFunc   ;==>_COLORMODE_DRAMCONTRAST
 
 
 ;~ WM_User = 0x400 (1024)
@@ -670,4 +877,6 @@ EndFunc   ;==>_COLORMODE_GREYSCALE_5
 
 ;ExitLoop(1)
 ;Binary('0x' & '4D5A00000000')
+
+
 
