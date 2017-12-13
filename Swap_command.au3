@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.6
+#AutoIt3Wrapper_Res_Fileversion=0.0.7
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.6
-#AutoIt3Wrapper_Res_Field=Build|2017.08.18
+#AutoIt3Wrapper_Res_Field=Version|0.0.7
+#AutoIt3Wrapper_Res_Field=Build|2017.11.02
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -28,21 +28,24 @@
 #include <Constants.au3>
 #include <WindowsConstants.au3>
 #include <WinAPI.au3>
+#include <SendMessage.au3>
 #EndRegion ************ Includes ************
 
 #RequireAdmin
 
-Global $CMExtendVersion = '0.0.6'
+Global $CMExtendVersion = '0.0.7'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $Available = False
 Global $iAddressCM = 0x004E20FC
+Global $WM_CMCOMMAND = 1024
 
 
 _IsWinCM()
-Example1()
+_SendCM(123, 456)
+; Example1()
 
 ;~ Local $hTimer = TimerInit()
 ;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
@@ -82,6 +85,7 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
     GUIRegisterMsg(0xC407, '_COMMAND_AI_WinSetOnTop')
     GUIRegisterMsg(0xC408, '_COMMAND_AI_WinSetTrans')
+    GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
     
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
@@ -868,6 +872,25 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_DRAMCONTRAST
 
+Func _SendCM($wParam, $lParam)
+    _SendMessage($hWndCM, $WM_CMCOMMAND, $wParam, $lParam)
+    If @error Then
+        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
+        Exit
+    EndIf
+EndFunc   ;==>_SendCM
+
+
+
+Func _ToggleMonitor($hwnd, $OnOff)
+    Local Const $WM_SYSCOMMAND = 274
+    Local Const $SC_MONITORPOWER = 61808
+    _SendMessage($hWnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $OnOff)
+    If @error Then
+        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
+        Exit
+    EndIf
+EndFunc   ;==>_ToggleMonitor
 
 ;~ WM_User = 0x400 (1024)
 ;~ Стандартные сообщения до WM_User-1.     от              0   до  0x03FF (1023)
@@ -878,5 +901,6 @@ EndFunc   ;==>_COLORMODE_DRAMCONTRAST
 ;ExitLoop(1)
 ;Binary('0x' & '4D5A00000000')
 
-
+;~ $hControl = ControlGetHandle($hWnd, '', '[CLASS:Button; TEXT:OK]')
+;~ ControlClick($hWnd, '', $hControl, 'main')
 

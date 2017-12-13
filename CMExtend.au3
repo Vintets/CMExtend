@@ -33,6 +33,7 @@
 #RequireAdmin
 Opt('MustDeclareVars', 1)
 Opt('TrayIconDebug', 1)
+;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное
 
 Global $Available = False
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $aPosCM[4], $aPosCMR[4]
