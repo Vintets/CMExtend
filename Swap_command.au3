@@ -2,11 +2,11 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.8
+#AutoIt3Wrapper_Res_Fileversion=0.0.9
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.8
+#AutoIt3Wrapper_Res_Field=Version|0.0.9
 #AutoIt3Wrapper_Res_Field=Build|2021.09.30
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -16,35 +16,37 @@
 ;===============================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.8
+; Version:          0.0.9
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ;
 ;===============================================================================
 
 #Region    ************ Includes ************
-#include <GUIConstantsEx.au3>
-#include <WindowsConstants.au3>
-#include <Constants.au3>
-#include <WindowsConstants.au3>
 #include <WinAPI.au3>
 #include <SendMessage.au3>
+
+#include <WindowsConstants.au3>
+#include <Constants.au3>
+#include <GUIConstantsEx.au3>
 #EndRegion ************ Includes ************
 
 #RequireAdmin
 
-Global $CMExtendVersion = '0.0.7'
+Global $CMExtendVersion = '0.0.9'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
+Global $CM_name = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
-Global $Available = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND = 1024
 
 
-_IsWinCM()
-Example1()
+$CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
+
+_WaitCM()
+; Example1()
 
 ;~ Local $hTimer = TimerInit()
 ;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
@@ -289,18 +291,28 @@ Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     Exit
 EndFunc   ;==>_WM_CLOSE
 
-Func _IsWinCM()
-    ;$hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
-    $hWndCM = _GetWin('главное', '[TITLE:Clickermann -]')
-    $hWndCMR = _GetWin('редактора', '[CLASS:TfrmEdit; TITLE:Редактор -]')
+Func _WaitCM()
+    $hWnd = WinWait('[TITLE:' & $CM_name & '; W:310; H:194]', '', 3)
+    If Not _IsWinCM() Then
+        MsgBox(16+4096, 'Внимание!', 'Окно Clickermann не найдено.' & @CRLF & 'Дополнительный функционал не подключен!', 3)
+        Exit
+    EndIf
+EndFunc   ;==>WaitCM
 
-    $iPidCM = WinGetProcess($hWndCM)
-    ;_WinAPI_GetWindowThreadProcessId ($hWndCM, $iPidCM2)
-    If $hWndCM <> '' Then
-        $Available = True
-        ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+Func _IsWinCM()
+    $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:' & $CM_name & '; W:0; H:0]')
+    $hWndCM = _GetWin('главное', '[TITLE:' & $CM_name & '; W:310; H:194]')
+
+    If $hWndCMM And $hWndCM Then
+        $hWndCMR = _GetWin('редактора', '[TITLE:Редактор -]')
+        ;_WinAPI_GetWindowThreadProcessId($hWndCM, $iPidCM2)
+
+        $iPidCM = WinGetProcess($hWndCM)
+        ; ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+        return True
     Else
-        $Available = False
+        Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
+        return False
     EndIf
 EndFunc   ;==>_IsWinCM
 
@@ -336,8 +348,7 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    _IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
@@ -396,8 +407,7 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    ;_IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
@@ -453,8 +463,7 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    ;_IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
@@ -513,8 +522,7 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    ;_IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $ah_Handle = DllOpen('kernel32.dll')
 
@@ -601,8 +609,7 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    ;_IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $ah_Handle = DllOpen('kernel32.dll')
 
@@ -699,8 +706,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
         ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
-    ;_IsWinCM()
-    If $Available = False Then Return
+    If Not _IsWinCM() Then Return
 
     $ah_Handle = DllOpen('kernel32.dll')
 
