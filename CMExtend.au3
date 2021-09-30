@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=CMExtend
-#AutoIt3Wrapper_Res_Fileversion=0.0.1
+#AutoIt3Wrapper_Res_Fileversion=0.0.2
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.1
-#AutoIt3Wrapper_Res_Field=Build|2017.06.01
+#AutoIt3Wrapper_Res_Field=Version|0.0.2
+#AutoIt3Wrapper_Res_Field=Build|2021.09.30
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -16,8 +16,8 @@
 ;===============================================================================
 ;
 ; Description:      CMExtend
-; Version:          0.0.1
-; Requirement(s):   Autoit 3.3.8.1
+; Version:          0.0.2
+; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ;
 ;===============================================================================
@@ -135,7 +135,7 @@ Func _CheckINI()
 EndFunc   ;==>_CheckINI
 
 Func _IsWinCM()
-    ;$hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
+    $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
     $hWndCM = _GetWin('главное', '[TITLE:Clickermann -]')
     $hWndCMR = _GetWin('редактора', '[CLASS:TfrmEdit; TITLE:Редактор -]')
 
@@ -143,7 +143,7 @@ Func _IsWinCM()
     ;_WinAPI_GetWindowThreadProcessId ($hWndCM, $iPidCM2)
     If $hWndCM <> '' Then
         $Available = True
-        ConsoleWrite('Идентификатор PID ', $iPidCM & @CRLF)
+        ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
     Else
         $Available = False
     EndIf
@@ -182,7 +182,8 @@ Func _AllWindInfo()
     _AddWinInfo(0, $hWndCMM)
     _AddWinInfo(1, $hWndCM)
     _AddWinInfo(2, $hWndCMR)
-    _ArrayDisplay($aWindows2D, 'Окна', -1, 0, $s, $s, $colnames)
+    _ArrayDisplay($aWindows2D, 'Окна', Default, 0, $s, $s, $colnames)
+    ConsoleWrite('Мы здесь' & @CRLF)
 EndFunc   ;==>_AllWindInf
 
 Func _AddWinInfo($num, $hWndt)
@@ -226,7 +227,7 @@ Func _LogPos()
     Local $text
     $text = 'CM_X ' & $aPosCM[0] & '  CM_Y ' & $aPosCM[1]
     $text &= '  CM_W ' & $aPosCM[2] & '  CM_H ' & $aPosCM[3] & @CRLF
-    $text &= 'CM_X ' & $aPosCMR[0] & '  CM_Y ' & $aPosCMR[1]
+    $text &= 'CMR_X ' & $aPosCMR[0] & '  CMR_Y ' & $aPosCMR[1]
     $text &= '  CMR_W ' & $aPosCMR[2] & '  CMR_H ' & $aPosCMR[3] & @CRLF
     ConsoleWrite($text)
 EndFunc   ;==>_LogPos

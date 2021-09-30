@@ -2,12 +2,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.7
+#AutoIt3Wrapper_Res_Fileversion=0.0.8
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.7
-#AutoIt3Wrapper_Res_Field=Build|2017.11.02
+#AutoIt3Wrapper_Res_Field=Version|0.0.8
+#AutoIt3Wrapper_Res_Field=Build|2021.09.30
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -16,8 +16,8 @@
 ;===============================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.7
-; Requirement(s):   Autoit 3.3.8.1
+; Version:          0.0.8
+; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ;
 ;===============================================================================
@@ -85,7 +85,7 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
     GUIRegisterMsg(0xC407, '_COMMAND_AI_WinSetOnTop')
     GUIRegisterMsg(0xC408, '_COMMAND_AI_WinSetTrans')
-    GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
+    ; GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
     
     GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
