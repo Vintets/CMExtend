@@ -25,6 +25,7 @@
 #Region    ************ Includes ************
 #include <WinAPI.au3>
 #include <Array.au3>
+
 #include <WindowsConstants.au3>
 #include <GUIConstants.au3>
 #include <GUIConstantsEx.au3>
@@ -135,7 +136,7 @@ Func _CheckINI()
 EndFunc   ;==>_CheckINI
 
 Func _IsWinCM()
-    $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
+    ; $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
     $hWndCM = _GetWin('главное', '[TITLE:Clickermann -]')
     $hWndCMR = _GetWin('редактора', '[CLASS:TfrmEdit; TITLE:Редактор -]')
 
