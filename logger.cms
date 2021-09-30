@@ -1,100 +1,95 @@
-//#name "logger"
+п»ї//#name "logger"
 // Author: Vint
-// Version: 1.1 (28.11.2016)
-// Скрипт для Clickermann v4.11 003
-// подключение logger:
+// Version: 1.2 (30.09.2021)
+// РЎРєСЂРёРїС‚ РґР»СЏ Clickermann v4.13.014
+// РїРѕРґРєР»СЋС‡РµРЅРёРµ logger:
 // #include "..\Libs\logger.cms"
 
+#define @CR:STRCONCAT(char(13),char(10))
 
 //==============================================================================
-//===  logXY вывод координат в лог  ============================================
+//===  logXY РІС‹РІРѕРґ РєРѕРѕСЂРґРёРЅР°С‚ РІ Р»РѕРі  ============================================
 SUB(logXY, $coordX,$coordY)
-   // Пример вызова:
-   // logXY($_return1,$_return2)
-   LOGWRITE("X = ", $coordX, ", Y = ", $coordY)
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // logXY($_return1,$_return2)
+    LOGWRITE("X = ", $coordX, ", Y = ", $coordY)
 END_SUB
 
 //==============================================================================
-//===  Вывод времени выполнения ms в формате час:мин:сек,мс ====================
+//===  Р’С‹РІРѕРґ РІСЂРµРјРµРЅРё РІС‹РїРѕР»РЅРµРЅРёСЏ ms РІ С„РѕСЂРјР°С‚Рµ С‡Р°СЃ:РјРёРЅ:СЃРµРє,РјСЃ ====================
 SUB(timeprint, $tt_print)
-   // Пример вызова:
-   // timeprint(12345)
-   IF($tt_print > 999)
-      $timesec = $tt_print/1000
-      $hours = int($timesec/3600)
-      $minuts = int(($timesec - ($hours*3600))/60)
-      $sec = ($tt_print - ($hours*3600*1000) - ($minuts*60*1000)) / 1000
-      LOGWRITE($hours, ":" , $minuts , ":" , $sec)
-   END_IF
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // timeprint(12345)
+    IF($tt_print > 999)
+        $timesec = $tt_print/1000
+        $hours = int($timesec/3600)
+        $minuts = int(($timesec - ($hours*3600))/60)
+        $sec = ($tt_print - ($hours*3600*1000) - ($minuts*60*1000)) / 1000
+        LOGWRITE($hours, ":" , $minuts , ":" , $sec)
+    END_IF
 END_SUB
 
 //==============================================================================
-//===  Вывод времени выполнения  ===============================================
+//===  Р’С‹РІРѕРґ РІСЂРµРјРµРЅРё РІС‹РїРѕР»РЅРµРЅРёСЏ  ===============================================
 SUB(print_timeaction, $actionnamet, $tt_search)
-   // Пример вызова:
-   // $timer1 = $_ms
-   // ...
-   // print_timeaction("тест 1", $_ms - $timer1)
-   LOGWRITE("===============  время выполнения  ===============")
-   LOGWRITE("время выполнения ", $actionnamet, " : ", $tt_search, " мс")
-   timeprint($tt_search)
-   LOGWRITE(" ")
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // $timer1 = $_ms
+    // ...
+    // print_timeaction("С‚РµСЃС‚ 1", $_ms - $timer1)
+    LOGWRITE("===============  РІСЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ===============")
+    LOGWRITE("РІСЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ ", $actionnamet, " : ", $tt_search, " РјСЃ")
+    timeprint($tt_search)
+    LOGWRITE(" ")
 END_SUB
 
 //==============================================================================
-//===  LOG_ARR вывод массива в лог  ============================================
+//===  LOG_ARR РІС‹РІРѕРґ РјР°СЃСЃРёРІР° РІ Р»РѕРі  ============================================
 SUB(LOG_ARR, $ARR_LOG)
-   // Пример вызова:
-   // LOG_ARR($ARR)
-   LOGWRITE("Размер массива: ", ARRSIZE($ARR_LOG))
-   FOR($INARR,$INARR < ARRSIZE($ARR_LOG))
-      LOGWRITE("[",$INARR,"] = ", $ARR_LOG[$INARR])
-   END_CYC
-   LOGWRITE(" ")
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // LOG_ARR($ARR)
+    LOGWRITE("Р Р°Р·РјРµСЂ РјР°СЃСЃРёРІР°: ", ARRSIZE($ARR_LOG))
+    FOR($INARR,$INARR < ARRSIZE($ARR_LOG))
+        LOGWRITE("[",$INARR,"] = ", $ARR_LOG[$INARR])
+    END_CYC
+    LOGWRITE(" ")
 END_SUB
 
 //==============================================================================
-//===  LOG_ARR2 вывод парных координат из массива в лог  =======================
+//===  LOG_ARR2 РІС‹РІРѕРґ РїР°СЂРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РёР· РјР°СЃСЃРёРІР° РІ Р»РѕРі  =======================
 SUB(LOG_ARR2, $ARR_LOG)
-   // Пример вызова:
-   // LOG_ARR2($ARR)
-   LOGWRITE("Наборов координат: ", ARRSIZE($ARR_LOG)/2)
-   FOR($INARR,$INARR < ARRSIZE($ARR_LOG), 2)
-      LOGWRITE($INARR," Координаты X/Y:  ", $ARR_LOG[$INARR], " / ", $ARR_LOG[$INARR+1])
-   END_CYC
-   LOGWRITE(" ")
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // LOG_ARR2($ARR)
+    LOGWRITE("РќР°Р±РѕСЂРѕРІ РєРѕРѕСЂРґРёРЅР°С‚: ", ARRSIZE($ARR_LOG)/2)
+    FOR($INARR,$INARR < ARRSIZE($ARR_LOG), 2)
+        LOGWRITE($INARR," РљРѕРѕСЂРґРёРЅР°С‚С‹ X/Y:  ", $ARR_LOG[$INARR], " / ", $ARR_LOG[$INARR+1])
+    END_CYC
+    LOGWRITE(" ")
 END_SUB
 
 //==============================================================================
-//===  LOG_DATE вывод лог  с датой и временем ==================================
+//===  LOG_DATE РІС‹РІРѕРґ Р»РѕРі  СЃ РґР°С‚РѕР№ Рё РІСЂРµРјРµРЅРµРј ==================================
 SUB(LOG_DATE, $note)
-   // Пример вызова:
-   // LOG_DATE("Примечание")
-   $th = $_time_h
-   $tm = $_time_m
-   $ts = $_time_s
-   $dd = $_date_d
-   $dm = $_date_m
-   $dy = $_date_y
-   IF(STRLEN($th) < 2)
-      $th = STRCONCAT ("0", $th)
-   END_IF
-   IF(STRLEN($tm) < 2)
-      $tm = STRCONCAT ("0", $tm)
-   END_IF
-   IF(STRLEN($ts) < 2)
-      $ts = STRCONCAT ("0", $ts)
-   END_IF
-   IF(STRLEN($dd) < 2)
-      $dd = STRCONCAT ("0", $dd)
-   END_IF
-   IF(STRLEN($dm) < 2)
-      $dm = STRCONCAT ("0", $dm)
-   END_IF
-   IF(STRLEN($dy) < 2)
-      $dy = STRCONCAT ("0", $dy)
-   END_IF
-   LOGWRITE($note) // запись в лог
-   TFWRITE("LOG.txt", STRCONCAT($dd,".",$dm,".",$dy," ",$th,":",$tm,":",$ts, " ", $note))
+    // РџСЂРёРјРµСЂ РІС‹Р·РѕРІР°:
+    // LOG_DATE("РџСЂРёРјРµС‡Р°РЅРёРµ")
+    $filelog = "LOG.txt"
+    UNDEFINE($timedata)
+    ARRPUSH($timedata, $_time_h)
+    ARRPUSH($timedata, $_time_m)
+    ARRPUSH($timedata, $_time_s)
+    ARRPUSH($timedata, $_date_d)
+    ARRPUSH($timedata, $_date_m)
+    ARRPUSH($timedata, $_date_y)
+    
+    FOR($i_t=0, $i_t < 6)
+        IF($timedata[$i_t] < 10)
+            $timedata[$i_t] = STRCONCAT ("0", $timedata[$i_t])
+        END_IF
+    END_CYC
+    
+    //LOGWRITE($note)
+    LOGWRITE($timedata[5],".",$timedata[4],".",$timedata[3]," ",$timedata[0],":",$timedata[1],":",$timedata[2], " ", $note)
+    TFWRITE($filelog, STRCONCAT($dd,".",$dm,".",$dy," ",$th,":",$tm,":",$ts, " ", $note))
 END_SUB
+
 //==============================================================================
+

@@ -49,7 +49,7 @@ Example1()
 ;~ Local $hTimer = TimerInit()
 ;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
 ;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
-;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+;~ ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 ;~ _SendCM(123, 456)
 
 
@@ -91,7 +91,7 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
     GUIRegisterMsg(0xC452, '_COMMAND_AI_DRAMCONTRAST')
 
-    ; Если регистрировать по имени. CM не может слать имя :-((
+    ; Р•СЃР»Рё СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊ РїРѕ РёРјРµРЅРё. CM РЅРµ РјРѕР¶РµС‚ СЃР»Р°С‚СЊ РёРјСЏ :-((
     ;$Code_AI_SETREGION = _WinAPI_RegisterWindowMessage('AI_SETREGION')
     ;ConsoleWrite('AI_SETREGION  ' & $Code_AI_SETREGION & @CRLF)
     ;GUIRegisterMsg('AI_SETREGION', '_COMMAND_SETREGION')
@@ -107,20 +107,20 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & _
                 @CRLF)
     $hWndFrom = $ilParam
-    $iLW = BitAND($iwParam, 0xFFFF) ; младшее слово
-    $iHW = BitShift($iwParam, 16) ; старшее слово
+    $iLW = BitAND($iwParam, 0xFFFF) ; РјР»Р°РґС€РµРµ СЃР»РѕРІРѕ
+    $iHW = BitShift($iwParam, 16) ; СЃС‚Р°СЂС€РµРµ СЃР»РѕРІРѕ
 
     ;Switch $hWndFrom
     ;    Case $hGUImain
     ;        Switch $iCode
     ;            Case 500
-    ;                ConsoleWrite('Есть!')
+    ;                ConsoleWrite('Р•СЃС‚СЊ!')
     ;        EndSwitch
     ;EndSwitch
-    ; Продолжение обработчика внутренних команд AutoIt3.
-    ; Вы также можете завершить, используя строку с выходом из функции.
-    ; !!! Но только 'Return' (без значения) без продолжения
-    ; обработчика внутренних команд AutoIt3 в дальнейшем !!!
+    ; РџСЂРѕРґРѕР»Р¶РµРЅРёРµ РѕР±СЂР°Р±РѕС‚С‡РёРєР° РІРЅСѓС‚СЂРµРЅРЅРёС… РєРѕРјР°РЅРґ AutoIt3.
+    ; Р’С‹ С‚Р°РєР¶Рµ РјРѕР¶РµС‚Рµ Р·Р°РІРµСЂС€РёС‚СЊ, РёСЃРїРѕР»СЊР·СѓСЏ СЃС‚СЂРѕРєСѓ СЃ РІС‹С…РѕРґРѕРј РёР· С„СѓРЅРєС†РёРё.
+    ; !!! РќРѕ С‚РѕР»СЊРєРѕ 'Return' (Р±РµР· Р·РЅР°С‡РµРЅРёСЏ) Р±РµР· РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ
+    ; РѕР±СЂР°Р±РѕС‚С‡РёРєР° РІРЅСѓС‚СЂРµРЅРЅРёС… РєРѕРјР°РЅРґ AutoIt3 РІ РґР°Р»СЊРЅРµР№С€РµРј !!!
     Return $GUI_RUNDEFMSG
 EndFunc   ;==>_COMMAND_555
 
@@ -238,10 +238,10 @@ EndFunc   ;==>_COMMAND_AI_WinSetTrans
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
-    $x1 = BitAND($iwParam, 0xFFFF) ; младшее слово
-    $y1 = BitShift($iwParam, 16) ; старшее слово
-    $x2 = BitAND($ilParam, 0xFFFF) ; младшее слово
-    $y2 = BitShift($ilParam, 16) ; старшее слово
+    $x1 = BitAND($iwParam, 0xFFFF) ; РјР»Р°РґС€РµРµ СЃР»РѕРІРѕ
+    $y1 = BitShift($iwParam, 16) ; СЃС‚Р°СЂС€РµРµ СЃР»РѕРІРѕ
+    $x2 = BitAND($ilParam, 0xFFFF) ; РјР»Р°РґС€РµРµ СЃР»РѕРІРѕ
+    $y2 = BitShift($ilParam, 16) ; СЃС‚Р°СЂС€РµРµ СЃР»РѕРІРѕ
     ;ConsoleWrite('(' & $x1 & ', ' & $y1 & ', ' & $x2 & ', ' & $y2 & ')' & @CRLF)
     ConsoleWrite($hWnd & '  ' & _
                 Hex(Int($iMsg), 4) & ' (SETREGION)  ' & _
@@ -255,8 +255,8 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $fx1, $fy1, $fx2, $fy2
 
-    $fx1 = BitAND($iwParam, 0xFFFF) ; младшее слово
-    $fy1 = BitShift($iwParam, 16) ; старшее слово
+    $fx1 = BitAND($iwParam, 0xFFFF) ; РјР»Р°РґС€РµРµ СЃР»РѕРІРѕ
+    $fy1 = BitShift($iwParam, 16) ; СЃС‚Р°СЂС€РµРµ СЃР»РѕРІРѕ
     $fx2 = BitAND($ilParam, 0xFFFF)
     $fy2 = BitShift($ilParam, 16)
     ;ConsoleWrite('(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & @CRLF)
@@ -290,15 +290,15 @@ Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
 EndFunc   ;==>_WM_CLOSE
 
 Func _IsWinCM()
-    ;$hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:Clickermann -]')
-    $hWndCM = _GetWin('главное', '[TITLE:Clickermann -]')
-    $hWndCMR = _GetWin('редактора', '[CLASS:TfrmEdit; TITLE:Редактор -]')
+    ;$hWndCMM = _GetWin('Р±Р°Р·РѕРІРѕРµ', '[CLASS:TApplication; TITLE:Clickermann -]')
+    $hWndCM = _GetWin('РіР»Р°РІРЅРѕРµ', '[TITLE:Clickermann -]')
+    $hWndCMR = _GetWin('СЂРµРґР°РєС‚РѕСЂР°', '[CLASS:TfrmEdit; TITLE:Р РµРґР°РєС‚РѕСЂ -]')
 
     $iPidCM = WinGetProcess($hWndCM)
     ;_WinAPI_GetWindowThreadProcessId ($hWndCM, $iPidCM2)
     If $hWndCM <> '' Then
         $Available = True
-        ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+        ConsoleWrite('РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ PID ' & $iPidCM & @CRLF)
     Else
         $Available = False
     EndIf
@@ -307,9 +307,9 @@ EndFunc   ;==>_IsWinCM
 Func _GetWin($type, $data)
     Local $hWndt = WinGetHandle($data), $text
     If $hWndt <> '' Then
-        $text = 'окно ' & $type & ' существует  ' & $hWndt & @CRLF
+        $text = 'РѕРєРЅРѕ ' & $type & ' СЃСѓС‰РµСЃС‚РІСѓРµС‚  ' & $hWndt & @CRLF
     Else
-        $text = 'окно ' & $type & ' НЕ существует' & @CRLF
+        $text = 'РѕРєРЅРѕ ' & $type & ' РќР• СЃСѓС‰РµСЃС‚РІСѓРµС‚' & @CRLF
     EndIf
     ConsoleWrite($text)
     Return $hWndt
@@ -333,7 +333,7 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     _IsWinCM()
@@ -341,12 +341,12 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
-        ;MsgBox(16+4096, 'Ошибка', 'Не удалось открыть память тестовой программы')
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
+        ;MsgBox(16+4096, 'РћС€РёР±РєР°', 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹')
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
@@ -377,9 +377,9 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
     Next
 
     If ProcessExists($iPidCM) Then
-        _WinAPI_CloseHandle($hProcess); Открытый процесс необходимо закрывать
+        _WinAPI_CloseHandle($hProcess); РћС‚РєСЂС‹С‚С‹Р№ РїСЂРѕС†РµСЃСЃ РЅРµРѕР±С…РѕРґРёРјРѕ Р·Р°РєСЂС‹РІР°С‚СЊ
     EndIf
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD1
 
 Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
@@ -393,7 +393,7 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     ;_IsWinCM()
@@ -401,12 +401,12 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
-        ;MsgBox(16+4096, 'Ошибка', 'Не удалось открыть память тестовой программы')
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
+        ;MsgBox(16+4096, 'РћС€РёР±РєР°', 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹')
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
@@ -429,14 +429,14 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
             DllStructSetData($tClrStruct, 1, $gray_canal, $x+2)
         Next
         _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite, $iWrite)
-        ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
+        ;ConsoleWrite('Р—Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚ ' & $iWrite & @CRLF)
         $startBufRd += @DesktopWidth * 4
     Next
 
     If ProcessExists($iPidCM) Then
         _WinAPI_CloseHandle($hProcess)
     EndIf
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD2
 
 Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
@@ -450,7 +450,7 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     ;_IsWinCM()
@@ -458,11 +458,11 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
 
     $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     _WinAPI_ReadProcessMemory($hProcess, $iAddressCM, DllStructGetPtr($tBf), 4, $iRead)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
@@ -483,14 +483,14 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
         _WinAPI_WriteProcessMemory($hProcess, $startBufRd, DllStructGetPtr($tClrStruct), $lenXBite*4, $iWrite)
-        ;ConsoleWrite('Записано байт ' & $iWrite & @CRLF)
+        ;ConsoleWrite('Р—Р°РїРёСЃР°РЅРѕ Р±Р°Р№С‚ ' & $iWrite & @CRLF)
         $startBufRd += @DesktopWidth * 4
     Next
 
     If ProcessExists($iPidCM) Then
         _WinAPI_CloseHandle($hProcess)
     EndIf
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD3
 
 Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
@@ -510,7 +510,7 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
             ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
             $fx2 < $fx1 Or $fy2 < $fy1 Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     ;_IsWinCM()
@@ -521,11 +521,11 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
             'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
@@ -582,7 +582,7 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
         DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
     DllClose($ah_Handle)
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_OLD4
 
 Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
@@ -598,7 +598,7 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
             ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
             $fx2 < $fx1 Or $fy2 < $fy1 Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     ;_IsWinCM()
@@ -609,11 +609,11 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
             'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
@@ -636,10 +636,10 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-            #Region    ************ Обработка ************
+            #Region    ************ РћР±СЂР°Р±РѕС‚РєР° ************
             $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
             $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
-            #EndRegion ************ Обработка ************
+            #EndRegion ************ РћР±СЂР°Р±РѕС‚РєР° ************
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
@@ -664,10 +664,10 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
                 ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
                 ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-                #Region    ************ Обработка ************
+                #Region    ************ РћР±СЂР°Р±РѕС‚РєР° ************
                 $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
                 $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
-                #EndRegion ************ Обработка ************
+                #EndRegion ************ РћР±СЂР°Р±РѕС‚РєР° ************
 
                 DllStructSetData($tClrStruct, 1, $color, $addrRd)
             Next
@@ -680,7 +680,7 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
         DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
     DllClose($ah_Handle)
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_GREYSCALE_5
 
 Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
@@ -696,7 +696,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
             ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
             $fx2 < $fx1 Or $fy2 < $fy1 Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
+        ConsoleWrite('РќРµРїСЂР°РІРёР»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹' & @CRLF)
         Return
     EndIf
     ;_IsWinCM()
@@ -707,14 +707,14 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        ConsoleWrite('РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ РїР°РјСЏС‚СЊ С‚РµСЃС‚РѕРІРѕР№ РїСЂРѕРіСЂР°РјРјС‹' & @CRLF)
         Return
     EndIf
 
     ConsoleWrite('(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')   ' & _
                 'mid_contr = ' & $fmid_contr & ',  k_contr = ' & $fk_contr & @CRLF)
 
-    ; Читаем адрес начала буфера в указателе
+    ; Р§РёС‚Р°РµРј Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° Р±СѓС„РµСЂР° РІ СѓРєР°Р·Р°С‚РµР»Рµ
     DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
             'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
@@ -737,7 +737,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-            #Region    ************ Обработка ************
+            #Region    ************ РћР±СЂР°Р±РѕС‚РєР° ************
             If (($R + $G + $B) / 3) > $fmid_contr Then
                 $R = $R + $fk_contr
                 $G = $G + $fk_contr
@@ -784,7 +784,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                 EndIf
             EndIf
             $color = $R*65536 + $G*256 + $B
-            #EndRegion ************ Обработка ************
+            #EndRegion ************ РћР±СЂР°Р±РѕС‚РєР° ************
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
@@ -809,7 +809,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                 ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
                 ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-                #Region    ************ Обработка ************
+                #Region    ************ РћР±СЂР°Р±РѕС‚РєР° ************
                 If (($R + $G + $B) / 3) > $fmid_contr Then
                     $R = $R + $fk_contr
                     $G = $G + $fk_contr
@@ -856,7 +856,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                     EndIf
                 EndIf
                 $color = $R*65536 + $G*256 + $B
-                #EndRegion ************ Обработка ************
+                #EndRegion ************ РћР±СЂР°Р±РѕС‚РєР° ************
 
                 DllStructSetData($tClrStruct, 1, $color, $addrRd)
             Next
@@ -869,7 +869,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
         DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
     DllClose($ah_Handle)
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ;ConsoleWrite('Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_DRAMCONTRAST
 
 Func _SendCM($wParam, $lParam)
@@ -893,9 +893,9 @@ Func _ToggleMonitor($hwnd, $OnOff)
 EndFunc   ;==>_ToggleMonitor
 
 ;~ WM_User = 0x400 (1024)
-;~ Стандартные сообщения до WM_User-1.     от              0   до  0x03FF (1023)
-;~ Локальные сообщения от WM_User          от  0x0400  (1024)  до  0x7FFF (32767)
-;~ Глобальные сообщения                    от  0xC000 (49152)  до  0xFFFF (65535)
+;~ РЎС‚Р°РЅРґР°СЂС‚РЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ РґРѕ WM_User-1.     РѕС‚              0   РґРѕ  0x03FF (1023)
+;~ Р›РѕРєР°Р»СЊРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ РѕС‚ WM_User          РѕС‚  0x0400  (1024)  РґРѕ  0x7FFF (32767)
+;~ Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ                    РѕС‚  0xC000 (49152)  РґРѕ  0xFFFF (65535)
 
 
 ;ExitLoop(1)
