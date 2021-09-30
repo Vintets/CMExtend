@@ -39,6 +39,7 @@ Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
+Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND = 1024
 
@@ -304,11 +305,14 @@ Func _IsWinCM()
     $hWndCM = _GetWin('главное', '[TITLE:' & $CM_name & '; W:310; H:194]')
 
     If $hWndCMM And $hWndCM Then
-        $hWndCMR = _GetWin('редактора', '[TITLE:Редактор -]')
-        ;_WinAPI_GetWindowThreadProcessId($hWndCM, $iPidCM2)
+        if Not $repeated Then
+            $hWndCMR = _GetWin('редактора', '[TITLE:Редактор -]')
+            ;_WinAPI_GetWindowThreadProcessId($hWndCM, $iPidCM2)
 
-        $iPidCM = WinGetProcess($hWndCM)
-        ; ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+            $iPidCM = WinGetProcess($hWndCM)
+            ; ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+        EndIf
+        $repeated = True
         return True
     Else
         Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
@@ -318,12 +322,14 @@ EndFunc   ;==>_IsWinCM
 
 Func _GetWin($type, $data)
     Local $hWndt = WinGetHandle($data), $text
-    If $hWndt <> '' Then
-        $text = 'окно ' & $type & ' существует  ' & $hWndt & @CRLF
-    Else
-        $text = 'окно ' & $type & ' НЕ существует' & @CRLF
+    if Not $repeated Then
+        If $hWndt Then
+            $text = 'окно ' & $type & ' существует  ' & $hWndt & @CRLF
+        Else
+            $text = 'окно ' & $type & ' НЕ существует' & @CRLF
+        EndIf
+        ConsoleWrite($text)
     EndIf
-    ConsoleWrite($text)
     Return $hWndt
 EndFunc   ;==>_GetWin
 
