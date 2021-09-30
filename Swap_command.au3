@@ -42,12 +42,13 @@ Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND = 1024
+Global $CM_title = ''
 
 
-$CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
 
+CreateCMTitle()
 _WaitCM()
-; Example1()
+_MainLoop()
 
 ;~ Local $hTimer = TimerInit()
 ;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
@@ -55,8 +56,12 @@ _WaitCM()
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 ;~ _SendCM(123, 456)
 
+Func CreateCMTitle()
+    $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
+    $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
+EndFunc   ;==>_MainLoop
 
-Func Example1()
+Func _MainLoop()
     Local $Msg, $Code_MY_SETREGION
     $hGUImain = GUICreate('CMExtend v' & $CMExtendVersion, 100, 50, 20, 20, $WS_OVERLAPPEDWINDOW + $WS_POPUP)
     GUISetState(@SW_SHOW)
@@ -70,14 +75,16 @@ Func Example1()
         $Msg = GUIGetMsg()
         Switch $Msg
             Case $GUI_EVENT_CLOSE
+                MsgBox(48+4096, 'Внимание!', 'Дополнительный функционал отключен!', 2)
                 ExitLoop
             Case Else
                 ;ConsoleWrite('$Msg =  ' & $Msg & @CRLF)
         EndSwitch
+        If Not WinExists($hWndCM) Then ExitLoop
         Sleep(50)
     WEnd
     GUIDelete()
-EndFunc   ;==>Example1
+EndFunc   ;==>_MainLoop
 
 Func _RegisterMyCommand()
     GUIRegisterMsg(0x555, '_COMMAND_555')
@@ -293,7 +300,7 @@ Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
 EndFunc   ;==>_WM_CLOSE
 
 Func _WaitCM()
-    $hWnd = WinWait('[TITLE:' & $CM_name & '; W:310; H:194]', '', 3)
+    $hWndCM = WinWait($CM_title, '', 3)
     If Not _IsWinCM() Then
         MsgBox(16+4096, 'Внимание!', 'Окно Clickermann не найдено.' & @CRLF & 'Дополнительный функционал не подключен!', 3)
         Exit
@@ -302,8 +309,7 @@ EndFunc   ;==>WaitCM
 
 Func _IsWinCM()
     $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:' & $CM_name & '; W:0; H:0]')
-    $hWndCM = _GetWin('главное', '[TITLE:' & $CM_name & '; W:310; H:194]')
-
+    $hWndCM = _GetWin('главное', $CM_title)
     If $hWndCMM And $hWndCM Then
         if Not $repeated Then
             $hWndCMR = _GetWin('редактора', '[TITLE:Редактор -]')
