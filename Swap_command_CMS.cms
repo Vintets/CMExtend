@@ -1,6 +1,6 @@
 #name "Swap_command"
 // Author: Vint
-// Version: 0.0.2 (01.08.2017)
+// Version: 0.0.6 (17.08.2017)
 // Скрипт для Clickermann v4.11 003
 #include "logger.cms"
 
@@ -9,74 +9,268 @@
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 // показывать окно лога. Глубина 0, 1, 2
-$log = 1
+$log = 2
 
 // главный файл настроек
 $main_ini = "settings_cme.ini"
 
-//##############################################################################
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+// ====== Описание параметров ==================================================
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~001~ Заголовки и текст окон (расширенные)
+
+// параметр $AI_title в функциях работы с окнами. Эти установки могут быть использованы, чтобы отличить окна по следующим свойствам:
+
+//TITLE - Заголовок окна
+//CLASS - Внутреннее название класса окна
+//REGEXPTITLE -Заголовок окна с использованием регулярных выражений
+//REGEXPCLASS - Название класса окна с использованием регулярных выражений
+//LAST - Последнее окно, использованное в предыдущей команде
+//ACTIVE - Текущее активное окно
+//X \ Y \ W \ H - Координаты и размер окна
+//INSTANCE - Номер экземпляра окна, если несколько окон соответствуют критерию поиска (отсчёт начинается с 1).
+// [СВОЙСТВО1:Значение1; СВОЙСТВО2:Значение2; СВОЙСТВО3:Значение3]
+// если "Значение" должно содержать символ ";", он должен быть продублирован
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~
+
+
+//##############################################################################
 // ====== Подпрограммы =========================================================
-SUB(log_show) //===  показ лога  ===============================================
+
+SUB(log_show) //--- показ лога -------------------------------------------------
     IF($log > 0)
         LOGSHOW(1, $_xmax-440, 28)            // отображение окна лога  (335)
         WNDSIZE(WNDFIND("Лог", 1), 441, 260)  // изменения размеров окна лога 260/800
     END_IF
 END_SUB
 
-SUB(wait_completion) //===  ожидание завершения  ===============================
+STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
+SUB(toHEX, $DEC)
+    $HEX = ""
+    WHILE($DEC > 0)
+        $cel = INT($DEC/16)
+        $ost = $DEC - $cel*16
+        IF($ost > 9)
+            $ost = $arr16[$ost - 10]
+        END_IF
+        $HEX = STRCONCAT($ost, $HEX)
+        $DEC = $cel
+    END_CYC
+    //LOGWRITE($HEX)
+END_SUB
+
+SUB(wait_completion) //--- ожидание завершения ---------------------------------
     WHILE(INT(INIREAD($main_ini, "completion", "clickermann")) = 0)
-        WAITMS(20)
+        WAITMS(10)
     END_CYC
 END_SUB
 
-SUB(getHWND_CMExtend) //===  получаем hwnd CMExtend  ===========================
-    $hwnd_CME = wndFind("Мой GUI")
+SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
+    $hwnd_CME = wndFind("CMExtend v")
     IF($hwnd_CME = 0)
-        LOGWRITE("Окно не найдено")
-        HINTPOPUP("Окно не найдено", "Мой GUI")
+        LOGWRITE("Окно CMExtend не найдено")
+        HINTPOPUP("Окно CMExtend не найдено", "CMExtend")
         HALT
     END_IF
     IF($log > 0)
         LOGWRITE("CMExtend hwnd: ", $hwnd_CME)
-        HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "Мой GUI")
+        LOGWRITE("")
+        HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "CMExtend")
     END_IF
 END_SUB
 
-SUB(test_555) //===  test_555  =================================================
-    PostMessage($hwnd_CME, 0x555, 5, 10)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//--- test_555 -----------------------------------------------------------------
+SUB(test_555)
+    PostMessage($hwnd_CME, 0x555, 4096+4096*65536, 1920+1080*65536)
     waitms(200)
 END_SUB
 
-#define MY_GET_PIDCM:0xC400
-SUB(GET_PIDCM) //===  получить PID Clickermann-а  ==============================
+//--- получить дескриптор окна (hWnd) ------------------------------------------
+#define AI_WinGetHandle:0xC400
+SUB(CME_WinGetHandle, $AI_title, $AI_text)
+    //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
     INIWRITE($main_ini, "completion", "0", "clickermann")
-    WAITMS(20)
-    PostMessage($hwnd_CME, MY_GET_PIDCM, 0, 0)
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
-    $pid_CM = INT(INIREAD($main_ini, "CMPID", "clickermann"))
-    IF($log > 0)
-        LOGWRITE("Clickermann pid: ", $pid_CM)
-        HINTPOPUP(STRCONCAT("Clickermann hwnd: ", $pid_CM), "Мой GUI")
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
     END_IF
 END_SUB
 
-#define MY_SETREGION:0xC401
-SUB(SETREGION, $x1, $y1, $x2, $y2) //===  SETREGION  ===========================
-    PostMessage($hwnd_CME, MY_SETREGION, $x1+$y1*65536, $x2+$y2*65536)
-    waitms(100)
+//--- получить дескриптор (hWnd) окна рабочего стола ---------------------------
+#define AI_GetDesktopWindow:0xC401
+SUB(CME_GetDesktopWindow)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("CME_GetDesktopWindow.  hWnd:  ", $CME_return)
+    END_IF
 END_SUB
 
-#define MY_GREYSCALE:0xC402
-SUB(GREYSCALE, $x1, $y1, $x2, $y2) //===  GREYSCALE  ===========================
-    PostMessage($hwnd_CME, MY_GREYSCALE, $x1+$y1*65536, $x2+$y2*65536)
-    waitms(100)
+//--- получить PID окна --------------------------------------------------------
+#define AI_WinGetProcess:0xC402
+SUB(CME_WinGetProcess, $AI_title, $AI_text)
+    //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    IF($log > 1)
+        LOGWRITE("CME_WinGetProcess.  PID:  ", $CME_return)
+    END_IF
 END_SUB
 
-SUB(test_888888) //===  test_555  ==============================================
+//--- получить PID Clickermann-а -----------------------------------------------
+#define AI_WinGetProcessCM:0xC403
+SUB(CME_WinGetProcessCM)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $pid_CM = $CME_return
+    IF($log > 1)
+        LOGWRITE("Clickermann pid: ", $pid_CM)
+        //HINTPOPUP(STRCONCAT("Clickermann PID: ", $CME_return), "PID")
+    END_IF
+END_SUB
+
+//--- получить состояние указанного окна. --------------------------------------
+#define AI_WinGetState:0xC404
+SUB(CME_WinGetState, $AI_title, $AI_text)
+    //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
+    // ответ:
+    // $CME_return  - состояние побитово
+    //    1 = существует
+    //    2 = отображается
+    //    4 = доступно
+    //    8 = активно
+    //   16 = свёрнуто
+    //   32 = развёрнуто
+    // и раздельно:
+    //    $fEXIST - существует
+    //    $fSHOW - отображается
+    //    $fENABLE - доступно
+    //    $fACTIVE - активно
+    //    $fMINIMIZE - свёрнуто
+    //    $fMAXIMIZE - развёрнуто на весь экран
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "title", $AI_title, "clickermann")
+    INIWRITE($main_ini, "text", $AI_text, "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
+    wait_completion()
+    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $fstate = $CME_return
+    $fEXIST = 0
+    $fSHOW = 0
+    $fENABLE = 0
+    $fACTIVE = 0
+    $fMINIMIZE = 0
+    $fMAXIMIZE = 0
+    IF($fstate > 31)
+        $fMAXIMIZE = 1
+        $fstate = $fstate - 32
+    END_IF
+    IF($fstate > 15)
+        $fMINIMIZE = 1
+        $fstate = $fstate - 16
+    END_IF
+    IF($fstate > 7)
+        $fACTIVE = 1
+        $fstate = $fstate - 8
+    END_IF
+    IF($fstate > 3)
+        $fENABLE = 1
+        $fstate = $fstate - 4
+    END_IF
+    IF($fstate > 1)
+        $fSHOW = 1
+        $fstate = $fstate - 2
+    END_IF
+    IF($fstate > 0)
+        $fEXIST = 1
+    END_IF
+    IF($log > 1)
+        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
+        LOGWRITE("существует               - ", $fEXIST)
+        LOGWRITE("отображается             - ", $fSHOW)
+        LOGWRITE("доступно                 - ", $fENABLE)
+        LOGWRITE("активно                  - ", $fACTIVE)
+        LOGWRITE("свёрнуто                 - ", $fMINIMIZE)
+        LOGWRITE("развёрнуто на весь экран - ", $fMAXIMIZE)
+    END_IF
+END_SUB
+
+//--- Поверх всех окон ---------------------------------------------------------
+#define AI_WinSetOnTop:0xC407
+SUB(CME_WinSetOnTop, $AI_hwnd, $AI_par1)
+    // hwnd окна
+    // 1 - включить, 0 - выключить
+    PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $AI_par1)
+END_SUB
+
+//--- Устанавливает прозрачность окна ------------------------------------------
+#define AI_WinSetTrans:0xC408
+SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
+    // hwnd окна
+    // прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
+    PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $AI_par1)
+END_SUB
+
+//--- получить -------------------------
+#define AI_:0xC400
+SUB(CME_)
     
 END_SUB
 
+
+
+//--- Передать границы региона SETREGION ---------------------------------------
+#define AI_SETREGION:0xC450
+SUB(CME_SETREGION, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
+    PostMessage($hwnd_CME, AI_SETREGION, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
+    waitms(5)
+END_SUB
+
+//--- преобразовать область в GREYSCALE ----------------------------------------
+#define AI_GREYSCALE:0xC451
+SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_GREYSCALE, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
+    wait_completion()
+END_SUB
+
+//--- применить к области DRAMCONTRAST -----------------------------------------
+#define AI_DRAMCONTRAST:0xC452
+SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
+    CME_SETREGION($AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n)
+    INIWRITE($main_ini, "completion", "0", "clickermann")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_DRAMCONTRAST, $AI_mid, $AI_k)
+    wait_completion()
+END_SUB
 
 // =============================================================================
 //##############################################################################
@@ -88,20 +282,153 @@ LOGCLEAR
 log_show()
 getHWND_CMExtend()
 
-GETSCREEN
-$x1 = 123
-$y1 = 456
-$x2 = 1600
-$y2 = 1200
 
+
+//$x1 = 123
+//$y1 = 456
+//$x2 = 1600
+//$y2 = 1200
+
+// 100х100
+$x1 = 750
+$y1 = 426
+$x2 = 849
+$y2 = 525
+
+//
+$x1 = 650
+$y1 = 350
+$x2 = 900
+$y2 = 550
+
+// Full Screen
+//$x1 = 0
+//$y1 = 0
+//$x2 = $_xmax
+//$y2 = $_ymax
+
+
+GETSCREEN
 $timer1 = $_ms
 
 //test_555()
-GET_PIDCM()
-//SETREGION($x1, $y1, $x2, $y2)
-//GREYSCALE($x1, $y1, $x2, $y2)
+//CME_WinGetHandle("[ACTIVE]", "")          // активное окно
+//CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
+//CME_GetDesktopWindow()
+//CME_WinGetProcess("[CLASS:Notepad]", "")
+
+//CME_WinGetProcessCM()
+//CME_WinGetState("[CLASS:Notepad]", "")
+//CME_WinSetOnTop($CME_return, 1)
+//CME_WinSetTrans($CME_return, 128)
+
+
+
+//CME_WINEXISTS("[CLASS:Notepad]")
+//CME_SETREGION($x1, $y1, $x2, $y2)
+//CME_GREYSCALE($x1, $y1, $x2, $y2)
+CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
+//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
+
+
 
 print_timeaction("тест 1", $_ms - $timer1)
 
+IF(($x2 = $_xmax) & ($y2 = $_ymax))
+    SCREENSHOT
+ELSE
+    SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
+END_IF
+
 
 HALT
+
+
+// 0xC400
+// Получает дескриптор указанного окна
+// CME_WinGetHandle("title", "text")
+// $CME_return  - hWnd
+
+// 0xC401
+// Получает дескриптор окна рабочего стола
+// CME_GetDesktopWindow()
+// $CME_return  - hWnd
+
+// 0xC402
+// Получает идентификатор процесса (Process ID, PID), связанного с указанным окном
+// CME_WinGetProcess("title", "text")
+// $CME_return  - PID
+
+// 0xC403
+// Получает идентификатор процесса (PID) окна Clickermann
+// CME_WinGetProcessCM()
+// $CME_return  - PID
+// $pid_CM      - PID
+
+// 0xC404
+// Получает состояние указанного окна
+// CME_WinGetState("title", "text")
+// $CME_return  - состояние побитово
+//    1 = существует
+//    2 = отображается
+//    4 = доступно
+//    8 = активно
+//   16 = свёрнуто
+//   32 = развёрнуто
+// и раздельно:
+//    $fEXIST - существует
+//    $fSHOW - отображается
+//    $fENABLE - доступно
+//    $fACTIVE - активно
+//    $fMINIMIZE - свёрнуто
+//    $fMAXIMIZE - развёрнуто на весь экран
+
+// 0xC407
+// Поверх всех окон
+// CME_WinSetOnTop(hwnd, 1/0)
+
+// 0xC408
+// Устанавливить прозрачность окна
+// CME_WinSetTrans(hwnd, transporency)
+
+
+
+
+
+
+// 0xC450
+// Передать границы региона SETREGION
+// CME_SETREGION($x1, $y1, $x2, $y2)
+
+// 0xC451
+// Преобразовать область в GREYSCALE
+// CME_GREYSCALE($x1, $y1, $x2, $y2)
+
+// 0xC452
+// применить к области DRAMCONTRAST
+// CME_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid, $k)
+
+
+
+
+
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+//$pid = 4936
+//READMEM($pid, "004E20FC", 4)  // читаем адрес начала буфера в указателе
+//$startbuf = $_return1
+//LOGWRITE("$startbuf = ", $startbuf)
+
+//$x1 = 194
+//$y1 = 347
+//$c = PXL($x1, $y1)
+//LOGWRITE($c, "  RGB  ", COLORR($c), " ", COLORG($c), " ", COLORB($c))
+//$startbufrd = $_return1 + ($y1*($_xmax+1)*4) + ($x1*4)
+//toHEX($startbufrd)
+//READMEM($pid, $HEX, 4)
+//$read = $_return1
+//LOGWRITE($read, "  RGB  ", COLORB($read), " ", COLORG($read), " ", COLORR($read))
+//$gray_canal = INT((0.299*COLORR($c)) + (0.587*COLORG($c)) + (0.114*COLORB($c)))
+//$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
+//LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)

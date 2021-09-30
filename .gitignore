@@ -18,6 +18,7 @@ Thumbs.db
 /screens/
 
 
+
 # нужные файлы в запрещённых директориях
 !settings_sample.ini
 #!/Разработка CMExtend/Диапазон сообщений Win.txt
