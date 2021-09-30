@@ -46,7 +46,7 @@ Global $CM_title = ''
 
 
 
-CreateCMTitle()
+_CreateCMTitle()
 _WaitCM()
 _MainLoop()
 
@@ -56,10 +56,6 @@ _MainLoop()
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 ;~ _SendCM(123, 456)
 
-Func CreateCMTitle()
-    $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
-    $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
-EndFunc   ;==>_MainLoop
 
 Func _MainLoop()
     Local $Msg, $Code_MY_SETREGION
@@ -298,6 +294,11 @@ Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     GUIDelete($hGUImain)
     Exit
 EndFunc   ;==>_WM_CLOSE
+
+Func _CreateCMTitle()
+    $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
+    $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
+EndFunc   ;==>_MainLoop
 
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
