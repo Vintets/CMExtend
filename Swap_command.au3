@@ -16,7 +16,7 @@
 ;===============================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.6
+; Version:          0.0.7
 ; Requirement(s):   Autoit 3.3.8.1
 ; Author(s):        Vint
 ;
@@ -44,13 +44,13 @@ Global $WM_CMCOMMAND = 1024
 
 
 _IsWinCM()
-_SendCM(123, 456)
-; Example1()
+Example1()
 
 ;~ Local $hTimer = TimerInit()
 ;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
 ;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+;~ _SendCM(123, 456)
 
 
 Func Example1()
