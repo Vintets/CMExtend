@@ -2,11 +2,11 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=CMTools
-#AutoIt3Wrapper_Res_Fileversion=1.0.0
+#AutoIt3Wrapper_Res_Fileversion=1.0.1
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|1.0.0
+#AutoIt3Wrapper_Res_Field=Version|1.0.1
 #AutoIt3Wrapper_Res_Field=Build|2021.10.01
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -16,7 +16,7 @@
 ;===================================================================================================
 ;
 ; Description:      CMTools
-; Version:          1.0.0
+; Version:          1.0.1
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ;
@@ -36,7 +36,7 @@ Opt('MustDeclareVars', 1)
 Opt('TrayIconDebug', 1)
 ;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное
 
-Global $CMExtendVersion = '1.0.0'
+Global $CMExtendVersion = '1.0.1'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -369,8 +369,8 @@ EndFunc   ;==>_GetWin
 
 Func _SendCM($wParam, $lParam)
     ; Ответы
-    ; (1, 0) - Error, команда выполнена неудачно
     ; (1, 1) - Ok, команда выполнена успешно
+    ; (1, 2) - Error, команда выполнена неудачно
     _SendMessage($hWndCM, $WM_CMCOMMAND, $wParam, $lParam)
     If @error Then
         MsgBox(4096, '_SendCM', '_SendMessage Error: ' & @error)

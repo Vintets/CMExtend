@@ -65,12 +65,12 @@ END_SUB
 
 SUB(CME_GetOkAction) //--- получить ответ Ok -----------------------------------
     // Ответы
-    // (1, 0) - Error, команда выполнена неудачно
     // (1, 1) - Ok, команда выполнена успешно
+    // (1, 2) - Error, команда выполнена неудачно
     $CME_completion_loop = 0
     WHILE($CME_completion_loop = 0)
         GETMESSAGE($wPar, $lPar, $isnew)
-        IF(($isnew != 0) & ($wPar == 1) & (($lPar == 0) | ($lPar == 1)))
+        IF(($isnew != 0) & ($wPar == 1) & (($lPar == 1) | ($lPar == 2)))
             $CME_completion = $lPar
             IF($log > 1)
                 LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
