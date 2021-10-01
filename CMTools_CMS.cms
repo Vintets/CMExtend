@@ -134,8 +134,8 @@ SUB(wait_completion) //--- ожидание завершения ---------------
 END_SUB
 
 SUB(getHWND_CMTools) //--- получаем hwnd CMTools -------------------------------
-    $time = $_time_t + 10
-    WHILE($time > $_time_t)
+    $time = $_ms + 3000
+    WHILE($time > $_ms)
         $hwnd_CME = wndFind("CMTools v")
         IF($hwnd_CME != 0)
             $time = 0
@@ -148,8 +148,9 @@ SUB(getHWND_CMTools) //--- получаем hwnd CMTools -----------------------
         END_IF
     END_CYC
     IF($time ! 0)
-        LOGWRITE("Окно CMTools не найдено")
-        HINTPOPUP("Окно CMTools не найдено", "CMTools")
+        $text = STRCONCAT("Окно CMTools не найдено", \n, "Скрипт остановлен!")
+        LOGWRITE($text)
+        HINTPOPUP($text, "CMTools")
         HALT
     END_IF
 END_SUB
