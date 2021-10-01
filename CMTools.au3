@@ -119,7 +119,7 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     $iLW = BitAND($iwParam, 0xFFFF) ; младшее слово
     $iHW = BitShift($iwParam, 16) ; старшее слово
 
-    _SendCM(1, 1)
+    _SendCM(0x555, 1)
     ;Switch $hWndFrom
     ;    Case $hGUImain
     ;        Switch $iCode
@@ -148,7 +148,7 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
         EndIf
     EndIf
-    _SendCM($freturn, 2)
+    _SendCM($freturn, 0xC400)
 EndFunc   ;==>_COMMAND_AI_WinGetHandle
 
 Func _COMMAND_AI_WinGetHandle_INI($hWnd, $iMsg, $iwParam, $ilParam)
