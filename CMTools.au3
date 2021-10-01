@@ -175,8 +175,7 @@ Func _COMMAND_AI_GetDesktopWindow($hWnd, $iMsg, $iwParam, $ilParam)
 
     $freturn = _WinAPI_GetDesktopWindow()
     ConsoleWrite('GetDesktopWindow   hWnd = ' & $freturn & @CRLF)
-    IniWrite($fileini, 'main', 'return', $freturn)  ; return
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM($freturn, 0xC401)
 EndFunc   ;==>_COMMAND_AI_GetDesktopWindow
 
 Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
@@ -197,21 +196,20 @@ Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('WinGetProcess   PID = ' & $freturn & @CRLF)
         EndIf
     EndIf
-    IniWrite($fileini, 'main', 'return', $freturn)  ; return
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM($freturn, 0xC402)
 EndFunc   ;==>_COMMAND_AI_WinGetProcess
 
 Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
-    _IsWinCM()
+    If Not _IsWinCM() Then $iPidCM = 0
     IniWrite($fileini, 'main', 'return', $iPidCM)  ; return
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM($iPidCM, 0xC403)
 EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
 
 Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
+    Local $freturn = 0, $ftitle = '', $ftext = '', $fhwnd
     ;Local $fEXIST, $fSHOW, $fENABLE, $fACTIVE, $fMINIMIZE, $fMAXIMIZE
 
     $ftitle = IniRead($fileini, 'window', 'title', '')
@@ -223,7 +221,7 @@ Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
         EndIf
         $freturn = WinGetState($ftitle, $ftext)
         If @error or $freturn = '' Then
-            $freturn = -1
+            $freturn = 0
         Else
             ConsoleWrite('WinGetState   hWnd = ' & $freturn & @CRLF)
             ConsoleWrite('EXIST = ' & BitAND($freturn, 1) & @CRLF)
@@ -234,8 +232,7 @@ Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('MAXIMIZE = ' & BitAND($freturn, 32) & @CRLF)
         EndIf
     EndIf
-    IniWrite($fileini, 'main', 'return', $freturn)  ; return
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM($freturn, 0xC404)
 EndFunc   ;==>_COMMAND_AI_WinGetState
 
 Func _COMMAND_AI_WinSetOnTop($hWnd, $iMsg, $iwParam, $ilParam)
@@ -245,6 +242,9 @@ Func _COMMAND_AI_WinSetOnTop($hWnd, $iMsg, $iwParam, $ilParam)
     $fhwnd = HWnd($iwParam)
     If Not @error Then
         WinSetOnTop($fhwnd, '', $ilParam)
+        _SendCM(0xC407, 1)
+    Else
+        _SendCM(0xC407, 2)
     EndIf
 EndFunc   ;==>_COMMAND_AI_WinSetOnTop
 
@@ -256,6 +256,9 @@ Func _COMMAND_AI_WinSetTrans($hWnd, $iMsg, $iwParam, $ilParam)
     If Not @error Then
         $res = WinSetTrans($fhwnd, '', $ilParam)
         ConsoleWrite($res & @CRLF)
+        _SendCM(0xC408, 1)
+    Else
+        _SendCM(0xC408, 2)
     EndIf
 EndFunc   ;==>_COMMAND_AI_WinSetTrans
 

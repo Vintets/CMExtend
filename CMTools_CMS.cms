@@ -190,25 +190,12 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     WHILE($CME_command != 0xC400)
         WAITMS(10)
     END_CYC
-END_SUB
-
-SUB(CME_WinGetHandle_INI, $AI_title, $AI_text)
-    // получает дескриптор окна (hWnd)
-    // $AI_title - Заголовок/дескриптор/класс окна
-    // $AI_text  - текст окна или пустая строка ""
-    
-    // Возвращаемые значения:
-    // $CME_return  - найденный hWnd или 0
-    INIWRITE($main_ini, "completion", "0", "main")
-    INIWRITE($main_ini, "title", $AI_title, "window")
-    INIWRITE($main_ini, "text", $AI_text, "window")
-    WAITMS(5)
-    PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
-    wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "main"))
-    IF($log > 1)
-        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
-    END_IF
+    // Вариант через INI
+    //wait_completion()
+    //$CME_return = INT(INIREAD($main_ini, "return", "main"))
+    //IF($log > 1)
+    //    LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
+    //END_IF
 END_SUB
 
 //--- получить дескриптор (hWnd) окна рабочего стола ---------------------------
@@ -220,11 +207,9 @@ SUB(CME_GetDesktopWindow)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
-    wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "main"))
-    IF($log > 1)
-        LOGWRITE("CME_GetDesktopWindow.  hWnd:  ", $CME_return)
-    END_IF
+    WHILE($CME_command != 0xC401)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- получить PID окна --------------------------------------------------------
@@ -241,11 +226,9 @@ SUB(CME_WinGetProcess, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
-    wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "main"))
-    IF($log > 1)
-        LOGWRITE("CME_WinGetProcess.  PID:  ", $CME_return)
-    END_IF
+    WHILE($CME_command != 0xC402)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- получить PID Clickermann-а -----------------------------------------------
@@ -260,19 +243,16 @@ SUB(CME_WinGetProcessCM)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
-    wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "main"))
+    WHILE($CME_command != 0xC403)
+        WAITMS(10)
+    END_CYC
     $pid_CM = $CME_return
-    IF($log > 1)
-        LOGWRITE("Clickermann pid: ", $pid_CM)
-        //HINTPOPUP(STRCONCAT("Clickermann PID: ", $CME_return), "PID")
-    END_IF
 END_SUB
 
 //--- получить состояние указанного окна. --------------------------------------
 #define AI_WinGetState:0xC404
 SUB(CME_WinGetState, $AI_title, $AI_text)
-    // получает состояние указанного окна через INI
+    // получает состояние указанного окна
     // $AI_title - Заголовок/дескриптор/класс окна
     // $AI_text  - текст окна или пустая строка ""
     
@@ -296,7 +276,9 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
-    wait_completion()
+    WHILE($CME_command != 0xC404)
+        WAITMS(10)
+    END_CYC
     $CME_return = INT(INIREAD($main_ini, "return", "main"))
     $fstate = $CME_return
     $fEXIST = 0
@@ -346,6 +328,9 @@ SUB(CME_WinSetOnTop, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - 1 - включить, 0 - выключить
     PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $AI_par1)
+    WHILE($CME_command != 0xC407)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- Устанавливает прозрачность окна ------------------------------------------
@@ -355,6 +340,9 @@ SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
     PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $AI_par1)
+    WHILE($CME_command != 0xC408)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- получить -------------------------
