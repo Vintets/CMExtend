@@ -136,7 +136,7 @@ EndFunc   ;==>_COMMAND_555
 
 Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $ftext = ''
+    Local $freturn = 0, $ftitle = '', $ftext = ''
 
     $ftitle = IniRead($fileini, 'window', 'title', '')
     $ftext = IniRead($fileini, 'window', 'text', '')
@@ -171,7 +171,7 @@ EndFunc   ;==>_COMMAND_AI_WinGetHandle
 
 Func _COMMAND_AI_GetDesktopWindow($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1
+    Local $freturn = 0
 
     $freturn = _WinAPI_GetDesktopWindow()
     ConsoleWrite('GetDesktopWindow   hWnd = ' & $freturn & @CRLF)
@@ -181,7 +181,7 @@ EndFunc   ;==>_COMMAND_AI_GetDesktopWindow
 
 Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
+    Local $freturn = 0, $ftitle = '', $ftext = '', $fhwnd
 
     $ftitle = IniRead($fileini, 'window', 'title', '')
     $ftext = IniRead($fileini, 'window', 'text', '')
@@ -192,7 +192,7 @@ Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
         EndIf
         $freturn = WinGetProcess($ftitle, $ftext)
         If @error or $freturn = '' Then
-            $freturn = -1
+            $freturn = 0
         Else
             ConsoleWrite('WinGetProcess   PID = ' & $freturn & @CRLF)
         EndIf
