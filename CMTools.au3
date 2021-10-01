@@ -36,7 +36,7 @@ Opt('MustDeclareVars', 1)
 Opt('TrayIconDebug', 1)
 ;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное
 
-Global $CMExtendVersion = '1.0.1'
+Global $CMToolsVersion = '1.0.1'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -61,7 +61,7 @@ _MainLoop()
 
 Func _MainLoop()
     Local $Msg, $Code_MY_SETREGION
-    $hGUImain = GUICreate('CMExtend v' & $CMExtendVersion, 100, 50, 20, 20, $WS_OVERLAPPEDWINDOW + $WS_POPUP)
+    $hGUImain = GUICreate('CMTools v' & $CMToolsVersion, 100, 50, 20, 20, $WS_OVERLAPPEDWINDOW + $WS_POPUP)
     GUISetState(@SW_SHOW)
     GUISetState(@SW_MINIMIZE)
 

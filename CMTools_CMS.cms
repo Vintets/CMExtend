@@ -92,23 +92,23 @@ SUB(wait_completion) //--- ожидание завершения ---------------
     END_CYC
 END_SUB
 
-SUB(getHWND_CMExtend) //--- получаем hwnd CMExtend -----------------------------
+SUB(getHWND_CMTools) //--- получаем hwnd CMTools -----------------------------
     $time = $_time_t + 10
     WHILE($time > $_time_t)
-        $hwnd_CME = wndFind("CMExtend v")
+        $hwnd_CME = wndFind("CMTools v")
         IF($hwnd_CME != 0)
             $time = 0
             IF($log > 0)
-                LOGWRITE("CMExtend hwnd: ", $hwnd_CME, \n)
-                HINTPOPUP(STRCONCAT("CMExtend hwnd: ", $hwnd_CME), "CMExtend")
+                LOGWRITE("CMTools hwnd: ", $hwnd_CME, \n)
+                HINTPOPUP(STRCONCAT("CMTools hwnd: ", $hwnd_CME), "CMTools")
             END_IF
         ELSE
             WAITMS(200)
         END_IF
     END_CYC
     IF($time ! 0)
-        LOGWRITE("Окно CMExtend не найдено")
-        HINTPOPUP("Окно CMExtend не найдено", "CMExtend")
+        LOGWRITE("Окно CMTools не найдено")
+        HINTPOPUP("Окно CMTools не найдено", "CMTools")
         HALT
     END_IF
 END_SUB
@@ -310,7 +310,7 @@ END_SUB
 WAITMS(300)
 LOGCLEAR
 //log_show()
-getHWND_CMExtend()
+getHWND_CMTools()
 
 
 //$x1 = 123
