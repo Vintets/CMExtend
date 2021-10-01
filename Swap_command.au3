@@ -2,25 +2,25 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=Swap_command
-#AutoIt3Wrapper_Res_Fileversion=0.0.9
+#AutoIt3Wrapper_Res_Fileversion=1.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.9
+#AutoIt3Wrapper_Res_Field=Version|1.0.0
 #AutoIt3Wrapper_Res_Field=Build|2021.09.30
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
-;===============================================================================
+;===================================================================================================
 ;
 ; Description:      Swap_command
-; Version:          0.0.9
+; Version:          1.0.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ;
-;===============================================================================
+;===================================================================================================
 
 #Region    ************ Includes ************
 #include <WinAPI.au3>
@@ -33,20 +33,19 @@
 
 #RequireAdmin
 
-Global $CMExtendVersion = '0.0.9'
+Global $CMExtendVersion = '1.0.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
+Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
 Global $iAddressCM = 0x004E20FC
-Global $WM_CMCOMMAND = 1024
-Global $CM_title = ''
+Global $WM_CMCOMMAND
 
 
-
-_CreateCMTitle()
+_Init()
 _WaitCM()
 _MainLoop()
 
@@ -107,6 +106,7 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $hWndFrom, $iIDFrom, $iCode
 
+    ConsoleWrite('$iMsg ' & $iMsg & @CRLF)
     ConsoleWrite($hWnd & '  ' & _
                 Hex(Int($iMsg), 4) & ' (555)  ' & _
                 $iwParam & '  ' & _
@@ -116,6 +116,7 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     $iLW = BitAND($iwParam, 0xFFFF) ; младшее слово
     $iHW = BitShift($iwParam, 16) ; старшее слово
 
+    _SendCM(1, 1)
     ;Switch $hWndFrom
     ;    Case $hGUImain
     ;        Switch $iCode
@@ -240,7 +241,6 @@ EndFunc   ;==>_COMMAND_AI_WinSetTrans
 
 
 
-
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
@@ -290,15 +290,34 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
     IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
-Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
-    GUIDelete($hGUImain)
-    Exit
-EndFunc   ;==>_WM_CLOSE
+Func _ToggleMonitor($hwnd, $OnOff)
+    Local Const $WM_SYSCOMMAND = 274
+    Local Const $SC_MONITORPOWER = 61808
+    _SendMessage($hWnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $OnOff)
+    If @error Then
+        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
+        Exit
+    EndIf
+EndFunc   ;==>_ToggleMonitor
 
-Func _CreateCMTitle()
+
+
+Func _Init()
+    _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
-EndFunc   ;==>_MainLoop
+
+    $WM_CMCOMMAND = Int(IniRead($fileini, 'clickermann', 'wm_cmcommand', 1024))
+EndFunc   ;==>_Init
+
+Func _CheckINI()
+    IniRenameSection($fileini, 'main_position_size', 'main_position_size')
+    If Not @error Then
+        MsgBox(4096, '', 'Произошла ошибка, отсутствует или повреждён файл settings_cme.ini', 2)
+        FileInstall('settings_cme_default.ini', $fileini)
+        Sleep(500)
+    EndIf
+EndFunc   ;==>_CheckINI
 
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
@@ -327,6 +346,11 @@ Func _IsWinCM()
     EndIf
 EndFunc   ;==>_IsWinCM
 
+Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
+    GUIDelete($hGUImain)
+    Exit
+EndFunc   ;==>_WM_CLOSE
+
 Func _GetWin($type, $data)
     Local $hWndt = WinGetHandle($data), $text
     if Not $repeated Then
@@ -340,14 +364,25 @@ Func _GetWin($type, $data)
     Return $hWndt
 EndFunc   ;==>_GetWin
 
+Func _SendCM($wParam, $lParam)
+    ; Ответы
+    ; (1, 0) - Error, команда выполнена неудачно
+    ; (1, 1) - Ok, команда выполнена успешно
+    _SendMessage($hWndCM, $WM_CMCOMMAND, $wParam, $lParam)
+    If @error Then
+        MsgBox(4096, '_SendCM', '_SendMessage Error: ' & @error)
+        Exit
+    EndIf
+EndFunc   ;==>_SendCM
+
+
+
 Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
     Local $aResult = DllCall($ah_Handle, 'handle', 'OpenProcess', 'dword', $iAccess, 'bool', $fInherit, 'dword', $iProcessID)
     If @error Then Return SetError(@error, @extended, 0)
     If $aResult[0] Then Return $aResult[0]
     Return 0
 EndFunc   ;==>_OpenProcess
-
-
 
 Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
@@ -891,25 +926,6 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_COLORMODE_DRAMCONTRAST
 
-Func _SendCM($wParam, $lParam)
-    _SendMessage($hWndCM, $WM_CMCOMMAND, $wParam, $lParam)
-    If @error Then
-        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
-        Exit
-    EndIf
-EndFunc   ;==>_SendCM
-
-
-
-Func _ToggleMonitor($hwnd, $OnOff)
-    Local Const $WM_SYSCOMMAND = 274
-    Local Const $SC_MONITORPOWER = 61808
-    _SendMessage($hWnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $OnOff)
-    If @error Then
-        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
-        Exit
-    EndIf
-EndFunc   ;==>_ToggleMonitor
 
 ;~ WM_User = 0x400 (1024)
 ;~ Стандартные сообщения до WM_User-1.     от              0   до  0x03FF (1023)
