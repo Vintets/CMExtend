@@ -106,28 +106,28 @@ EndFunc   ;==>_SetPosCM
 Func _ReadINIPos()
     Local $text
 
-    $aPosCM[0] = IniRead($fileini, 'main_position_size', 'CM_X', '-1')
-    $aPosCM[1] = IniRead($fileini, 'main_position_size', 'CM_Y', '-1')
+    $aPosCM[0] = IniRead($fileini, 'window_attributes', 'CM_X', '-1')
+    $aPosCM[1] = IniRead($fileini, 'window_attributes', 'CM_Y', '-1')
     $aPosCM[2] = 310
     $aPosCM[3] = 197
-    $aPosCMR[0] = IniRead($fileini, 'main_position_size', 'CMR_X', '-1')
-    $aPosCMR[1] = IniRead($fileini, 'main_position_size', 'CMR_Y', '-1')
-    $aPosCMR[2] = IniRead($fileini, 'main_position_size', 'CMR_W', '649')
-    $aPosCMR[3] = IniRead($fileini, 'main_position_size', 'CMR_H', '480')
-;~     IniWrite($fileini, 'main_position_size', 'running', '100')
+    $aPosCMR[0] = IniRead($fileini, 'window_attributes', 'CMR_X', '-1')
+    $aPosCMR[1] = IniRead($fileini, 'window_attributes', 'CMR_Y', '-1')
+    $aPosCMR[2] = IniRead($fileini, 'window_attributes', 'CMR_W', '649')
+    $aPosCMR[3] = IniRead($fileini, 'window_attributes', 'CMR_H', '480')
+;~     IniWrite($fileini, 'window_attributes', 'running', '100')
 EndFunc   ;==>_ReadINIPos
 
 Func _SaveINIPos()
-    IniWrite($fileini, 'main_position_size', 'CM_X', $aPosCM[0])
-    IniWrite($fileini, 'main_position_size', 'CM_Y', $aPosCM[1])
-    IniWrite($fileini, 'main_position_size', 'CMR_X', $aPosCMR[0])
-    IniWrite($fileini, 'main_position_size', 'CMR_Y', $aPosCMR[1])
-    IniWrite($fileini, 'main_position_size', 'CMR_W', $aPosCMR[2])
-    IniWrite($fileini, 'main_position_size', 'CMR_H', $aPosCMR[3])
+    IniWrite($fileini, 'window_attributes', 'CM_X', $aPosCM[0])
+    IniWrite($fileini, 'window_attributes', 'CM_Y', $aPosCM[1])
+    IniWrite($fileini, 'window_attributes', 'CMR_X', $aPosCMR[0])
+    IniWrite($fileini, 'window_attributes', 'CMR_Y', $aPosCMR[1])
+    IniWrite($fileini, 'window_attributes', 'CMR_W', $aPosCMR[2])
+    IniWrite($fileini, 'window_attributes', 'CMR_H', $aPosCMR[3])
 EndFunc   ;==>_SaveINIPos
 
 Func _CheckINI()
-    IniRenameSection($fileini, 'main_position_size', 'main_position_size')
+    IniRenameSection($fileini, 'clickermann', 'clickermann')
     If Not @error Then
         MsgBox(4096, '', 'Произошла ошибка, отсутствует или повреждён файл settings_cme.ini', 2)
         FileInstall('settings_cme_default.ini', $fileini)

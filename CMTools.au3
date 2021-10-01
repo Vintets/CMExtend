@@ -314,7 +314,7 @@ Func _Init()
 EndFunc   ;==>_Init
 
 Func _CheckINI()
-    IniRenameSection($fileini, 'main_position_size', 'main_position_size')
+    IniRenameSection($fileini, 'clickermann', 'clickermann')
     If Not @error Then
         MsgBox(4096, '', 'Произошла ошибка, отсутствует или повреждён файл settings_cme.ini', 2)
         FileInstall('settings_cme_default.ini', $fileini)
