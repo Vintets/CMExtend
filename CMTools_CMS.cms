@@ -20,6 +20,10 @@ $main_ini = "settings_cme.ini"
 // частота проверки входных сообщений ms
 $CME_check_period = 10
 
+
+
+STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ====== Описание параметров ==================================================
 
@@ -49,20 +53,35 @@ THREAD(CME_GetResponse, 1) //--- получение сообщений ---------
     // $lPar = 2  - Error, команда выполнена неудачно. $wPar - код команды вернувшей сообщение
     // $lPar = 3  - Получены данные. $wPar - данные
     // $lPar >= 0xC400 - Получены данные от команды $lPar. $wPar - данные
-
+    
     // Проставляемые переменные
     // $CME_command - команда вернувшая сообщение
     // $CME_return  - данные
-
+    
+    SUB(toHEX, $DEC)
+        $HEX = ""
+        WHILE($DEC > 0)
+            $cel = INT($DEC/16)
+            $ost = $DEC - $cel*16
+            IF($ost > 9)
+                $ost = $arr16[$ost - 10]
+            END_IF
+            $HEX = STRCONCAT($ost, $HEX)
+            $DEC = $cel
+        END_CYC
+        $HEX = STRCONCAT("0x", $HEX)
+    END_SUB
+    
     SUB(login_message)
         IF($log > 1)
             LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
         END_IF
         IF($log > 1)
-            LOGWRITE("CME_command: ", $CME_command, "  CME_return: ", $CME_return)
+            toHEX($CME_command)
+            LOGWRITE("CME_command: ", $HEX, "  CME_return: ", $CME_return)
         END_IF
     END_SUB
-
+    
     GETMESSAGE($wPar, $lPar, $isnew)
     IF($isnew == 1)
         IF(($lPar == 1) | ($lPar == 2))
@@ -94,7 +113,6 @@ SUB(log_show) //--- показ лога ----------------------------------------
     END_IF
 END_SUB
 
-STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
 SUB(toHEX, $DEC)
     $HEX = ""
     WHILE($DEC > 0)
