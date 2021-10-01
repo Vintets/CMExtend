@@ -62,28 +62,52 @@ SUB(toHEX, $DEC)
     //LOGWRITE($HEX)
 END_SUB
 
-
 SUB(CME_GetOkAction) //--- получить ответ Ok -----------------------------------
     // Ответы
+    // (код_команды, команда)
     // (1, 1) - Ok, команда выполнена успешно
-    // (1, 2) - Error, команда выполнена неудачно
+    // (2, 1) - Error, команда выполнена неудачно
+    $CME_return = 0
     $CME_completion_loop = 0
     WHILE($CME_completion_loop = 0)
         GETMESSAGE($wPar, $lPar, $isnew)
-        IF(($isnew != 0) & ($wPar == 1) & (($lPar == 1) | ($lPar == 2)))
-            $CME_completion = $lPar
+        IF(($isnew != 0) & ($lPar == 1) & (($wPar == 1) | ($wPar == 2)))
+            $CME_return = $wPar
+            $CME_completion_loop = 1
             IF($log > 1)
-                LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
-                IF($lPar == 1)
+                IF($wPar == 1)
                     LOGWRITE("Команда выполнена успешно")
                 ELSE
                     LOGWRITE("Команда не выполнена")
                 END_IF
+                IF($log > 2)
+                    LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
+                END_IF
             END_IF
-            $CME_completion_loop = 1
         END_IF
         WAITMS(10)
     END_CYC
+END_SUB
+
+SUB(CME_GetResponse) //--- получить ответ 2 слова ------------------------------
+    // Ответы
+    // (xxxxxxxx, 2) - Ok, команда выполнена успешно
+    $CME_return = 0
+    $CME_completion_loop = 0
+    WHILE($CME_completion_loop = 0)
+        GETMESSAGE($wPar, $lPar, $isnew)
+        IF(($isnew != 0) & ($lPar == 2))
+            $CME_return = $wPar
+            $CME_completion_loop = 1
+            IF($log > 1)
+                LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
+            END_IF
+        END_IF
+        WAITMS(10)
+    END_CYC
+    IF($log > 2)
+        LOGWRITE("CME_GetResponse.  ", $CME_return)
+    END_IF
 END_SUB
 
 SUB(wait_completion) //--- ожидание завершения ---------------------------------
@@ -92,15 +116,15 @@ SUB(wait_completion) //--- ожидание завершения ---------------
     END_CYC
 END_SUB
 
-SUB(getHWND_CMTools) //--- получаем hwnd CMTools -----------------------------
+SUB(getHWND_CMTools) //--- получаем hwnd CMTools -------------------------------
     $time = $_time_t + 10
     WHILE($time > $_time_t)
         $hwnd_CME = wndFind("CMTools v")
         IF($hwnd_CME != 0)
             $time = 0
-            IF($log > 0)
+            IF($log > 1)
                 LOGWRITE("CMTools hwnd: ", $hwnd_CME, \n)
-                HINTPOPUP(STRCONCAT("CMTools hwnd: ", $hwnd_CME), "CMTools")
+                //HINTPOPUP(STRCONCAT("CMTools hwnd: ", $hwnd_CME), "CMTools")
             END_IF
         ELSE
             WAITMS(200)
@@ -125,6 +149,19 @@ END_SUB
 //--- получить дескриптор окна (hWnd) ------------------------------------------
 #define AI_WinGetHandle:0xC400
 SUB(CME_WinGetHandle, $AI_title, $AI_text)
+    //~001~ Заголовки и текст окон (расширенные)
+    // $AI_text - текст окна или пустая строка""
+    INIWRITE($main_ini, "title", $AI_title, "window")
+    INIWRITE($main_ini, "text", $AI_text, "window")
+    WAITMS(5)
+    PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
+    CME_GetResponse()
+    IF($log > 1)
+        LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
+    END_IF
+END_SUB
+
+SUB(CME_WinGetHandle_INI, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
     // $AI_text - текст окна или пустая строка""
     INIWRITE($main_ini, "completion", "0", "main")
@@ -340,13 +377,16 @@ $y2 = 550
 GETSCREEN
 $timer1 = $_ms
 
-test_555()
+//test_555()
 //CME_WinGetHandle("[ACTIVE]", "")          // активное окно
-//CME_WinGetHandle("[CLASS:Notepad]", "")  // класс блокнот
+CME_WinGetHandle("[TITLE:Clickermann_; W:310; H:194]", "") // окно кликера
+//CME_WinGetHandle("[CLASS:Notepad]", "")   // класс блокнот
 //CME_GetDesktopWindow()
 //CME_WinGetProcess("[CLASS:Notepad]", "")
 
 //CME_WinGetProcessCM()
+//print("$_hwnd_self ", $_hwnd_self)
+
 //CME_WinGetState("[CLASS:Notepad]", "")
 //CME_WinSetOnTop($CME_return, 1)
 //CME_WinSetTrans($CME_return, 128)
@@ -359,7 +399,7 @@ test_555()
 //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
 //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
 
-CME_GetOkAction()
+//CME_GetOkAction()
 
 
 print_timeaction("тест 1", $_ms - $timer1)

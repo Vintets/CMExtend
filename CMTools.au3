@@ -143,6 +143,23 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
     If $ftitle <> '' Then
         $freturn = WinGetHandle($ftitle, $ftext)
         If @error or $freturn = '' Then
+            $freturn = 0
+        Else
+            ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
+        EndIf
+    EndIf
+    _SendCM($freturn, 2)
+EndFunc   ;==>_COMMAND_AI_WinGetHandle
+
+Func _COMMAND_AI_WinGetHandle_INI($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $freturn = -1, $ftitle = '', $ftext = ''
+
+    $ftitle = IniRead($fileini, 'window', 'title', '')
+    $ftext = IniRead($fileini, 'window', 'text', '')
+    If $ftitle <> '' Then
+        $freturn = WinGetHandle($ftitle, $ftext)
+        If @error or $freturn = '' Then
             $freturn = -1
         Else
             ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
@@ -369,8 +386,9 @@ EndFunc   ;==>_GetWin
 
 Func _SendCM($wParam, $lParam)
     ; Ответы
+    ; (код_команды, команда)
     ; (1, 1) - Ok, команда выполнена успешно
-    ; (1, 2) - Error, команда выполнена неудачно
+    ; (2, 1) - Error, команда выполнена неудачно
     _SendMessage($hWndCM, $WM_CMCOMMAND, $wParam, $lParam)
     If @error Then
         MsgBox(4096, '_SendCM', '_SendMessage Error: ' & @error)
