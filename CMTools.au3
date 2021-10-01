@@ -1,13 +1,13 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
-#AutoIt3Wrapper_Res_Comment=Swap_command
+#AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Fileversion=1.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
 #AutoIt3Wrapper_Res_Field=Version|1.0.0
-#AutoIt3Wrapper_Res_Field=Build|2021.09.30
+#AutoIt3Wrapper_Res_Field=Build|2021.10.01
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -15,7 +15,7 @@
 
 ;===================================================================================================
 ;
-; Description:      Swap_command
+; Description:      CMTools
 ; Version:          1.0.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
