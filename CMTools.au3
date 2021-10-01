@@ -138,8 +138,8 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $freturn = -1, $ftitle = '', $ftext = ''
 
-    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
-    $ftext = IniRead($fileini, 'clickermann', 'text', '')
+    $ftitle = IniRead($fileini, 'window', 'title', '')
+    $ftext = IniRead($fileini, 'window', 'text', '')
     If $ftitle <> '' Then
         $freturn = WinGetHandle($ftitle, $ftext)
         If @error or $freturn = '' Then
@@ -166,8 +166,8 @@ Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
 
-    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
-    $ftext = IniRead($fileini, 'clickermann', 'text', '')
+    $ftitle = IniRead($fileini, 'window', 'title', '')
+    $ftext = IniRead($fileini, 'window', 'text', '')
     If $ftitle <> '' Then
         $fhwnd = HWnd(Int($ftitle))
         If Not @error Then
@@ -197,8 +197,8 @@ Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
     Local $freturn = -1, $ftitle = '', $ftext = '', $fhwnd
     ;Local $fEXIST, $fSHOW, $fENABLE, $fACTIVE, $fMINIMIZE, $fMAXIMIZE
 
-    $ftitle = IniRead($fileini, 'clickermann', 'title', '')
-    $ftext = IniRead($fileini, 'clickermann', 'text', '')
+    $ftitle = IniRead($fileini, 'window', 'title', '')
+    $ftext = IniRead($fileini, 'window', 'text', '')
     If $ftitle <> '' Then
         $fhwnd = HWnd(Int($ftitle))
         If Not @error Then
