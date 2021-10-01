@@ -1,4 +1,4 @@
-2#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=CMTools
@@ -107,7 +107,7 @@ EndFunc   ;==>_RegisterMyCommand
 
 Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $hWndFrom, $iIDFrom, $iCode
+    Local $hWndFrom, $iIDFrom, $iCode, $iLW, $iHW
 
     ConsoleWrite('$iMsg ' & $iMsg & @CRLF)
     ConsoleWrite($hWnd & '  ' & _
@@ -233,7 +233,7 @@ EndFunc   ;==>_COMMAND_AI_WinSetOnTop
 
 Func _COMMAND_AI_WinSetTrans($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
-    Local $fhwnd
+    Local $fhwnd, $res
 
     $fhwnd = HWnd($iwParam)
     If Not @error Then
@@ -388,8 +388,9 @@ Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
 EndFunc   ;==>_OpenProcess
 
 Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
-    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
+    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd, $hProcess
     Local $color=0, $R, $G, $B
+    Local $gray_canal
     Local $lenstrX = $fx2 - $fx1
     Local $tBf = DllStructCreate('DWORD')
     Local $tClrStruct = DllStructCreate('DWORD')
@@ -448,6 +449,7 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
+    Local $gray_canal
     Local Const $lenXBite = ($fx2 - $fx1 + 1) * 4
     Local Const $tagSTRUCT = 'byte[' & $lenXBite &']'
     Local $tClrStruct = DllStructCreate($tagSTRUCT)
@@ -504,6 +506,7 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
+    Local $gray_canal
     Local Const $lenXBite = ($fx2 - $fx1 + 1)
     Local Const $tagSTRUCT = 'DWORD[' & $lenXBite &']'
     Local $tClrStruct = DllStructCreate($tagSTRUCT)
@@ -557,6 +560,7 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A, $lenPxl
+    Local $gray_canal
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenXPxl = ($fx2 - $fx1 + 1)
     Local $lenXBite = $lenXPxl * 4
@@ -648,10 +652,12 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
+    Local $gray_canal
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenXPxl = ($fx2 - $fx1 + 1)
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
+    Local $yFull
 
     ;Local $hTimer = TimerInit()
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
@@ -749,6 +755,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $lenXPxl = ($fx2 - $fx1 + 1)
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
+    Local $yFull
 
     ;Local $hTimer = TimerInit()
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _

@@ -311,8 +311,6 @@ WAITMS(300)
 LOGCLEAR
 //log_show()
 getHWND_CMExtend()
-CME_GetOkAction()
-
 
 
 //$x1 = 123
@@ -361,6 +359,7 @@ test_555()
 //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
 //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
 
+CME_GetOkAction()
 
 
 print_timeaction("тест 1", $_ms - $timer1)
