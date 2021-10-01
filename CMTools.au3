@@ -48,6 +48,10 @@ Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND
 
 
+If @Compiled Then
+    ; FileInstall('ResourcesZomBot2\VK.jpg', @ScriptDir & '\ResourcesZomBot2\VK.jpg')
+EndIf
+
 _Init()
 _WaitCM()
 _MainLoop()
