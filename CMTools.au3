@@ -1,4 +1,4 @@
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+2#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=CMTools
@@ -32,6 +32,9 @@
 #EndRegion ************ Includes ************
 
 #RequireAdmin
+Opt('MustDeclareVars', 1)
+Opt('TrayIconDebug', 1)
+;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное
 
 Global $CMExtendVersion = '1.0.0'
 Global $hGUImain
@@ -145,8 +148,8 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
         EndIf
     EndIf
-    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'return', $freturn)  ; return
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetHandle
 
 Func _COMMAND_AI_GetDesktopWindow($hWnd, $iMsg, $iwParam, $ilParam)
@@ -155,8 +158,8 @@ Func _COMMAND_AI_GetDesktopWindow($hWnd, $iMsg, $iwParam, $ilParam)
 
     $freturn = _WinAPI_GetDesktopWindow()
     ConsoleWrite('GetDesktopWindow   hWnd = ' & $freturn & @CRLF)
-    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'return', $freturn)  ; return
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GetDesktopWindow
 
 Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
@@ -177,16 +180,16 @@ Func _COMMAND_AI_WinGetProcess($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('WinGetProcess   PID = ' & $freturn & @CRLF)
         EndIf
     EndIf
-    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'return', $freturn)  ; return
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetProcess
 
 Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
     _IsWinCM()
-    IniWrite($fileini, 'clickermann', 'return', $iPidCM)  ; return
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'return', $iPidCM)  ; return
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
 
 Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
@@ -214,8 +217,8 @@ Func _COMMAND_AI_WinGetState($hWnd, $iMsg, $iwParam, $ilParam)
             ConsoleWrite('MAXIMIZE = ' & BitAND($freturn, 32) & @CRLF)
         EndIf
     EndIf
-    IniWrite($fileini, 'clickermann', 'return', $freturn)  ; return
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'return', $freturn)  ; return
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetState
 
 Func _COMMAND_AI_WinSetOnTop($hWnd, $iMsg, $iwParam, $ilParam)
@@ -273,7 +276,7 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
     _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
 Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
@@ -287,7 +290,7 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
                 'mid_contr = ' & $mid_contr & ',    k_contr = ' & $k_contr & _
                 @CRLF)
     _COLORMODE_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
-    IniWrite($fileini, 'clickermann', 'completion', 1)  ; Ok
+    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 Func _ToggleMonitor($hwnd, $OnOff)

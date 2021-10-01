@@ -17,8 +17,7 @@ $log = 2
 // главный файл настроек
 $main_ini = "settings_cme.ini"
 
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ====== Описание параметров ==================================================
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,10 +38,6 @@ $main_ini = "settings_cme.ini"
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//~~~
-
-
-//##############################################################################
 // ====== Подпрограммы =========================================================
 
 SUB(log_show) //--- показ лога -------------------------------------------------
@@ -92,7 +87,7 @@ SUB(CME_GetOkAction) //--- получить ответ Ok ----------------------
 END_SUB
 
 SUB(wait_completion) //--- ожидание завершения ---------------------------------
-    WHILE(INT(INIREAD($main_ini, "completion", "clickermann")) = 0)
+    WHILE(INT(INIREAD($main_ini, "completion", "main")) = 0)
         WAITMS(10)
     END_CYC
 END_SUB
@@ -132,13 +127,13 @@ END_SUB
 SUB(CME_WinGetHandle, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
     // $AI_text - текст окна или пустая строка""
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     IF($log > 1)
         LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
     END_IF
@@ -147,11 +142,11 @@ END_SUB
 //--- получить дескриптор (hWnd) окна рабочего стола ---------------------------
 #define AI_GetDesktopWindow:0xC401
 SUB(CME_GetDesktopWindow)
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     IF($log > 1)
         LOGWRITE("CME_GetDesktopWindow.  hWnd:  ", $CME_return)
     END_IF
@@ -162,13 +157,13 @@ END_SUB
 SUB(CME_WinGetProcess, $AI_title, $AI_text)
     //~001~ Заголовки и текст окон (расширенные)
     // $AI_text - текст окна или пустая строка""
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     IF($log > 1)
         LOGWRITE("CME_WinGetProcess.  PID:  ", $CME_return)
     END_IF
@@ -177,11 +172,11 @@ END_SUB
 //--- получить PID Clickermann-а -----------------------------------------------
 #define AI_WinGetProcessCM:0xC403
 SUB(CME_WinGetProcessCM)
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     $pid_CM = $CME_return
     IF($log > 1)
         LOGWRITE("Clickermann pid: ", $pid_CM)
@@ -209,13 +204,13 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     //    $fACTIVE - активно
     //    $fMINIMIZE - свёрнуто
     //    $fMAXIMIZE - развёрнуто на весь экран
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     INIWRITE($main_ini, "title", $AI_title, "clickermann")
     INIWRITE($main_ini, "text", $AI_text, "clickermann")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
     wait_completion()
-    $CME_return = INT(INIREAD($main_ini, "return", "clickermann"))
+    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     $fstate = $CME_return
     $fEXIST = 0
     $fSHOW = 0
@@ -274,7 +269,7 @@ SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
 END_SUB
 
 //--- получить -------------------------
-#define AI_:0xC400
+#define AI_:0xC409
 SUB(CME_)
     
 END_SUB
@@ -291,7 +286,7 @@ END_SUB
 //--- преобразовать область в GREYSCALE ----------------------------------------
 #define AI_GREYSCALE:0xC451
 SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_GREYSCALE, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
     wait_completion()
@@ -301,7 +296,7 @@ END_SUB
 #define AI_DRAMCONTRAST:0xC452
 SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     CME_SETREGION($AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n)
-    INIWRITE($main_ini, "completion", "0", "clickermann")
+    INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_DRAMCONTRAST, $AI_mid, $AI_k)
     wait_completion()
@@ -316,7 +311,7 @@ WAITMS(300)
 LOGCLEAR
 //log_show()
 getHWND_CMExtend()
-//CME_GetOkAction()
+CME_GetOkAction()
 
 
 
