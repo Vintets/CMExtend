@@ -334,14 +334,14 @@ END_SUB
 
 
 //--- Передать границы региона SETREGION ---------------------------------------
-#define AI_SETREGION:0xC450
+#define AI_SETREGION:0xC420
 SUB(CME_SETREGION, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     PostMessage($hwnd_CME, AI_SETREGION, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
     waitms(5)
 END_SUB
 
 //--- преобразовать область в GREYSCALE ----------------------------------------
-#define AI_GREYSCALE:0xC451
+#define AI_GREYSCALE:0xC421
 SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
@@ -350,7 +350,7 @@ SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
 END_SUB
 
 //--- применить к области DRAMCONTRAST -----------------------------------------
-#define AI_DRAMCONTRAST:0xC452
+#define AI_DRAMCONTRAST:0xC422
 SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     CME_SETREGION($AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n)
     INIWRITE($main_ini, "completion", "0", "main")
@@ -487,15 +487,15 @@ HALT
 
 
 
-// 0xC450
+// 0xC420
 // Передать границы региона SETREGION
 // CME_SETREGION($x1, $y1, $x2, $y2)
 
-// 0xC451
+// 0xC421
 // Преобразовать область в GREYSCALE
 // CME_GREYSCALE($x1, $y1, $x2, $y2)
 
-// 0xC452
+// 0xC422
 // применить к области DRAMCONTRAST
 // CME_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid, $k)
 
@@ -523,3 +523,4 @@ HALT
 //$gray_canal = INT((0.299*COLORR($c)) + (0.587*COLORG($c)) + (0.114*COLORB($c)))
 //$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
 //LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)
+

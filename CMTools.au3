@@ -95,9 +95,9 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC408, '_COMMAND_AI_WinSetTrans')
     ; GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
     
-    GUIRegisterMsg(0xC450, '_COMMAND_AI_SETREGION')
-    GUIRegisterMsg(0xC451, '_COMMAND_AI_GREYSCALE')
-    GUIRegisterMsg(0xC452, '_COMMAND_AI_DRAMCONTRAST')
+    GUIRegisterMsg(0xC420, '_COMMAND_AI_SETREGION')
+    GUIRegisterMsg(0xC421, '_COMMAND_AI_GREYSCALE')
+    GUIRegisterMsg(0xC422, '_COMMAND_AI_DRAMCONTRAST')
 
     ; Если регистрировать по имени. CM не может слать имя :-((
     ;$Code_AI_SETREGION = _WinAPI_RegisterWindowMessage('AI_SETREGION')
