@@ -1,6 +1,6 @@
 ﻿#name "CMTools"
 // Author: Vint
-// Version: 0.0.9 (01.10.2021)
+// Version: 1.0.0 (04.10.2021)
 // Скрипт для Clickermann v4.13.014
 // подключение CMTools_CMS:
 // #include "CMTools\CMTools_CMS.cms"
@@ -46,7 +46,7 @@ $CME_check_period = 10
 
 STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
 
-$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState:AI_WinSetOnTop:AI_WinSetTrans:AI_MouseWheelScrollEvent:AI_MouseWheelScrollEventUpDown: : : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
+$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState:AI_WinSetOnTop:AI_WinSetTrans:AI_MouseWheelScrollEvent:AI_MouseWheelScrollEventUpDown:AI_MouseMoveEvent: : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
 STRSEPARATE($comands_str, ":", $comands_list)
 // 0xC400 = 50176
 
@@ -96,6 +96,9 @@ THREAD(CME_GetResponse, 0) //--- получение сообщений ---------
             login_message()
             IF(($CME_command == AI_MouseWheelScrollEvent) | ($CME_command == AI_MouseWheelScrollEventUpDown))
                 $WheelScrollEvent = $CME_return
+            END_IF
+            IF($CME_command == AI_MouseMoveEvent)
+                $MouseMoveEvent = $CME_return
             END_IF
         END_IF
         
@@ -401,8 +404,29 @@ SUB(CME_MouseWheelScrollEventUpDown, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     END_IF
 END_SUB
 
+//--- Отслеживание движение мыши -----------------------------------------------
+#define AI_MouseMoveEvent:0xC409
+SUB(CME_MouseMoveEvent, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
+    // Запустить/остановить отслеживание движения мыши
+    // $AI_on_off - 0/1 start/stop отслеживания собития
+    // $AI_hwnd - hwnd окна. если не 0, события отслеживаются только для указанного окна
+    // $AI_BlockDefProc - 0/1 следует ли блокировать событие
+    
+    // после запуска будут приходить сообщения.
+    // при сообщении переменной $MouseMoveEvent присваивается 1
+    // $MouseMoveEvent = 2
+    PostMessage($hwnd_CME, AI_MouseMoveEvent, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
+    $MouseMoveEvent = 0
+    WHILE($CME_command != AI_MouseMoveEvent)
+        WAITMS(10)
+    END_CYC
+    IF($AI_on_off == 0)
+        $MouseMoveEvent = 0
+    END_IF
+END_SUB
+
 //--- получить -------------------------
-#define AI_:0xC409
+#define AI_:0xC40A
 SUB(CME_)
     
 END_SUB
@@ -490,10 +514,14 @@ SUB(Test)
     //CME_MouseWheelScrollEvent(0, 0, 0)  // закончили отслеживать WheelScroll
     //WAIT(3)
     
-    CME_MouseWheelScrollEventUpDown(1, 0, 1)  // Отслеживаем WheelScroll UpDown С блокировкой события
-    WAIT(5)
-    CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
+    //CME_MouseWheelScrollEventUpDown(1, 0, 1)  // Отслеживаем WheelScroll UpDown С блокировкой события
+    //WAIT(5)
+    //CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
     //WAIT(3)
+    
+    CME_MouseMoveEvent(1, 0, 1)
+    WAIT(5)
+    CME_MouseMoveEvent(0, 0, 0)
     
     //CME_WINEXISTS("[CLASS:Notepad]")
     //CME_SETREGION($x1, $y1, $x2, $y2)

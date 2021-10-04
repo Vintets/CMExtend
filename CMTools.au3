@@ -4,7 +4,7 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.0.2
+; Version:          1.1.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             04.10.2021
@@ -22,13 +22,13 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.0.2
+#AutoIt3Wrapper_Res_Fileversion=1.1.0
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.0.2
+#AutoIt3Wrapper_Res_Field=Version|1.1.0
 #AutoIt3Wrapper_Res_Field=Build|2021.10.04
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -57,7 +57,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.0.2'
+Global $CMToolsVersion = '1.1.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -67,7 +67,7 @@ Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND
-Global $MouseWheelScrollEvent_Tooltip
+Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 
 #EndRegion Global Constants and Variables
 
@@ -122,7 +122,7 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC406, '_COMMAND_AI_WinSetTrans')
     GUIRegisterMsg(0xC407, '_COMMAND_AI_MouseWheelScrollEvent')
     GUIRegisterMsg(0xC408, '_COMMAND_AI_MouseWheelScrollEventUpDown')
-    ; GUIRegisterMsg(0xC409, '_COMMAND_AI_')
+    GUIRegisterMsg(0xC409, '_COMMAND_AI_MouseMoveEvent')
     
     GUIRegisterMsg(0xC420, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC421, '_COMMAND_AI_GREYSCALE')
@@ -323,7 +323,7 @@ EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEvent
 Func _MouseWheelEvents($iEvent)
     _SendCM(1, 0xC407)
     If $MouseWheelScrollEvent_Tooltip Then
-        ToolTip('Прокручивание колёсика', -Default, Default, 'MouseWheel', 1)
+        ToolTip('Прокручивание колёсика', Default, Default, 'MouseWheel', 1)
     EndIf
 EndFunc
 
@@ -363,16 +363,54 @@ Func _MouseWheelEvents_UpDown($iEvent)
         Case $MOUSE_WHEELSCROLLUP_EVENT
             _SendCM(2, 0xC408)
             If $MouseWheelScrollEvent_Tooltip Then
-                ToolTip('Прокручивание колёсика ВВЕРХ', -Default, Default, 'Up', 1)
+                ToolTip('Прокручивание колёсика ВВЕРХ', Default, Default, 'Up', 1)
             EndIf
         Case $MOUSE_WHEELSCROLLDOWN_EVENT
             _SendCM(3, 0xC408)
             If $MouseWheelScrollEvent_Tooltip Then
-                ToolTip('Прокручивание колёсика ВНИЗ', -Default, Default, 'Down', 1)
+                ToolTip('Прокручивание колёсика ВНИЗ', Default, Default, 'Down', 1)
             EndIf
     EndSwitch
     ;Return $MOE_BLOCKDEFPROC ;Block
 EndFunc
+
+Func _COMMAND_AI_MouseMoveEvent($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $fhwnd = 0, $res, $AI_on_off, $AI_BlockDefProc
+
+    $AI_on_off = BitAND($ilParam, 0xFFFF) ; младшее слово
+    $AI_BlockDefProc= BitShift($ilParam, 16) ; старшее слово
+    If $iwParam > 0 Then
+        $fhwnd = HWnd($iwParam)
+    EndIf
+    If @error Then
+        $fhwnd = 0
+    EndIf
+    ; ConsoleWrite($AI_on_off & '  ' & $fhwnd & '  ' & $AI_BlockDefProc & @CRLF)
+
+    If $AI_on_off Then
+        _MouseSetOnEvent($MOUSE_MOVE_EVENT, '_MouseMoveEvents', $fhwnd, $AI_BlockDefProc)
+    Else
+        _MouseSetOnEvent($MOUSE_MOVE_EVENT)
+        If $MouseMoveEvent_Tooltip Then
+            ToolTip('')
+        EndIf
+    EndIf
+    If Not @error Then
+        _SendCM(0xC409, 1)
+    Else
+        _SendCM(0xC409, 2)
+    EndIf
+EndFunc   ;==>_COMMAND_AI_MouseMoveEvent
+
+Func _MouseMoveEvents($iEvent)
+    _SendCM(1, 0xC409)
+    If $MouseMoveEvent_Tooltip Then
+        ToolTip('Перемещение мыши', Default, Default, 'MouseMove', 1)
+    EndIf
+EndFunc
+
+
 
 
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
@@ -444,6 +482,7 @@ Func _Init()
     $WM_CMCOMMAND = Int(IniRead($fileini, 'clickermann', 'wm_cmcommand', 1024))
 
     $MouseWheelScrollEvent_Tooltip = Int(IniRead($fileini, 'other', 'MouseWheelScrollEvent_Tooltip', 0))
+    $MouseMoveEvent_Tooltip = Int(IniRead($fileini, 'other', 'MouseMoveEvent_Tooltip', 0))
 EndFunc   ;==>_Init
 
 Func _CheckINI()
