@@ -35,23 +35,27 @@
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
+#Region    **** AutoItSetOption ****
 #Au3Stripper_Ignore_Funcs=_MouseWheel_Events
-
-#Region    ************ Includes ************
-#include <WinAPI.au3>
-#include <SendMessage.au3>
-
-#include <WindowsConstants.au3>
-#include <Constants.au3>
-#include <GUIConstantsEx.au3>
-#EndRegion ************ Includes ************
-
 #RequireAdmin
 Opt('MustDeclareVars', 1)
 Opt('WinWaitDelay', 100)  ; пауза после успешных оконных функций. 250 мс
 Opt('TrayIconDebug', 1)
 Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня и дочерних
 ;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное, 4-расширено, -1 to -4=Nocase
+#EndRegion **** AutoItSetOption ****
+
+#Region    **** Includes ****
+#include <WinAPI.au3>
+#include <SendMessage.au3>
+
+#include <WindowsConstants.au3>
+#include <Constants.au3>
+#include <GUIConstantsEx.au3>
+#include <MouseOnEvent.au3>
+#EndRegion **** Includes ****
+
+#Region Global Constants and Variables
 
 Global $CMToolsVersion = '1.0.2'
 Global $hGUImain
@@ -64,6 +68,7 @@ Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND
 
+#EndRegion Global Constants and Variables
 
 If @Compiled Then
     ; FileInstall('ResourcesZomBot2\VK.jpg', @ScriptDir & '\ResourcesZomBot2\VK.jpg')
