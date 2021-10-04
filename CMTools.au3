@@ -306,7 +306,7 @@ Func _COMMAND_AI_MouseWheelScrollEvent($hWnd, $iMsg, $iwParam, $ilParam)
     ; ConsoleWrite($AI_on_off & '  ' & $fhwnd & '  ' & $AI_BlockDefProc & @CRLF)
 
     If $AI_on_off Then
-        _MouseSetOnEvent($MOUSE_WHEELSCROLL_EVENT, '_MouseWheel_Events', $fhwnd, $AI_BlockDefProc)
+        _MouseSetOnEvent($MOUSE_WHEELSCROLL_EVENT, '_MouseWheelEvents', $fhwnd, $AI_BlockDefProc)
     Else
         _MouseSetOnEvent($MOUSE_WHEELSCROLL_EVENT)
         If $MouseWheelScrollEvent_Tooltip Then
@@ -320,7 +320,7 @@ Func _COMMAND_AI_MouseWheelScrollEvent($hWnd, $iMsg, $iwParam, $ilParam)
     EndIf
 EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEvent
 
-Func _MouseWheel_Events($iEvent)
+Func _MouseWheelEvents($iEvent)
     _SendCM(1, 0xC407)
     If $MouseWheelScrollEvent_Tooltip Then
         ToolTip('Прокручивание колёсика', -Default, Default, 'MouseWheel', 1)
@@ -342,8 +342,8 @@ Func _COMMAND_AI_MouseWheelScrollEventUpDown($hWnd, $iMsg, $iwParam, $ilParam)
     ; ConsoleWrite($AI_on_off & '  ' & $fhwnd & '  ' & $AI_BlockDefProc & @CRLF)
 
     If $AI_on_off Then
-        _MouseSetOnEvent($MOUSE_WHEELSCROLLUP_EVENT, '_MouseWheel_Events_UpDown', $fhwnd, $AI_BlockDefProc)
-        _MouseSetOnEvent($MOUSE_WHEELSCROLLDOWN_EVENT, '_MouseWheel_Events_UpDown', $fhwnd, $AI_BlockDefProc)
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLUP_EVENT, '_MouseWheelEvents_UpDown', $fhwnd, $AI_BlockDefProc)
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLDOWN_EVENT, '_MouseWheelEvents_UpDown', $fhwnd, $AI_BlockDefProc)
     Else
         _MouseSetOnEvent($MOUSE_WHEELSCROLLUP_EVENT)
         _MouseSetOnEvent($MOUSE_WHEELSCROLLDOWN_EVENT)
@@ -358,7 +358,7 @@ Func _COMMAND_AI_MouseWheelScrollEventUpDown($hWnd, $iMsg, $iwParam, $ilParam)
     EndIf
 EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEventUpDown
 
-Func _MouseWheel_Events_UpDown($iEvent)
+Func _MouseWheelEvents_UpDown($iEvent)
     Switch $iEvent
         Case $MOUSE_WHEELSCROLLUP_EVENT
             _SendCM(2, 0xC408)
