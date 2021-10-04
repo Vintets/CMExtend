@@ -1,26 +1,41 @@
+#Region Header
+;===================================================================================================
+;
+; Title:            CMTools
+; Filename:         CMTools.au3
+; Description:      Дополнительные команды для Clickermann
+; Version:          1.0.2
+; Requirement(s):   Autoit 3.3.14.5
+; Author(s):        Vint
+; Date:             04.10.2021
+;
+;===================================================================================================
+#EndRegion Header
+
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+; #AutoIt3Wrapper_UseX64=n  ; Использовать X64 версию AutoIt3_x64 или AUT2EXE_x64
+; #AutoIt3Wrapper_Compile_both=y ; Компилировать оба варианта X86 и X64 за раз
 #AutoIt3Wrapper_Icon=cmex.ico
+#AutoIt3Wrapper_OutFile=CMTools.exe
+#AutoIt3Wrapper_OutFile_X64=CMToolsX64.exe 
+#AutoIt3Wrapper_OutFile_Type=exe
 #AutoIt3Wrapper_Compression=4
+#AutoIt3Wrapper_UseUpx=y
+
+#AutoIt3Wrapper_Res_Fileversion=1.0.2
+#AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
+#AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
-#AutoIt3Wrapper_Res_Fileversion=1.0.1
-#AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
-#AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|1.0.1
-#AutoIt3Wrapper_Res_Field=Build|2021.10.01
+#AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
+#AutoIt3Wrapper_Res_Field=Version|1.0.2
+#AutoIt3Wrapper_Res_Field=Build|2021.10.04
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
-;===================================================================================================
-;
-; Description:      CMTools
-; Version:          1.0.1
-; Requirement(s):   Autoit 3.3.14.5
-; Author(s):        Vint
-;
-;===================================================================================================
+#Au3Stripper_Ignore_Funcs=_MouseWheel_Events
 
 #Region    ************ Includes ************
 #include <WinAPI.au3>
