@@ -48,11 +48,12 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 #Region    **** Includes ****
 #include <WinAPI.au3>
 #include <SendMessage.au3>
+#include <Misc.au3>
+#include <MouseOnEvent.au3>
 
 #include <WindowsConstants.au3>
 #include <Constants.au3>
 #include <GUIConstantsEx.au3>
-#include <MouseOnEvent.au3>
 #EndRegion **** Includes ****
 
 #Region Global Constants and Variables
@@ -71,6 +72,8 @@ Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 
 #EndRegion Global Constants and Variables
 
+
+_Singleton(@ScriptName)  ; запуск только одной копии
 If @Compiled Then
     ; FileInstall('ResourcesZomBot2\VK.jpg', @ScriptDir & '\ResourcesZomBot2\VK.jpg')
 EndIf
