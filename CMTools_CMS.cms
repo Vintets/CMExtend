@@ -44,13 +44,13 @@ $CME_check_period = 10
 
 STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
 
-$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState:AI_WinSetOnTop:AI_WinSetTrans:AI_: : : : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
+$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState:AI_WinSetOnTop:AI_WinSetTrans:AI_MouseWheelScrollEvent:AI_MouseWheelScrollEventUpDown: : : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
 STRSEPARATE($comands_str, ":", $comands_list)
 // 0xC400 = 50176
 
 // =============================================================================
 
-THREAD(CME_GetResponse, 1) //--- получение сообщений ---------------------------
+THREAD(CME_GetResponse, 0) //--- получение сообщений ---------------------------
     // Входящие сообщения
     // (data, command)  -  ($wPar, $lPar)
     // $lPar = 1  - Ok, команда выполнена успешно. $wPar - код команды вернувшей сообщение
@@ -77,8 +77,8 @@ THREAD(CME_GetResponse, 1) //--- получение сообщений ---------
     END_SUB
     
     SUB(login_message)
-        IF($log > 1)
-            LOGWRITE("wParam:", $wPar, "  lParam:", $lPar, "  $isnew:", $isnew)
+        IF($log > 2)
+            LOGWRITE("wParam:", $wPar, "  lParam:", $lPar)  // , "  $isnew:", $isnew
         END_IF
         IF($log > 1)
             toHEX($CME_command)
@@ -88,20 +88,24 @@ THREAD(CME_GetResponse, 1) //--- получение сообщений ---------
     
     GETMESSAGE($wPar, $lPar, $isnew)
     IF($isnew == 1)
-        IF(($lPar == 1) | ($lPar == 2))
-            $CME_command = $wPar
-            $CME_return = $lPar
-            login_message()
-        END_IF
-        
-        IF($lPar == 3)
-            $CME_return = $wPar
-            login_message()
-        END_IF
-        
         IF($lPar >= 0xC400)
             $CME_command = $lPar
             $CME_return = $wPar
+            login_message()
+            IF(($CME_command == AI_MouseWheelScrollEvent) | ($CME_command == AI_MouseWheelScrollEventUpDown))
+                $WheelScroll = $CME_return
+            END_IF
+        END_IF
+        
+        IF($lPar == 3)
+            $CME_command = 0
+            $CME_return = $wPar
+            login_message()
+        END_IF
+        
+        IF(($lPar == 1) | ($lPar == 2))
+            $CME_command = $wPar
+            $CME_return = $lPar
             login_message()
         END_IF
     END_IF
@@ -111,9 +115,9 @@ END_THREAD
 // ====== Подпрограммы =========================================================
 SUB(log_show) //--- показ лога -------------------------------------------------
     IF($log > 0)
-        //LOGSHOW(1, $_xmax-440, 28)            // отображение окна лога  (335)
-        LOGSHOW(1, 0, 1080-284)                    // отображение окна лога  (335)
-        WNDSIZE(WNDFIND("Лог", 1), 518, 260)  // изменения размеров окна лога 260/800
+        //LOGSHOW(1, $_xmax-440, 28)          // отображение окна лога  (335)
+        LOGSHOW(1, 0, 1080-284)               // отображение окна лога  (335)
+        WNDSIZE(WNDFIND("Лог", 1), 536, 260)  // изменения размеров окна лога 260/800
     END_IF
 END_SUB
 
@@ -142,6 +146,13 @@ END_SUB
 SUB(wait_completion) //--- ожидание завершения ---------------------------------
     WHILE(INT(INIREAD($main_ini, "completion", "main")) = 0)
         WAITMS(10)
+    END_CYC
+END_SUB
+
+SUB(clear_message_queue)
+    $isnew = 1
+    WHILE($isnew == 1)
+        GETMESSAGE($wPar, $lPar, $isnew)
     END_CYC
 END_SUB
 
@@ -188,7 +199,7 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
-    WHILE($CME_command != 0xC400)
+    WHILE($CME_command != AI_WinGetHandle)
         WAITMS(10)
     END_CYC
     // Вариант через INI
@@ -208,7 +219,7 @@ SUB(CME_GetDesktopWindow)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
-    WHILE($CME_command != 0xC401)
+    WHILE($CME_command != AI_GetDesktopWindow)
         WAITMS(10)
     END_CYC
 END_SUB
@@ -227,7 +238,7 @@ SUB(CME_WinGetProcess, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
-    WHILE($CME_command != 0xC402)
+    WHILE($CME_command != AI_WinGetProcess)
         WAITMS(10)
     END_CYC
 END_SUB
@@ -244,7 +255,7 @@ SUB(CME_WinGetProcessCM)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
-    WHILE($CME_command != 0xC403)
+    WHILE($CME_command != AI_WinGetProcessCM)
         WAITMS(10)
     END_CYC
     $pid_CM = $CME_return
@@ -277,7 +288,7 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
-    WHILE($CME_command != 0xC404)
+    WHILE($CME_command != AI_WinGetState)
         WAITMS(10)
     END_CYC
     $CME_return = INT(INIREAD($main_ini, "return", "main"))
@@ -329,7 +340,7 @@ SUB(CME_WinSetOnTop, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - 1 - включить, 0 - выключить
     PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != 0xC405)
+    WHILE($CME_command != AI_WinSetOnTop)
         WAITMS(10)
     END_CYC
 END_SUB
@@ -341,9 +352,51 @@ SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
     PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != 0xC406)
+    WHILE($CME_command != AI_WinSetTrans)
         WAITMS(10)
     END_CYC
+END_SUB
+
+//--- Отслеживание прокрутки колеса мыши ---------------------------------------
+#define AI_MouseWheelScrollEvent:0xC407
+SUB(CME_MouseWheelScrollEvent, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
+    // Запустить/остановить отслеживание прокрутки колеса мыши
+    // $AI_on_off - 0/1 start/stop отслеживания собития
+    // $AI_hwnd - hwnd окна. если не 0, события отслеживаются только для указанного окна
+    // $AI_BlockDefProc - 0/1 следует ли блокировать событие
+    
+    // после запуска будут приходить сообщения.
+    // при сообщении переменной $WheelScroll присваивается 1
+    // $WheelScroll = 1
+    PostMessage($hwnd_CME, AI_MouseWheelScrollEvent, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
+    $WheelScroll = 0
+    WHILE($CME_command != AI_MouseWheelScrollEvent)
+        WAITMS(10)
+    END_CYC
+    IF($AI_on_off == 0)
+        $WheelScroll = 0
+    END_IF
+END_SUB
+
+//--- Отслеживание прокрутки колеса мыши UpDown --------------------------------
+#define AI_MouseWheelScrollEventUpDown:0xC408
+SUB(CME_MouseWheelScrollEventUpDown, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
+    // Запустить/остановить отслеживание прокрутки колеса мыши вверх и вниз отдельно
+    // $AI_on_off - 0/1 start/stop отслеживания собития
+    // $AI_hwnd - hwnd окна. если не 0, события отслеживаются только для указанного окна
+    // $AI_BlockDefProc - 0/1 следует ли блокировать событие
+    
+    // после запуска будут приходить сообщения.
+    // при сообщении переменной $WheelScroll присваивается 2 - вверх или 3 - вниз
+    // $WheelScroll = 2
+    PostMessage($hwnd_CME, AI_MouseWheelScrollEventUpDown, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
+    $WheelScroll = 0
+    WHILE($CME_command != AI_MouseWheelScrollEventUpDown)
+        WAITMS(10)
+    END_CYC
+    IF($AI_on_off == 0)
+        $WheelScroll = 0
+    END_IF
 END_SUB
 
 //--- получить -------------------------
@@ -351,7 +404,6 @@ END_SUB
 SUB(CME_)
     
 END_SUB
-
 
 
 //--- Передать границы региона SETREGION ---------------------------------------
@@ -380,84 +432,95 @@ SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     wait_completion()
 END_SUB
 
+//--- Тестирование функций. Отключить при импорте! -----------------------------
+SUB(Test)
+    WAITMS(300)
+    LOGCLEAR
+    log_show()
+    //log_comands_list()
+    
+    //$x1 = 123
+    //$y1 = 456
+    //$x2 = 1600
+    //$y2 = 1200
+    
+    // 100х100
+    $x1 = 750
+    $y1 = 426
+    $x2 = 849
+    $y2 = 525
+    
+    //
+    $x1 = 650
+    $y1 = 350
+    $x2 = 900
+    $y2 = 550
+    
+    // Full Screen
+    //$x1 = 0
+    //$y1 = 0
+    //$x2 = $_xmax
+    //$y2 = $_ymax
+    
+    //GETSCREEN
+    
+    $timer1 = $_ms
+    
+    //test_555()
+    
+    //CME_WinGetHandle("[TITLE:Clickermann_; W:310; H:194]", "") // окно кликера
+    //print("$_hwnd_self ", $_hwnd_self)
+    
+    //CME_WinGetHandle("[ACTIVE]", "")          // активное окно
+    //CME_WinGetHandle("[CLASS:Notepad]", "")   // класс блокнот
+    //CME_GetDesktopWindow()
+    //CME_WinGetProcess("[CLASS:Notepad]", "")
+    
+    //CME_WinGetProcessCM()
+    
+    //CME_WinGetState("[CLASS:Notepad]", "")
+    //CME_WinSetOnTop($CME_return, 1)
+    //CME_WinSetTrans($CME_return, 128)
+    
+    //CME_MouseWheelScrollEvent(1, 2296148, 1)
+    //CME_MouseWheelScrollEvent(1, 0, 1)  // Отслеживаем WheelScroll С блокировкой события
+    //WAIT(5)
+    //CME_MouseWheelScrollEvent(0, 0, 0)  // закончили отслеживать WheelScroll
+    //WAIT(3)
+    
+    CME_MouseWheelScrollEventUpDown(1, 0, 1)  // Отслеживаем WheelScroll UpDown С блокировкой события
+    WAIT(5)
+    CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
+    //WAIT(3)
+    
+    //CME_WINEXISTS("[CLASS:Notepad]")
+    //CME_SETREGION($x1, $y1, $x2, $y2)
+    //CME_GREYSCALE($x1, $y1, $x2, $y2)
+    //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
+    //CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
+    
+    
+    //WAITMS(50)
+    print_timeaction("тест 1", $_ms - $timer1)
+    
+    //IF(($x2 = $_xmax) & ($y2 = $_ymax))
+    //    SCREENSHOT
+    //ELSE
+    //    SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
+    //END_IF
+    
+    HALT
+END_SUB
+
 // =============================================================================
 //##############################################################################
 
-
-
-WAITMS(300)
-LOGCLEAR
-log_show()
-//log_comands_list()
-
+// Start
 getHWND_CMTools()
+clear_message_queue()
+SETTHREAD(CME_GetResponse, 1)
 
-
-//$x1 = 123
-//$y1 = 456
-//$x2 = 1600
-//$y2 = 1200
-
-// 100х100
-$x1 = 750
-$y1 = 426
-$x2 = 849
-$y2 = 525
-
-//
-$x1 = 650
-$y1 = 350
-$x2 = 900
-$y2 = 550
-
-// Full Screen
-//$x1 = 0
-//$y1 = 0
-//$x2 = $_xmax
-//$y2 = $_ymax
-
-
-GETSCREEN
-$timer1 = $_ms
-
-//test_555()
-
-CME_WinGetHandle("[TITLE:Clickermann_; W:310; H:194]", "") // окно кликера
-print("$_hwnd_self ", $_hwnd_self)
-
-//CME_WinGetHandle("[ACTIVE]", "")          // активное окно
-//CME_WinGetHandle("[CLASS:Notepad]", "")   // класс блокнот
-//CME_GetDesktopWindow()
-//CME_WinGetProcess("[CLASS:Notepad]", "")
-
-//CME_WinGetProcessCM()
-
-//CME_WinGetState("[CLASS:Notepad]", "")
-//CME_WinSetOnTop($CME_return, 1)
-//CME_WinSetTrans($CME_return, 128)
-
-
-
-//CME_WINEXISTS("[CLASS:Notepad]")
-//CME_SETREGION($x1, $y1, $x2, $y2)
-//CME_GREYSCALE($x1, $y1, $x2, $y2)
-//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
-//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
-
-
-
-print_timeaction("тест 1", $_ms - $timer1)
-
-//IF(($x2 = $_xmax) & ($y2 = $_ymax))
-//    SCREENSHOT
-//ELSE
-//    SCREENSHOTEX(700,400, 900,550, "Gray_", 0)
-//END_IF
-
-
-HALT
-
-
+Test()  // Тестирование функций. Отключить при импорте!
 
 //##############################################################################
 
@@ -550,4 +613,3 @@ HALT
 //$gray_canal = INT((0.299*COLORR($c)) + (0.587*COLORG($c)) + (0.114*COLORB($c)))
 //$gray = COLORGEN($gray_canal, $gray_canal, $gray_canal)
 //LOGWRITE("$gray_canal = ", $gray_canal, "   ", $gray)
-

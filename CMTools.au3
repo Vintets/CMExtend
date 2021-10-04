@@ -67,6 +67,7 @@ Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND
+Global $MouseWheelScrollEvent_Tooltip
 
 #EndRegion Global Constants and Variables
 
@@ -119,7 +120,9 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
     GUIRegisterMsg(0xC405, '_COMMAND_AI_WinSetOnTop')
     GUIRegisterMsg(0xC406, '_COMMAND_AI_WinSetTrans')
-    ; GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
+    GUIRegisterMsg(0xC407, '_COMMAND_AI_MouseWheelScrollEvent')
+    GUIRegisterMsg(0xC408, '_COMMAND_AI_MouseWheelScrollEventUpDown')
+    ; GUIRegisterMsg(0xC409, '_COMMAND_AI_')
     
     GUIRegisterMsg(0xC420, '_COMMAND_AI_SETREGION')
     GUIRegisterMsg(0xC421, '_COMMAND_AI_GREYSCALE')
@@ -288,6 +291,88 @@ Func _COMMAND_AI_WinSetTrans($hWnd, $iMsg, $iwParam, $ilParam)
     EndIf
 EndFunc   ;==>_COMMAND_AI_WinSetTrans
 
+Func _COMMAND_AI_MouseWheelScrollEvent($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $fhwnd = 0, $res, $AI_on_off, $AI_BlockDefProc
+
+    $AI_on_off = BitAND($ilParam, 0xFFFF) ; младшее слово
+    $AI_BlockDefProc= BitShift($ilParam, 16) ; старшее слово
+    If $iwParam > 0 Then
+        $fhwnd = HWnd($iwParam)
+    EndIf
+    If @error Then
+        $fhwnd = 0
+    EndIf
+    ; ConsoleWrite($AI_on_off & '  ' & $fhwnd & '  ' & $AI_BlockDefProc & @CRLF)
+
+    If $AI_on_off Then
+        _MouseSetOnEvent($MOUSE_WHEELSCROLL_EVENT, '_MouseWheel_Events', $fhwnd, $AI_BlockDefProc)
+    Else
+        _MouseSetOnEvent($MOUSE_WHEELSCROLL_EVENT)
+        If $MouseWheelScrollEvent_Tooltip Then
+            ToolTip('')
+        EndIf
+    EndIf
+    If Not @error Then
+        _SendCM(0xC407, 1)
+    Else
+        _SendCM(0xC407, 2)
+    EndIf
+EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEvent
+
+Func _MouseWheel_Events($iEvent)
+    _SendCM(1, 0xC407)
+    If $MouseWheelScrollEvent_Tooltip Then
+        ToolTip('Прокручивание колёсика', -Default, Default, 'MouseWheel', 1)
+    EndIf
+EndFunc
+
+Func _COMMAND_AI_MouseWheelScrollEventUpDown($hWnd, $iMsg, $iwParam, $ilParam)
+    #forceref $hWnd, $iMsg
+    Local $fhwnd = 0, $res, $AI_on_off, $AI_BlockDefProc
+
+    $AI_on_off = BitAND($ilParam, 0xFFFF) ; младшее слово
+    $AI_BlockDefProc= BitShift($ilParam, 16) ; старшее слово
+    If $iwParam > 0 Then
+        $fhwnd = HWnd($iwParam)
+    EndIf
+    If @error Then
+        $fhwnd = 0
+    EndIf
+    ; ConsoleWrite($AI_on_off & '  ' & $fhwnd & '  ' & $AI_BlockDefProc & @CRLF)
+
+    If $AI_on_off Then
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLUP_EVENT, '_MouseWheel_Events_UpDown', $fhwnd, $AI_BlockDefProc)
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLDOWN_EVENT, '_MouseWheel_Events_UpDown', $fhwnd, $AI_BlockDefProc)
+    Else
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLUP_EVENT)
+        _MouseSetOnEvent($MOUSE_WHEELSCROLLDOWN_EVENT)
+        If $MouseWheelScrollEvent_Tooltip Then
+            ToolTip('')
+        EndIf
+    EndIf
+    If Not @error Then
+        _SendCM(0xC408, 1)
+    Else
+        _SendCM(0xC408, 2)
+    EndIf
+EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEventUpDown
+
+Func _MouseWheel_Events_UpDown($iEvent)
+    Switch $iEvent
+        Case $MOUSE_WHEELSCROLLUP_EVENT
+            _SendCM(2, 0xC408)
+            If $MouseWheelScrollEvent_Tooltip Then
+                ToolTip('Прокручивание колёсика ВВЕРХ', -Default, Default, 'Up', 1)
+            EndIf
+        Case $MOUSE_WHEELSCROLLDOWN_EVENT
+            _SendCM(3, 0xC408)
+            If $MouseWheelScrollEvent_Tooltip Then
+                ToolTip('Прокручивание колёсика ВНИЗ', -Default, Default, 'Down', 1)
+            EndIf
+    EndSwitch
+    ;Return $MOE_BLOCKDEFPROC ;Block
+EndFunc
 
 
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
@@ -357,6 +442,8 @@ Func _Init()
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 
     $WM_CMCOMMAND = Int(IniRead($fileini, 'clickermann', 'wm_cmcommand', 1024))
+
+    $MouseWheelScrollEvent_Tooltip = Int(IniRead($fileini, 'other', 'MouseWheelScrollEvent_Tooltip', 0))
 EndFunc   ;==>_Init
 
 Func _CheckINI()
