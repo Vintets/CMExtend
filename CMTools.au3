@@ -48,10 +48,12 @@
 
 #RequireAdmin
 Opt('MustDeclareVars', 1)
+Opt('WinWaitDelay', 100)  ; пауза после успешных оконных функций. 250 мс
 Opt('TrayIconDebug', 1)
-;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное
+Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня и дочерних
+;~ Opt('WinTitleMatchMode', 2)  ; 1-начальное, 2-любая подстрока, 3-точное, 4-расширено, -1 to -4=Nocase
 
-Global $CMToolsVersion = '1.0.1'
+Global $CMToolsVersion = '1.0.2'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
