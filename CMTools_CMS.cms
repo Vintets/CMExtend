@@ -43,7 +43,7 @@ $CME_check_period = 10
 
 STRSEPARATE("A:B:C:D:E:F", ":", $arr16) //===  перевод числа в HEX. Выход $HEX =
 
-$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState: : :AI_WinSetOnTop:AI_WinSetTrans:AI_: : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
+$comands_str = "AI_WinGetHandle:AI_GetDesktopWindow:AI_WinGetProcess:AI_WinGetProcessCM:AI_WinGetState:AI_WinSetOnTop:AI_WinSetTrans:AI_: : : : : : : : : : : : : : : : : : : : : : : : :AI_SETREGION:AI_GREYSCALE:AI_DRAMCONTRAST"
 STRSEPARATE($comands_str, ":", $comands_list)
 // 0xC400 = 50176
 
@@ -322,25 +322,25 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
 END_SUB
 
 //--- Поверх всех окон ---------------------------------------------------------
-#define AI_WinSetOnTop:0xC407
+#define AI_WinSetOnTop:0xC405
 SUB(CME_WinSetOnTop, $AI_hwnd, $AI_par1)
     // Ставит окно поверх всех окон
     // $AI_hwnd - hwnd окна
     // $AI_par1 - 1 - включить, 0 - выключить
     PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != 0xC407)
+    WHILE($CME_command != 0xC405)
         WAITMS(10)
     END_CYC
 END_SUB
 
 //--- Устанавливает прозрачность окна ------------------------------------------
-#define AI_WinSetTrans:0xC408
+#define AI_WinSetTrans:0xC406
 SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
     // Устанавливает прозрачность окна
     // $AI_hwnd - hwnd окна
     // $AI_par1 - прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
     PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != 0xC408)
+    WHILE($CME_command != 0xC406)
         WAITMS(10)
     END_CYC
 END_SUB
@@ -500,11 +500,11 @@ HALT
 //    $fMINIMIZE - свёрнуто
 //    $fMAXIMIZE - развёрнуто на весь экран
 
-// 0xC407
+// 0xC405
 // Поверх всех окон
 // CME_WinSetOnTop(hwnd, 1/0)
 
-// 0xC408
+// 0xC406
 // Устанавливить прозрачность окна
 // CME_WinSetTrans(hwnd, transporency)
 

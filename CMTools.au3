@@ -95,8 +95,8 @@ Func _RegisterMyCommand()
     GUIRegisterMsg(0xC402, '_COMMAND_AI_WinGetProcess')
     GUIRegisterMsg(0xC403, '_COMMAND_AI_WinGetProcessCM')
     GUIRegisterMsg(0xC404, '_COMMAND_AI_WinGetState')
-    GUIRegisterMsg(0xC407, '_COMMAND_AI_WinSetOnTop')
-    GUIRegisterMsg(0xC408, '_COMMAND_AI_WinSetTrans')
+    GUIRegisterMsg(0xC405, '_COMMAND_AI_WinSetOnTop')
+    GUIRegisterMsg(0xC406, '_COMMAND_AI_WinSetTrans')
     ; GUIRegisterMsg(0xC409, '_COMMAND_AI_Win777')
     
     GUIRegisterMsg(0xC420, '_COMMAND_AI_SETREGION')
@@ -246,9 +246,9 @@ Func _COMMAND_AI_WinSetOnTop($hWnd, $iMsg, $iwParam, $ilParam)
     $fhwnd = HWnd($iwParam)
     If Not @error Then
         WinSetOnTop($fhwnd, '', $ilParam)
-        _SendCM(0xC407, 1)
+        _SendCM(0xC405, 1)
     Else
-        _SendCM(0xC407, 2)
+        _SendCM(0xC405, 2)
     EndIf
 EndFunc   ;==>_COMMAND_AI_WinSetOnTop
 
@@ -260,9 +260,9 @@ Func _COMMAND_AI_WinSetTrans($hWnd, $iMsg, $iwParam, $ilParam)
     If Not @error Then
         $res = WinSetTrans($fhwnd, '', $ilParam)
         ConsoleWrite($res & @CRLF)
-        _SendCM(0xC408, 1)
+        _SendCM(0xC406, 1)
     Else
-        _SendCM(0xC408, 2)
+        _SendCM(0xC406, 2)
     EndIf
 EndFunc   ;==>_COMMAND_AI_WinSetTrans
 
