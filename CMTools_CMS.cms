@@ -93,7 +93,7 @@ THREAD(CME_GetResponse, 0) //--- получение сообщений ---------
             $CME_return = $wPar
             login_message()
             IF(($CME_command == AI_MouseWheelScrollEvent) | ($CME_command == AI_MouseWheelScrollEventUpDown))
-                $WheelScroll = $CME_return
+                $WheelScrollEvent = $CME_return
             END_IF
         END_IF
         
@@ -366,15 +366,15 @@ SUB(CME_MouseWheelScrollEvent, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     // $AI_BlockDefProc - 0/1 следует ли блокировать событие
     
     // после запуска будут приходить сообщения.
-    // при сообщении переменной $WheelScroll присваивается 1
-    // $WheelScroll = 1
+    // при сообщении переменной $WheelScrollEvent присваивается 1
+    // $WheelScrollEvent = 1
     PostMessage($hwnd_CME, AI_MouseWheelScrollEvent, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
-    $WheelScroll = 0
+    $WheelScrollEvent = 0
     WHILE($CME_command != AI_MouseWheelScrollEvent)
         WAITMS(10)
     END_CYC
     IF($AI_on_off == 0)
-        $WheelScroll = 0
+        $WheelScrollEvent = 0
     END_IF
 END_SUB
 
@@ -387,15 +387,15 @@ SUB(CME_MouseWheelScrollEventUpDown, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     // $AI_BlockDefProc - 0/1 следует ли блокировать событие
     
     // после запуска будут приходить сообщения.
-    // при сообщении переменной $WheelScroll присваивается 2 - вверх или 3 - вниз
-    // $WheelScroll = 2
+    // при сообщении переменной $WheelScrollEvent присваивается 2 - вверх или 3 - вниз
+    // $WheelScrollEvent = 2
     PostMessage($hwnd_CME, AI_MouseWheelScrollEventUpDown, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
-    $WheelScroll = 0
+    $WheelScrollEvent = 0
     WHILE($CME_command != AI_MouseWheelScrollEventUpDown)
         WAITMS(10)
     END_CYC
     IF($AI_on_off == 0)
-        $WheelScroll = 0
+        $WheelScrollEvent = 0
     END_IF
 END_SUB
 
