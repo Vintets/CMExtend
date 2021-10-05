@@ -83,8 +83,8 @@ _WaitCM()
 _MainLoop()
 
 ;~ Local $hTimer = TimerInit()
-;~ _COLORMODE_GREYSCALE_OLD4(750, 426, 849, 525)
-;~ _COLORMODE_GREYSCALE(750, 426, 849, 525)
+;~ _ColormodeGreyscale_OLD4(750, 426, 849, 525)
+;~ _ColormodeGreyscale(750, 426, 849, 525)
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 ;~ _SendCM(123, 456)
 
@@ -448,7 +448,7 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
-    _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+    _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     _SendCM(1, 0xC421)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
@@ -462,7 +462,7 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 'mid_contr = ' & $mid_contr & ',    k_contr = ' & $k_contr & _
                 @CRLF)
-    _COLORMODE_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
+    _ColormodeDramContrast($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
     _SendCM(1, 0xC422)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
@@ -564,7 +564,7 @@ Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
     Return 0
 EndFunc   ;==>_OpenProcess
 
-Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
+Func _ColormodeGreyscale_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd, $hProcess
     Local $color=0, $R, $G, $B
     Local $gray_canal
@@ -620,9 +620,9 @@ Func _COLORMODE_GREYSCALE_OLD1($fx1, $fy1, $fx2, $fy2)
         _WinAPI_CloseHandle($hProcess); Открытый процесс необходимо закрывать
     EndIf
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_OLD1
+EndFunc   ;==>_ColormodeGreyscale_OLD1
 
-Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
+Func _ColormodeGreyscale_OLD2($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
@@ -677,9 +677,9 @@ Func _COLORMODE_GREYSCALE_OLD2($fx1, $fy1, $fx2, $fy2)
         _WinAPI_CloseHandle($hProcess)
     EndIf
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_OLD2
+EndFunc   ;==>_ColormodeGreyscale_OLD2
 
-Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
+Func _ColormodeGreyscale_OLD3($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A
@@ -731,9 +731,9 @@ Func _COLORMODE_GREYSCALE_OLD3($fx1, $fy1, $fx2, $fy2)
         _WinAPI_CloseHandle($hProcess)
     EndIf
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_OLD3
+EndFunc   ;==>_ColormodeGreyscale_OLD3
 
-Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
+Func _ColormodeGreyscale_OLD4($fx1, $fy1, $fx2, $fy2)
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd
     Local $color, $R, $G, $B, $A, $lenPxl
@@ -823,9 +823,9 @@ Func _COLORMODE_GREYSCALE_OLD4($fx1, $fy1, $fx2, $fy2)
     EndIf
     DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_OLD4
+EndFunc   ;==>_ColormodeGreyscale_OLD4
 
-Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
+Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
@@ -922,9 +922,9 @@ Func _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
     EndIf
     DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_GREYSCALE_5
+EndFunc   ;==>_ColormodeGreyscale_5
 
-Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
+Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $ah_Handle, $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
@@ -1111,7 +1111,7 @@ Func _COLORMODE_DRAMCONTRAST($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     EndIf
     DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
-EndFunc   ;==>_COLORMODE_DRAMCONTRAST
+EndFunc   ;==>_ColormodeDramContrast
 
 
 ;~ WM_User = 0x400 (1024)
