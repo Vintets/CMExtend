@@ -436,7 +436,9 @@ END_SUB
 #define AI_SETREGION:0xC420
 SUB(CME_SETREGION, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     PostMessage($hwnd_CME, AI_SETREGION, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
-    waitms(5)
+    WHILE($CME_command != AI_SETREGION)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- преобразовать область в GREYSCALE ----------------------------------------
@@ -445,7 +447,9 @@ SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     INIWRITE($main_ini, "completion", "0", "main")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_GREYSCALE, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
-    wait_completion()
+    WHILE($CME_command != AI_GREYSCALE)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- применить к области DRAMCONTRAST -----------------------------------------
@@ -456,6 +460,9 @@ SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     WAITMS(5)
     PostMessage($hwnd_CME, AI_DRAMCONTRAST, $AI_mid, $AI_k)
     wait_completion()
+    WHILE($CME_command != AI_DRAMCONTRAST)
+        WAITMS(10)
+    END_CYC
 END_SUB
 
 //--- Тестирование функций. Отключить при импорте! -----------------------------

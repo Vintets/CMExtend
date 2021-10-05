@@ -430,6 +430,7 @@ Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 '(' & $x1 & ', ' & $y1 & ', ' & $x2 & ', ' & $y2 & ')' & _
                 @CRLF)
+    _SendCM(1, 0xC420)
 EndFunc   ;==>_COMMAND_AI_SETREGION
 
 Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
@@ -448,7 +449,7 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
     _COLORMODE_GREYSCALE($fx1, $fy1, $fx2, $fy2)
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM(1, 0xC421)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
 Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
@@ -462,7 +463,7 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
                 'mid_contr = ' & $mid_contr & ',    k_contr = ' & $k_contr & _
                 @CRLF)
     _COLORMODE_DRAMCONTRAST($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    _SendCM(1, 0xC422)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 Func _ToggleMonitor($hwnd, $OnOff)
