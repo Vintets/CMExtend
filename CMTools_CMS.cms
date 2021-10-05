@@ -7,7 +7,7 @@
 
 #define \n:STRCONCAT(char(13),char(10))
 
-EXECUTE(CMExtend.exe)
+EXECUTE("CMExtend.exe")
 WAITMS(500)
 #include "logger.cms"
 
