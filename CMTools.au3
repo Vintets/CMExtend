@@ -467,6 +467,7 @@ EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 
 Func _Init()
+    FileInstall('settings_cme_default.ini', @ScriptDir & 'settings_cme.ini', 0)
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'

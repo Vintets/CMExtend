@@ -1,0 +1,55 @@
+﻿#name "Test_MouseEvent"
+// Author: Vint
+// Version: 1.0.0 (05.10.2021)
+// Скрипт для Clickermann v4.13.014
+
+// подключение CMTools_CMS:
+#include "CMTools_CMS.cms"
+//#include "CMTools\CMTools_CMS.cms"
+
+
+//                              Настройки
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// показывать окно лога. Глубина 0, 1, 2
+$log = 2
+
+
+//##############################################################################
+
+WAITMS(300)
+LOGCLEAR
+log_show()
+
+$timer1 = $_ms
+
+//--- Тестирование функций -----------------------------------------------------
+
+//CME_MouseWheelScrollEvent(1, 2296148, 1)
+//CME_MouseWheelScrollEvent(1, 0, 1)  // отслеживаем WheelScroll С блокировкой события
+//WAIT(5)
+//CME_MouseWheelScrollEvent(0, 0, 0)  // закончили отслеживать WheelScroll
+//WAIT(3)
+
+//CME_MouseWheelScrollEventUpDown(1, 0, 1)  // отслеживаем WheelScroll UpDown С блокировкой события
+//WAIT(5)
+//CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
+//WAIT(3)
+
+//CME_MouseMoveEvent(1, 0, 1)               // отслеживаем MoveEvent
+//WAIT(5)
+//CME_MouseMoveEvent(0, 0, 0)               // закончили отслеживать MoveEvent
+//WAIT(1)
+
+CME_MouseWheelScrollEventUpDown(1, 0, 0)  // отслеживаем WheelScroll UpDown
+CME_MouseMoveEvent(1, 0, 0)               // отслеживаем MoveEvent
+WAIT(5)
+CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
+CME_MouseMoveEvent(0, 0, 0)               // закончили отслеживать MoveEvent
+WAIT(1)
+
+// =============================================================================
+
+print_timeaction("тест 1", $_ms - $timer1)
+HALT
+
