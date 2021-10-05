@@ -467,9 +467,9 @@ EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 
 Func _Init()
-    FileInstall('settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 0)
-    FileInstall('logger.cms', @ScriptDir & '\logger.cms', 0)
-    FileInstall('CMTools_CMS.cms', @ScriptDir & '\CMTools_CMS.cms', 0)
+    FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 0)
+    FileInstall('CMTools\logger.cms', @ScriptDir & '\logger.cms', 0)
+    FileInstall('CMTools\CMTools_CMS.cms', @ScriptDir & '\CMTools_CMS.cms', 0)
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
@@ -481,11 +481,13 @@ Func _Init()
 EndFunc   ;==>_Init
 
 Func _CheckINI()
-    IniRenameSection($fileini, 'clickermann', 'clickermann')
-    If Not @error Then
+    Local $temp
+    $temp = IniRead($fileini, 'clickermann', 'program_name', 0)
+    If @error Then
         MsgBox(4096, '', 'Произошла ошибка, отсутствует или повреждён файл settings_cme.ini', 2)
-        FileInstall('settings_cme_default.ini', $fileini)
+        ; FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 1)
         Sleep(500)
+        Exit
     EndIf
 EndFunc   ;==>_CheckINI
 

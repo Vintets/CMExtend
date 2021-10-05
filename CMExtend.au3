@@ -127,10 +127,11 @@ Func _SaveINIPos()
 EndFunc   ;==>_SaveINIPos
 
 Func _CheckINI()
-    IniRenameSection($fileini, 'clickermann', 'clickermann')
-    If Not @error Then
+    Local $temp
+    $temp = IniRead($fileini, 'clickermann', 'program_name')
+    If @error Then
         MsgBox(4096, '', 'Произошла ошибка, отсутствует или повреждён файл settings_cme.ini', 2)
-        FileInstall('settings_cme_default.ini', $fileini)
+        FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 1)
         Sleep(500)
     EndIf
 EndFunc   ;==>_CheckINI
