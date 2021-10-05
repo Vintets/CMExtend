@@ -271,7 +271,6 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
     wait_response(AI_WinGetState)
-    $CME_return = INT(INIREAD($main_ini, "return", "main"))
     $fstate = $CME_return
     $fEXIST = 0
     $fSHOW = 0
