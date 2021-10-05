@@ -148,12 +148,6 @@ SUB(log_comands_list) //--- вывод $comands_list для контроля ---
     END_CYC
 END_SUB
 
-SUB(wait_completion) //--- ожидание завершения ---------------------------------
-    WHILE(INT(INIREAD($main_ini, "completion", "main")) = 0)
-        WAITMS(10)
-    END_CYC
-END_SUB
-
 SUB(clear_message_queue)
     $isnew = 1
     WHILE($isnew == 1)
@@ -212,12 +206,6 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
     wait_response(AI_WinGetHandle)
-    // Вариант через INI
-    //wait_completion()
-    //$CME_return = INT(INIREAD($main_ini, "return", "main"))
-    //IF($log > 1)
-    //    LOGWRITE("CME_WinGetHandle.  hWnd:  ", $CME_return)
-    //END_IF
 END_SUB
 
 //--- получить дескриптор (hWnd) окна рабочего стола ---------------------------
