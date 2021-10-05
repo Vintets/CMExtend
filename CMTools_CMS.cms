@@ -1,6 +1,6 @@
-﻿#name "CMTools"
+﻿#name "CMTools_CMS"
 // Author: Vint
-// Version: 1.0.0 (04.10.2021)
+// Version: 1.1.0 (05.10.2021)
 // Скрипт для Clickermann v4.13.014
 // подключение CMTools_CMS:
 // #include "CMTools\CMTools_CMS.cms"
@@ -482,19 +482,19 @@ SUB(Test)
     //CME_WinSetTrans($hwnd_Notepad, 180)
     
     //CME_MouseWheelScrollEvent(1, 2296148, 1)
-    //CME_MouseWheelScrollEvent(1, 0, 1)  // Отслеживаем WheelScroll С блокировкой события
+    //CME_MouseWheelScrollEvent(1, 0, 1)  // отслеживаем WheelScroll С блокировкой события
     //WAIT(5)
     //CME_MouseWheelScrollEvent(0, 0, 0)  // закончили отслеживать WheelScroll
     //WAIT(3)
     
-    //CME_MouseWheelScrollEventUpDown(1, 0, 1)  // Отслеживаем WheelScroll UpDown С блокировкой события
+    //CME_MouseWheelScrollEventUpDown(1, 0, 1)  // отслеживаем WheelScroll UpDown С блокировкой события
     //WAIT(5)
     //CME_MouseWheelScrollEventUpDown(0, 0, 0)  // закончили отслеживать WheelScroll UpDown
     //WAIT(3)
     
-    CME_MouseMoveEvent(1, 0, 1)
-    WAIT(5)
-    CME_MouseMoveEvent(0, 0, 0)
+    //CME_MouseMoveEvent(1, 0, 1)               // отслеживаем MoveEvent
+    //WAIT(5)
+    //CME_MouseMoveEvent(0, 0, 0)               // закончили отслеживать MoveEvent
     
     //CME_WINEXISTS("[CLASS:Notepad]")
     //CME_SETREGION($x1, $y1, $x2, $y2)
@@ -519,6 +519,8 @@ END_SUB
 //##############################################################################
 
 // Start
+EXECUTE(CMExtend.exe)
+WAITMS(500)
 getHWND_CMTools()
 clear_message_queue()
 SETTHREAD(CME_GetResponse, 1)
