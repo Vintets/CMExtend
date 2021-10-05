@@ -519,7 +519,7 @@ END_SUB
 //##############################################################################
 
 // Start
-EXECUTE("CMExtend.exe")
+EXECUTE("CMTools.exe")
 WAITMS(500)
 getHWND_CMTools()
 clear_message_queue()
