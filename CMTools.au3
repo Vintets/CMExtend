@@ -184,24 +184,9 @@ Func _COMMAND_AI_WinGetHandle($hWnd, $iMsg, $iwParam, $ilParam)
         EndIf
     EndIf
     _SendCM($freturn, 0xC400)
-EndFunc   ;==>_COMMAND_AI_WinGetHandle
-
-Func _COMMAND_AI_WinGetHandle_INI($hWnd, $iMsg, $iwParam, $ilParam)
-    #forceref $hWnd, $iMsg
-    Local $freturn = -1, $ftitle = '', $ftext = ''
-
-    $ftitle = IniRead($fileini, 'window', 'title', '')
-    $ftext = IniRead($fileini, 'window', 'text', '')
-    If $ftitle <> '' Then
-        $freturn = WinGetHandle($ftitle, $ftext)
-        If @error or $freturn = '' Then
-            $freturn = -1
-        Else
-            ConsoleWrite('WinGetHandle   hWnd = ' & $freturn & @CRLF)
-        EndIf
-    EndIf
-    IniWrite($fileini, 'main', 'return', $freturn)  ; return
-    IniWrite($fileini, 'main', 'completion', 1)  ; Ok
+    ; old ini
+    ; IniWrite($fileini, 'main', 'return', $freturn)  ; return
+    ; IniWrite($fileini, 'main', 'completion', 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_WinGetHandle
 
 Func _COMMAND_AI_GetDesktopWindow($hWnd, $iMsg, $iwParam, $ilParam)
