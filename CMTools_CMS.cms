@@ -454,6 +454,14 @@ SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     END_CYC
 END_SUB
 
+
+//--- Управление монитором -----------------------------------------------------
+SUB(ToggleMonitor, $TM_hwnd, $TM_OnOff)
+    $WM_SYSCOMMAND = 274
+    $SC_MONITORPOWER = 61808
+    _SendMessage($TM_hwnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $TM_OnOff)
+END_SUB
+
 //--- Тестирование функций. Отключить при импорте! -----------------------------
 SUB(Test)
     WAITMS(300)
