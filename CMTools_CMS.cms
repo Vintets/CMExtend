@@ -161,6 +161,12 @@ SUB(clear_message_queue)
     END_CYC
 END_SUB
 
+SUB(wait_response, $WR_code_command)
+    WHILE($CME_command != $WR_code_command)
+        WAITMS(5)
+    END_CYC
+END_SUB
+
 SUB(getHWND_CMTools) //--- получаем hwnd CMTools -------------------------------
     $time = $_ms + 3000
     WHILE($time > $_ms)
@@ -189,7 +195,7 @@ END_SUB
 #define AI_Test:0x555
 SUB(test_555)
     PostMessage($hwnd_CME, AI_Test, 4096+4096*65536, 1920+1080*65536)
-    //waitms(200)
+    wait_response(AI_Test)
 END_SUB
 
 //--- получить дескриптор окна (hWnd) ------------------------------------------
@@ -205,9 +211,7 @@ SUB(CME_WinGetHandle, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetHandle, 0, 0)
-    WHILE($CME_command != AI_WinGetHandle)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinGetHandle)
     // Вариант через INI
     //wait_completion()
     //$CME_return = INT(INIREAD($main_ini, "return", "main"))
@@ -223,9 +227,7 @@ SUB(CME_GetDesktopWindow)
     // Возвращаемые значения:
     // $CME_return  - найденный hWnd
     PostMessage($hwnd_CME, AI_GetDesktopWindow, 0, 0)
-    WHILE($CME_command != AI_GetDesktopWindow)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_GetDesktopWindow)
 END_SUB
 
 //--- получить PID окна --------------------------------------------------------
@@ -241,9 +243,7 @@ SUB(CME_WinGetProcess, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetProcess, 0, 0)
-    WHILE($CME_command != AI_WinGetProcess)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinGetProcess)
 END_SUB
 
 //--- получить PID Clickermann-а -----------------------------------------------
@@ -256,9 +256,7 @@ SUB(CME_WinGetProcessCM)
     // Возвращаемые значения:
     // $pid_CM  - найденный PID или 0
     PostMessage($hwnd_CME, AI_WinGetProcessCM, 0, 0)
-    WHILE($CME_command != AI_WinGetProcessCM)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinGetProcessCM)
     $pid_CM = $CME_return
 END_SUB
 
@@ -288,9 +286,7 @@ SUB(CME_WinGetState, $AI_title, $AI_text)
     INIWRITE($main_ini, "text", $AI_text, "window")
     WAITMS(5)
     PostMessage($hwnd_CME, AI_WinGetState, 0, 0)
-    WHILE($CME_command != AI_WinGetState)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinGetState)
     $CME_return = INT(INIREAD($main_ini, "return", "main"))
     $fstate = $CME_return
     $fEXIST = 0
@@ -340,9 +336,7 @@ SUB(CME_WinSetOnTop, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - 1 - включить, 0 - выключить
     PostMessage($hwnd_CME, AI_WinSetOnTop, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != AI_WinSetOnTop)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinSetOnTop)
 END_SUB
 
 //--- Устанавливает прозрачность окна ------------------------------------------
@@ -352,9 +346,7 @@ SUB(CME_WinSetTrans, $AI_hwnd, $AI_par1)
     // $AI_hwnd - hwnd окна
     // $AI_par1 - прозрачность окна  255 = непрозрачно, 0 = прозрачно (невидимое)
     PostMessage($hwnd_CME, AI_WinSetTrans, $AI_hwnd, $AI_par1)
-    WHILE($CME_command != AI_WinSetTrans)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_WinSetTrans)
 END_SUB
 
 //--- Отслеживание прокрутки колеса мыши ---------------------------------------
@@ -370,9 +362,7 @@ SUB(CME_MouseWheelScrollEvent, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     // $WheelScrollEvent = 1
     PostMessage($hwnd_CME, AI_MouseWheelScrollEvent, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
     $WheelScrollEvent = 0
-    WHILE($CME_command != AI_MouseWheelScrollEvent)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_MouseWheelScrollEvent)
     IF($AI_on_off == 0)
         $WheelScrollEvent = 0
     END_IF
@@ -391,9 +381,7 @@ SUB(CME_MouseWheelScrollEventUpDown, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     // $WheelScrollEvent = 2
     PostMessage($hwnd_CME, AI_MouseWheelScrollEventUpDown, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
     $WheelScrollEvent = 0
-    WHILE($CME_command != AI_MouseWheelScrollEventUpDown)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_MouseWheelScrollEventUpDown)
     IF($AI_on_off == 0)
         $WheelScrollEvent = 0
     END_IF
@@ -412,9 +400,7 @@ SUB(CME_MouseMoveEvent, $AI_on_off, $AI_hwnd, $AI_BlockDefProc)
     // $MouseMoveEvent = 2
     PostMessage($hwnd_CME, AI_MouseMoveEvent, $AI_hwnd, $AI_on_off+$AI_BlockDefProc*65536)
     $MouseMoveEvent = 0
-    WHILE($CME_command != AI_MouseMoveEvent)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_MouseMoveEvent)
     IF($AI_on_off == 0)
         $MouseMoveEvent = 0
     END_IF
@@ -431,18 +417,14 @@ END_SUB
 #define AI_SETREGION:0xC420
 SUB(CME_SETREGION, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     PostMessage($hwnd_CME, AI_SETREGION, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
-    WHILE($CME_command != AI_SETREGION)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_SETREGION)
 END_SUB
 
 //--- преобразовать область в GREYSCALE ----------------------------------------
 #define AI_GREYSCALE:0xC421
 SUB(CME_GREYSCALE, $AI_x1, $AI_y1, $AI_x2, $AI_y2)
     PostMessage($hwnd_CME, AI_GREYSCALE, $AI_x1+$AI_y1*65536, $AI_x2+$AI_y2*65536)
-    WHILE($CME_command != AI_GREYSCALE)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_GREYSCALE)
 END_SUB
 
 //--- применить к области DRAMCONTRAST -----------------------------------------
@@ -450,9 +432,7 @@ END_SUB
 SUB(CME_DRAMCONTRAST, $AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n, $AI_mid, $AI_k)
     CME_SETREGION($AI_x1n, $AI_y1n, $AI_x2n, $AI_y2n)
     PostMessage($hwnd_CME, AI_DRAMCONTRAST, $AI_mid, $AI_k)
-    WHILE($CME_command != AI_DRAMCONTRAST)
-        WAITMS(10)
-    END_CYC
+    wait_response(AI_DRAMCONTRAST)
 END_SUB
 
 
