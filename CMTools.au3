@@ -223,7 +223,6 @@ Func _COMMAND_AI_WinGetProcessCM($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
 
     If Not _IsWinCM() Then $iPidCM = 0
-    IniWrite($fileini, 'main', 'return', $iPidCM)  ; return
     _SendCM($iPidCM, 0xC403)
 EndFunc   ;==>_COMMAND_AI_WinGetProcessCM
 
