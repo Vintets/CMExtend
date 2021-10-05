@@ -387,6 +387,46 @@ Func _COMMAND_AI_MouseMoveEvent($hWnd, $iMsg, $iwParam, $ilParam)
 EndFunc   ;==>_COMMAND_AI_MouseMoveEvent
 
 
+; ToDo
+
+#CS
+ToolTip Создаёт всплывающую подсказку в любом месте экрана
+    https://autoit-script.ru/docs/functions/tooltip.htm
+
+WinSetState Показать, скрыть, свернуть, развернуть, или восстановить окно
+WinGetClassList Возвращает класс окна
+WinExists
+WinClose
+WinMenuSelectItem Вызывает пункт меню окна
+
+
+#include <Sound.au3>
+_SoundPlay
+_SoundStop
+
+ControlGetHandle Возвращает внутренний указатель элемента
+ControlCommand Высылает команду элементу
+    https://autoit-script.ru/docs/functions/controlcommand.htm
+ControlClick Эмулирует нажатие мыши на указанный элемент интерфейса
+    Пример: нажимаем 2-ой экземпляр элемента "Button", содержащий текст "Finish"
+    ControlClick("Моё окно", "", "[CLASS:Button; TEXT:Finish; INSTANCE:2]")
+
+ControlSend Выслать строку символов в элемент
+ControlDisable Отключает элемент, делая его серым, недоступным
+ControlEnable Разблокировывает элемент (делает доступным)
+ControlHide Скрыть элемент
+ControlShow Отображает ранее скрытый элемент
+ControlFocus Устанавливает фокус ввода указанному элементу окна
+ControlMove Переместить элемент в пределах окна
+ControlGetFocus Возвращает ControlRef# элемента, который имеет фокус ввода в указанном окне
+ControlGetPos Возвращает координаты и размер элемента относительно окна
+ControlGetText Возвращает текст из элемента
+ControlSetText Устанавливает текст в элемент
+ControlListView Высылает команду элементу ListView32
+#CE
+
+
+
 
 Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
