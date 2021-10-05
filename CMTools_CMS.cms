@@ -7,6 +7,8 @@
 
 #define \n:STRCONCAT(char(13),char(10))
 
+EXECUTE(CMExtend.exe)
+WAITMS(500)
 #include "logger.cms"
 
 
@@ -519,8 +521,6 @@ END_SUB
 //##############################################################################
 
 // Start
-EXECUTE(CMExtend.exe)
-WAITMS(500)
 getHWND_CMTools()
 clear_message_queue()
 SETTHREAD(CME_GetResponse, 1)
