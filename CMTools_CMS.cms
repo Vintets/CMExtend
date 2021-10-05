@@ -494,15 +494,16 @@ SUB(Test)
     //print("$_hwnd_self ", $_hwnd_self)
     
     //CME_WinGetHandle("[ACTIVE]", "")          // активное окно
-    //CME_WinGetHandle("[CLASS:Notepad]", "")   // класс блокнот
+    //CME_WinGetHandle("[CLASS:Notepad++]", "")   // класс блокнот
     //CME_GetDesktopWindow()
-    //CME_WinGetProcess("[CLASS:Notepad]", "")
+    //CME_WinGetProcess("[CLASS:Notepad++]", "")
     
     //CME_WinGetProcessCM()
     
-    //CME_WinGetState("[CLASS:Notepad]", "")
-    //CME_WinSetOnTop($CME_return, 1)
-    //CME_WinSetTrans($CME_return, 128)
+    //CME_WinGetState("[CLASS:Notepad++]", "")
+    //$hwnd_Notepad = $CME_return
+    //CME_WinSetOnTop($hwnd_Notepad, 1)
+    //CME_WinSetTrans($hwnd_Notepad, 180)
     
     //CME_MouseWheelScrollEvent(1, 2296148, 1)
     //CME_MouseWheelScrollEvent(1, 0, 1)  // Отслеживаем WheelScroll С блокировкой события
