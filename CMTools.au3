@@ -137,6 +137,9 @@ Func _RegisterMyCommand()
     ;GUIRegisterMsg('AI_SETREGION', '_COMMAND_SETREGION')
 EndFunc   ;==>_RegisterMyCommand
 
+
+#Region    **** COMMANDS function ****
+
 Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $hWndFrom, $iIDFrom, $iCode, $iLW, $iHW
@@ -323,13 +326,6 @@ Func _COMMAND_AI_MouseWheelScrollEvent($hWnd, $iMsg, $iwParam, $ilParam)
     EndIf
 EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEvent
 
-Func _MouseWheelEvents($iEvent)
-    _SendCM(1, 0xC407)
-    If $MouseWheelScrollEvent_Tooltip Then
-        ToolTip('Прокручивание колёсика', Default, Default, 'MouseWheel', 1)
-    EndIf
-EndFunc
-
 Func _COMMAND_AI_MouseWheelScrollEventUpDown($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $fhwnd = 0, $res, $AI_on_off, $AI_BlockDefProc
@@ -361,22 +357,6 @@ Func _COMMAND_AI_MouseWheelScrollEventUpDown($hWnd, $iMsg, $iwParam, $ilParam)
     EndIf
 EndFunc   ;==>_COMMAND_AI_MouseWheelScrollEventUpDown
 
-Func _MouseWheelEvents_UpDown($iEvent)
-    Switch $iEvent
-        Case $MOUSE_WHEELSCROLLUP_EVENT
-            _SendCM(2, 0xC408)
-            If $MouseWheelScrollEvent_Tooltip Then
-                ToolTip('Прокручивание колёсика ВВЕРХ', Default, Default, 'Up', 1)
-            EndIf
-        Case $MOUSE_WHEELSCROLLDOWN_EVENT
-            _SendCM(3, 0xC408)
-            If $MouseWheelScrollEvent_Tooltip Then
-                ToolTip('Прокручивание колёсика ВНИЗ', Default, Default, 'Down', 1)
-            EndIf
-    EndSwitch
-    ;Return $MOE_BLOCKDEFPROC ;Block
-EndFunc
-
 Func _COMMAND_AI_MouseMoveEvent($hWnd, $iMsg, $iwParam, $ilParam)
     #forceref $hWnd, $iMsg
     Local $fhwnd = 0, $res, $AI_on_off, $AI_BlockDefProc
@@ -405,14 +385,6 @@ Func _COMMAND_AI_MouseMoveEvent($hWnd, $iMsg, $iwParam, $ilParam)
         _SendCM(0xC409, 2)
     EndIf
 EndFunc   ;==>_COMMAND_AI_MouseMoveEvent
-
-Func _MouseMoveEvents($iEvent)
-    _SendCM(1, 0xC409)
-    If $MouseMoveEvent_Tooltip Then
-        ToolTip('Перемещение мыши', Default, Default, 'MouseMove', 1)
-    EndIf
-EndFunc
-
 
 
 
@@ -466,16 +438,7 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
     _SendCM(1, 0xC422)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
-Func _ToggleMonitor($hwnd, $OnOff)
-    Local Const $WM_SYSCOMMAND = 274
-    Local Const $SC_MONITORPOWER = 61808
-    _SendMessage($hWnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $OnOff)
-    If @error Then
-        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
-        Exit
-    EndIf
-EndFunc   ;==>_ToggleMonitor
-
+#EndRegion **** COMMANDS function ****
 
 
 Func _Init()
@@ -556,6 +519,47 @@ Func _SendCM($wParam, $lParam)
 EndFunc   ;==>_SendCM
 
 
+#Region    **** Realization  function ****
+
+Func _MouseMoveEvents($iEvent)
+    _SendCM(1, 0xC409)
+    If $MouseMoveEvent_Tooltip Then
+        ToolTip('Перемещение мыши', Default, Default, 'MouseMove', 1)
+    EndIf
+EndFunc
+
+Func _MouseWheelEvents($iEvent)
+    _SendCM(1, 0xC407)
+    If $MouseWheelScrollEvent_Tooltip Then
+        ToolTip('Прокручивание колёсика', Default, Default, 'MouseWheel', 1)
+    EndIf
+EndFunc
+
+Func _MouseWheelEvents_UpDown($iEvent)
+    Switch $iEvent
+        Case $MOUSE_WHEELSCROLLUP_EVENT
+            _SendCM(2, 0xC408)
+            If $MouseWheelScrollEvent_Tooltip Then
+                ToolTip('Прокручивание колёсика ВВЕРХ', Default, Default, 'Up', 1)
+            EndIf
+        Case $MOUSE_WHEELSCROLLDOWN_EVENT
+            _SendCM(3, 0xC408)
+            If $MouseWheelScrollEvent_Tooltip Then
+                ToolTip('Прокручивание колёсика ВНИЗ', Default, Default, 'Down', 1)
+            EndIf
+    EndSwitch
+    ;Return $MOE_BLOCKDEFPROC ;Block
+EndFunc
+
+Func _ToggleMonitor($hwnd, $OnOff)
+    Local Const $WM_SYSCOMMAND = 274
+    Local Const $SC_MONITORPOWER = 61808
+    _SendMessage($hWnd, $WM_SYSCOMMAND, $SC_MONITORPOWER, $OnOff)
+    If @error Then
+        MsgBox(4096, '_ToggleMonitor', '_SendMessage Error: ' & @error)
+        Exit
+    EndIf
+EndFunc   ;==>_ToggleMonitor
 
 Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
     Local $aResult = DllCall($ah_Handle, 'handle', 'OpenProcess', 'dword', $iAccess, 'bool', $fInherit, 'dword', $iProcessID)
@@ -1113,6 +1117,10 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_ColormodeDramContrast
 
+#EndRegion **** Realization  function ****
+
+
+; ≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
 ;~ WM_User = 0x400 (1024)
 ;~ Стандартные сообщения до WM_User-1.     от              0   до  0x03FF (1023)
