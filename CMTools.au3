@@ -4,10 +4,10 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.1.2
+; Version:          1.2.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             05.10.2021
+; Date:             08.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -22,14 +22,14 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.1.2
+#AutoIt3Wrapper_Res_Fileversion=1.2.0
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.1.2
-#AutoIt3Wrapper_Res_Field=Build|2021.10.05
+#AutoIt3Wrapper_Res_Field=Version|1.2.0
+#AutoIt3Wrapper_Res_Field=Build|2021.10.08
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -58,7 +58,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.1.2'
+Global $CMToolsVersion = '1.2.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -66,7 +66,7 @@ Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
-Global $iAddressCM = 0x004E20FC
+Global $iAddressCM, $startBuf
 Global $WM_CMCOMMAND
 Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 Global $hDLLkernel32
@@ -82,6 +82,7 @@ EndIf
 _Init()
 _WaitCM()
 $hDLLkernel32 = DllOpen('kernel32.dll')
+_CalculateBuffer()
 _MainLoop()
 
 ;~ Local $hTimer = TimerInit()
@@ -550,6 +551,47 @@ Func _SendCM($wParam, $lParam)
     EndIf
 EndFunc   ;==>_SendCM
 
+Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
+    Local $aResult = DllCall($ah_Handle, 'handle', 'OpenProcess', 'dword', $iAccess, 'bool', $fInherit, 'dword', $iProcessID)
+    If @error Then Return SetError(@error, @extended, 0)
+    If $aResult[0] Then Return $aResult[0]
+    Return 0
+EndFunc   ;==>_OpenProcess
+
+Func _CalculateBuffer()
+    Local $hProcess
+    Local $pointer
+    Local Const $DesktopWidthSize = @DesktopWidth * 4
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $tBf = DllStructCreate('DWORD')
+    Local $versionCM
+
+    $versionCM = IniRead($fileini, 'clickermann', 'version_CM', '')
+    If $versionCM == '4.13.014' Then
+        ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+        $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+        If Not $hProcess Then
+            ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+            Return
+        EndIf
+
+        $iAddressCM = 0x00655BB8
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 034CFCC0
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + 0x1C, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
+    EndIf
+EndFunc   ;==>_CalculateBuffer
+
+
 
 #Region    **** Realization  function ****
 
@@ -592,13 +634,6 @@ Func _ToggleMonitor($hwnd, $OnOff)
         Exit
     EndIf
 EndFunc   ;==>_ToggleMonitor
-
-Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
-    Local $aResult = DllCall($ah_Handle, 'handle', 'OpenProcess', 'dword', $iAccess, 'bool', $fInherit, 'dword', $iProcessID)
-    If @error Then Return SetError(@error, @extended, 0)
-    If $aResult[0] Then Return $aResult[0]
-    Return 0
-EndFunc   ;==>_OpenProcess
 
 Func _ColormodeGreyscale_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd, $hProcess
