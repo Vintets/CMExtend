@@ -69,6 +69,7 @@ Global $repeated = False
 Global $iAddressCM = 0x004E20FC
 Global $WM_CMCOMMAND
 Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
+Global $hDLLkernel32
 
 #EndRegion Global Constants and Variables
 
@@ -80,6 +81,7 @@ EndIf
 
 _Init()
 _WaitCM()
+$hDLLkernel32 = DllOpen('kernel32.dll')
 _MainLoop()
 
 ;~ Local $hTimer = TimerInit()
@@ -519,6 +521,7 @@ EndFunc   ;==>_IsWinCM
 
 Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     GUIDelete($hGUImain)
+    DllClose($hDLLkernel32)
     Exit
 EndFunc   ;==>_WM_CLOSE
 
