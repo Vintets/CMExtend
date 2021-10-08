@@ -26,7 +26,7 @@ Global $CM_name = 'Clickermann_'
 Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
-Global $startBuf, $startBufRd, $pointer
+Global $startBuf, $startBufRd
 Global $iAddressCM = 0x00655BB8
 
 
@@ -88,6 +88,7 @@ EndFunc   ;==>_ReadPXLs
 
 Func _CalculateBuffer()
     Local $hProcess
+    Local $pointer
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
