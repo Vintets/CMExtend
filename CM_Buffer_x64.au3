@@ -4,7 +4,7 @@
 ; Title:            CM_Buffer_x64
 ; Filename:         CM_Buffer_x64.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.1
+; Version:          1.0.2
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             12.10.2021
@@ -26,35 +26,34 @@ Global $CM_name = 'Clickermann_'
 Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
-Global $startBuf, $startBufRd
+Global $startBuf
 Global $aDesk = WinGetPos('Program Manager'), $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
 
 
 _WaitCM()
 ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
 
-
-
 $startBuf = _CalculateBuffer()
 
-$startBufRd = $startBuf + 0 * 4  ;0x0039F440 * 4
-ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
+_ReadLinePXLs(0, 1)  ; $startY, $lenXPxl
 
-_ReadLinePXLs($startBufRd, 1)
-#cs
-iAddressCM  00655BB8
-pointer  034CFCC0
-startBuf  057B0000
-startBufRd  0662D100
-color  FFFA0000   RGB  250  0  0
-#ce
+
 
 DllClose($hDLLkernel32)
 
 
-Func _ReadLinePXLs($startRd, $lenXPxl)
+Func _ReadLinePXLs($startY, $lenXPxl)
     Local $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $hProcess
+    Local $startBufRd = $startBuf + (($DesktopWidth * ($DesktopHeight - 1 - $startY)) * 4)
+
+    ; ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
+    ; 0x0             ; последняя строка
+    ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
+
+    If ($startY > ($DesktopHeight - 1)) Or ($startY < 0) Then
+        Return
+    EndIf
 
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
@@ -77,16 +76,8 @@ Func _ReadLinePXLs($startRd, $lenXPxl)
         $R = BitAND(BitShift($color, 16), 0xFF)
         ConsoleWrite('color  ' & Hex($color, 8) & '   RGB  ' & _
                    $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
-
-        ; #Region    ************ Обработка ************
-        ; $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
-        ; $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
-        ; #EndRegion ************ Обработка ************
-
-        ; DllStructSetData($tClrStruct, 1, $color, $addrRd)
     Next
-EndFunc   ;==>_ReadPXLs
-
+EndFunc   ;==>_ReadLinePXLs
 
 Func _CalculateBuffer()
     Local $hProcess
@@ -100,6 +91,13 @@ Func _CalculateBuffer()
     $iAddressCM = 0x007CC6F0
     $offset = 0x24
 
+    #cs
+    iAddressCM  007CC6F0
+    pointer  0298D730
+    startBuf  05130000
+    Screen 1 line  05FAD100
+    color  FFFA0000   RGB  250  0  0
+    #ce
 
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
