@@ -4,10 +4,10 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.2.0
+; Version:          1.2.1
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             08.10.2021
+; Date:             12.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -22,14 +22,14 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.2.0
+#AutoIt3Wrapper_Res_Fileversion=1.2.1
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.2.0
-#AutoIt3Wrapper_Res_Field=Build|2021.10.08
+#AutoIt3Wrapper_Res_Field=Version|1.2.1
+#AutoIt3Wrapper_Res_Field=Build|2021.10.12
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -58,7 +58,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.2.0'
+Global $CMToolsVersion = '1.2.1'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -66,7 +66,7 @@ Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $fileini = @ScriptDir & '\settings_cme.ini'
 Global $repeated = False
-Global $iAddressCM, $startBuf
+Global $startBuf
 Global $WM_CMCOMMAND
 Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 Global $hDLLkernel32
@@ -564,6 +564,7 @@ Func _CalculateBuffer()
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
+    Local $iAddressCM, $offset
     Local $versionCM
 
     $versionCM = IniRead($fileini, 'clickermann', 'version_CM', '')
@@ -576,6 +577,7 @@ Func _CalculateBuffer()
         EndIf
 
         $iAddressCM = 0x00655BB8
+        $offset = 0x1C
         ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
 
         ; Читаем адрес начала буфера в указателе
@@ -585,7 +587,7 @@ Func _CalculateBuffer()
         ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 034CFCC0
 
         DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-                'ptr', $pointer + 0x1C, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
     EndIf
@@ -642,6 +644,7 @@ Func _ColormodeGreyscale_OLD1($fx1, $fy1, $fx2, $fy2)
     Local $lenstrX = $fx2 - $fx1
     Local $tBf = DllStructCreate('DWORD')
     Local $tClrStruct = DllStructCreate('DWORD')
+    Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
@@ -702,6 +705,7 @@ Func _ColormodeGreyscale_OLD2($fx1, $fy1, $fx2, $fy2)
     Local Const $tagSTRUCT = 'byte[' & $lenXBite &']'
     Local $tClrStruct = DllStructCreate($tagSTRUCT)
     Local $tBf = DllStructCreate('DWORD')
+    Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
@@ -759,6 +763,7 @@ Func _ColormodeGreyscale_OLD3($fx1, $fy1, $fx2, $fy2)
     Local Const $tagSTRUCT = 'DWORD[' & $lenXBite &']'
     Local $tClrStruct = DllStructCreate($tagSTRUCT)
     Local $tBf = DllStructCreate('DWORD')
+    Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
     If $fx1 > @DesktopWidth Or $fx2 > @DesktopWidth Or $fy1 > @DesktopHeight Or $fy2 > @DesktopHeight Then
@@ -813,7 +818,7 @@ Func _ColormodeGreyscale_OLD4($fx1, $fy1, $fx2, $fy2)
     Local $lenXPxl = ($fx2 - $fx1 + 1)
     Local $lenXBite = $lenXPxl * 4
     Local $tagSTRUCT = 'DWORD[' & $lenXPxl &']'
-    
+    Local $iAddressCM
     
     Local $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
@@ -906,6 +911,7 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
     Local $yFull
+    Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
@@ -1004,6 +1010,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
     Local $yFull
+    Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
     If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _

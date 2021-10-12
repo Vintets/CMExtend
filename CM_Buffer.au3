@@ -4,10 +4,10 @@
 ; Title:            CM_Buffer
 ; Filename:         CM_Buffer.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.0
+; Version:          1.0.1
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             08.10.2021
+; Date:             12.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -27,7 +27,6 @@ Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
 Global $startBuf, $startBufRd
-Global $iAddressCM = 0x00655BB8
 
 
 _WaitCM()
@@ -92,7 +91,12 @@ Func _CalculateBuffer()
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
+    Local $iAddressCM, $offset
     ; Local $hDLLkernel32 = DllOpen('kernel32.dll')
+
+    $iAddressCM = 0x00655BB8
+    $offset = 0x1C
+
 
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
@@ -101,7 +105,6 @@ Func _CalculateBuffer()
         Return
     EndIf
 
-    $iAddressCM = 0x00655BB8
     ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
 
     ; Читаем адрес начала буфера в указателе
@@ -111,7 +114,7 @@ Func _CalculateBuffer()
     ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 034CFCC0
 
     DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $pointer + 0x1C, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+            'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startBuf = DllStructGetData($tBf, 1)
     ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
     Return $startBuf
