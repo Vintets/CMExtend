@@ -117,6 +117,10 @@ Func _CalculateBuffer()
             'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startBuf = DllStructGetData($tBf, 1)
     ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
+    
+    If ProcessExists($iPidCM) Then
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
+    EndIf
     Return $startBuf
 EndFunc   ;==>_CalculateBuffer
 

@@ -567,15 +567,15 @@ Func _CalculateBuffer()
     Local $iAddressCM, $offset
     Local $versionCM
 
+    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
     $versionCM = IniRead($fileini, 'clickermann', 'version_CM', '')
     If $versionCM == '4.13.014' Then
-        ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
-        $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
-        If Not $hProcess Then
-            ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
-            Return
-        EndIf
-
         $iAddressCM = 0x00655BB8
         $offset = 0x1C
         ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
@@ -590,6 +590,10 @@ Func _CalculateBuffer()
                 'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
+    EndIf
+
+    If ProcessExists($iPidCM) Then
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
 EndFunc   ;==>_CalculateBuffer
 
