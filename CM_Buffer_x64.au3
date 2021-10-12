@@ -27,7 +27,9 @@ Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
 Global $startBuf
-Global $aDesk = WinGetPos('Program Manager'), $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
+Global $aDesk = WinGetPos('Program Manager')
+Global $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
+Global $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
 
 
 _WaitCM()
@@ -35,23 +37,21 @@ ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
 
 $startBuf = _CalculateBuffer()
 
-_ReadLinePXLs(0, 1)  ; $startY, $lenXPxl
-
-
+; _ReadLinePXLs(0, 0, 1)  ; $startX, $startY, $lenXPxl
 
 DllClose($hDLLkernel32)
 
 
-Func _ReadLinePXLs($startY, $lenXPxl)
+Func _ReadLinePXLs($startX, $startY, $lenXPxl)
     Local $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $hProcess
-    Local $startBufRd = $startBuf + (($DesktopWidth * ($DesktopHeight - 1 - $startY)) * 4)
+    Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - $startY)) * 4) + ($startX * 4)
 
     ; ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
     ; 0x0             ; последняя строка
     ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
 
-    If ($startY > ($DesktopHeight - 1)) Or ($startY < 0) Then
+    If ($startY < 0) Or ($startY > $yMax) Or ($startX < 0) Or ($startX > $xMax) Then
         Return
     EndIf
 
