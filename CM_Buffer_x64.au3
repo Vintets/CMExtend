@@ -4,7 +4,7 @@
 ; Title:            CM_Buffer_x64
 ; Filename:         CM_Buffer_x64.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.2
+; Version:          1.0.3
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             12.10.2021
@@ -38,6 +38,9 @@ ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
 $startBuf = _CalculateBuffer()
 
 ; _ReadLinePXLs(0, 0, 1)  ; $startX, $startY, $lenXPxl
+_FillSquare(0, 0, 'RG')
+_FillSquare(260, 0, 'RB')
+_FillSquare(0, 260, 'GB')
 
 DllClose($hDLLkernel32)
 
@@ -78,6 +81,64 @@ Func _ReadLinePXLs($startX, $startY, $lenXPxl)
                    $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
     Next
 EndFunc   ;==>_ReadLinePXLs
+
+Func _FillSquare($startX, $startY, $colorCombination = 'RG')
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $hProcess
+    Local $yFull, $addrWr
+    Local $lenXPxl = 256, $lenYPxl = 256
+    Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - ($startY + ($lenYPxl - 1)))) * 4) + ($startX * 4)
+
+    ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
+    ; 0x0             ; последняя строка
+    ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
+
+    If ($startY < 0) Or ($startY > $yMax) Or ($startX < 0) Or ($startX > $xMax) Then
+        Return
+    EndIf
+
+    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
+    $lenPxl = (($lenYPxl - 1) * $DesktopWidth) + $lenXPxl
+    $lenXBite = $lenPxl * 4
+    ConsoleWrite('$lenXBite ' & $lenXBite  & @CRLF)
+    $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+    $tClrStruct = DllStructCreate($tagSTRUCT)
+    $pClrStruct = DllStructGetPtr($tClrStruct)
+
+    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+
+    For $y = 0 To $lenYPxl - 1
+        $yFull = $y * $DesktopWidth
+        ; ConsoleWrite($y & @CRLF)
+        For $x = 0 To $lenXPxl - 1
+            $addrWr = $yFull + $x + 1
+            ; ConsoleWrite($x & @CRLF)
+            If $colorCombination = 'RG' Then
+                $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100 + 0
+            ElseIf $colorCombination = 'RB' Then
+                $color = 0xFF*0x1000000 + $x*0x10000 + 0*0x100 + (255-$y)
+            ElseIf $colorCombination = 'GB' Then
+                $color = 0xFF*0x1000000 + 0*0x10000 + $x*0x100 + (255-$y)
+            Else
+                $color = 0
+            EndIf
+
+            DllStructSetData($tClrStruct, 1, $color, $addrWr)
+        Next
+        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    Next
+
+    If ProcessExists($iPidCM) Then
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
+    EndIf
+EndFunc   ;==>_FillSquare
 
 Func _CalculateBuffer()
     Local $hProcess
