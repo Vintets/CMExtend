@@ -75,9 +75,7 @@ Global $hDLLkernel32
 
 
 _Singleton(@ScriptName)  ; запуск только одной копии
-If @Compiled Then
-    ; FileInstall('ResourcesZomBot2\VK.jpg', @ScriptDir & '\ResourcesZomBot2\VK.jpg')
-EndIf
+
 
 _Init()
 _WaitCM()
@@ -469,9 +467,11 @@ EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 
 Func _Init()
-    FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 0)
-    FileInstall('CMTools\logger.cms', @ScriptDir & '\logger.cms', 0)
-    FileInstall('CMTools\CMTools_CMS.cms', @ScriptDir & '\CMTools_CMS.cms', 0)
+    If @Compiled Then
+        FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 0)
+        FileInstall('CMTools\logger.cms', @ScriptDir & '\logger.cms', 0)
+        FileInstall('CMTools\CMTools_CMS.cms', @ScriptDir & '\CMTools_CMS.cms', 0)
+    EndIf
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
