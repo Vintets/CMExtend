@@ -27,10 +27,13 @@ Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
 Global $startBuf, $startBufRd
+Global $aDesk = WinGetPos('Program Manager'), $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
 
 
 _WaitCM()
 ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+
+
 
 $startBuf = _CalculateBuffer()
 
