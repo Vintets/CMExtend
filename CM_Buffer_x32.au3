@@ -1,8 +1,8 @@
 #Region Header
 ;===================================================================================================
 ;
-; Title:            CM_Buffer
-; Filename:         CM_Buffer.au3
+; Title:            CM_Buffer_x32
+; Filename:         CM_Buffer_x32.au3
 ; Description:      Работа с буфером Clickermann
 ; Version:          1.0.5
 ; Requirement(s):   Autoit 3.3.14.5
