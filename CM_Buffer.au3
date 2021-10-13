@@ -93,6 +93,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
     ; 0x0             ; последняя строка
     ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
 
+    Local $hTimer = TimerInit()
     If ($startY < 0) Or ($startY > $yMax) Or ($startX < 0) Or ($startX > $xMax) Then
         Return
     EndIf
@@ -120,11 +121,11 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
             $addrWr = $yFull + $x + 1
             ; ConsoleWrite($x & @CRLF)
             If $colorCombination = 'RG' Then
-                $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100 + 0
+                $color = $x*0x10000 + (255-$y)*0x100  ; 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100 + 0
             ElseIf $colorCombination = 'RB' Then
-                $color = 0xFF*0x1000000 + $x*0x10000 + 0*0x100 + (255-$y)
+                $color = $x*0x10000 + (255-$y)  ; 0xFF*0x1000000 + $x*0x10000 + 0*0x100 + (255-$y)
             ElseIf $colorCombination = 'GB' Then
-                $color = 0xFF*0x1000000 + 0*0x10000 + $x*0x100 + (255-$y)
+                $color = $x*0x100 + (255-$y)  ; 0xFF*0x1000000 + 0*0x10000 + $x*0x100 + (255-$y)
             Else
                 $color = 0
             EndIf
@@ -138,6 +139,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
+    ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_FillSquare
 
 Func _CalculateBuffer()
