@@ -4,7 +4,7 @@
 ; Title:            CM_Buffer_x64
 ; Filename:         CM_Buffer_x64.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.5
+; Version:          1.0.6
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -148,52 +148,6 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
     ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_FillSquare
 
-Func _CalculateBuffer()
-    Local $hProcess
-    Local $pointer
-    Local Const $DesktopWidthSize = @DesktopWidth * 4
-    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
-    Local $tBf = DllStructCreate('DWORD')
-    Local $iAddressCM, $offset
-    ; Local $hDLLkernel32 = DllOpen('kernel32.dll')
-
-    $iAddressCM = 0x007CC6F0
-    $offset = 0x24
-
-    #cs
-    iAddressCM  007CC6F0
-    pointer  0298D730
-    startBuf  05130000
-    Screen 1 line  05FAD100
-    color  FFFA0000   RGB  250  0  0
-    #ce
-
-    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
-    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
-    If Not $hProcess Then
-        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
-        Return
-    EndIf
-
-    ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
-
-    ; Читаем адрес начала буфера в указателе
-    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
-    $pointer = DllStructGetData($tBf, 1)
-    ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 0298D730
-
-    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
-    $startBuf = DllStructGetData($tBf, 1)
-    ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
-
-    If ProcessExists($iPidCM) Then
-        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
-    EndIf
-    Return $startBuf
-EndFunc   ;==>_CalculateBuffer
-
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
     $repeated = False
@@ -271,4 +225,51 @@ Func _OpenProcess($ah_Handle, $iAccess, $fInherit, $iProcessID)
     If $aResult[0] Then Return $aResult[0]
     Return 0
 EndFunc   ;==>_OpenProcess
+
+Func _CalculateBuffer()
+    Local $hProcess
+    Local $pointer
+    Local Const $DesktopWidthSize = @DesktopWidth * 4
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $tBf = DllStructCreate('DWORD')
+    Local $iAddressCM, $offset
+
+    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    If Not $hProcess Then
+        ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        Return
+    EndIf
+
+    If $versionFullCM = '4.13.014x64' Then
+        $iAddressCM = 0x007CC6F0
+        $offset = 0x24
+
+        #cs
+        iAddressCM  007CC6F0
+        pointer  0298D730
+        startBuf  05130000
+        Screen 1 line  05FAD100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 0298D730
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
+    EndIf
+
+    If ProcessExists($iPidCM) Then
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
+    EndIf
+    Return $startBuf
+EndFunc   ;==>_CalculateBuffer
 
