@@ -4,10 +4,10 @@
 ; Title:            CM_Buffer_x64
 ; Filename:         CM_Buffer_x64.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.3
+; Version:          1.0.4
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             12.10.2021
+; Date:             13.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -39,8 +39,9 @@ $startBuf = _CalculateBuffer()
 
 ; _ReadLinePXLs(0, 0, 1)  ; $startX, $startY, $lenXPxl
 _FillSquare(0, 0, 'RG')
-; _FillSquare(260, 0, 'RB')
-; _FillSquare(0, 260, 'GB')
+_FillSquare(260, 0, 'RB')
+_FillSquare(0, 260, 'GB')
+_FillSquare(260, 260, 'R')
 
 DllClose($hDLLkernel32)
 
@@ -126,6 +127,8 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
                 $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)  ; + $x*0x10000 + 0*0x100 + (255-$y)
             ElseIf $colorCombination = 'GB' Then
                 $color = 0xFF*0x1000000 + $x*0x100 + (255-$y)  ; + 0*0x10000 + $x*0x100 + (255-$y)
+            ElseIf $colorCombination = 'R' Then
+                $color = 0xFF*0x1000000 + $x*0x10000
             Else
                 $color = 0
             EndIf
@@ -162,7 +165,7 @@ Func _CalculateBuffer()
     color  FFFA0000   RGB  250  0  0
     #ce
 
-    ; $hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
