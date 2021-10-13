@@ -121,11 +121,11 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
             $addrWr = $yFull + $x + 1
             ; ConsoleWrite($x & @CRLF)
             If $colorCombination = 'RG' Then
-                $color = $x*0x10000 + (255-$y)*0x100  ; 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100 + 0
+                $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100  ; + $x*0x10000 + (255-$y)*0x100 + 0
             ElseIf $colorCombination = 'RB' Then
-                $color = $x*0x10000 + (255-$y)  ; 0xFF*0x1000000 + $x*0x10000 + 0*0x100 + (255-$y)
+                $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)  ; + $x*0x10000 + 0*0x100 + (255-$y)
             ElseIf $colorCombination = 'GB' Then
-                $color = $x*0x100 + (255-$y)  ; 0xFF*0x1000000 + 0*0x10000 + $x*0x100 + (255-$y)
+                $color = 0xFF*0x1000000 + $x*0x100 + (255-$y)  ; + 0*0x10000 + $x*0x100 + (255-$y)
             Else
                 $color = 0
             EndIf
