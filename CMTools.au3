@@ -709,7 +709,7 @@ EndFunc   ;==>_ToggleMonitor
 
 Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
-    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
+    Local $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
     Local $gray_canal
     Local Const $DesktopWidthSize = @DesktopWidth * 4
@@ -735,13 +735,7 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
         Return
     EndIf
 
-    ; Читаем адрес начала буфера в указателе
-    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
-    $startbuf = DllStructGetData($tBf, 1)
-    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
-
-    $startBufRd = $startbuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
+    $startBufRd = $startBuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
     If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
         $lenPxl = @DesktopWidth * @DesktopHeight
         $lenXBite = $lenPxl * 4
@@ -806,7 +800,7 @@ EndFunc   ;==>_ColormodeGreyscale_5
 
 Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $hProcess
-    Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
+    Local $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
     Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenXPxl = ($fx2 - $fx1 + 1)
@@ -834,13 +828,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ConsoleWrite('(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')   ' & _
                 'mid_contr = ' & $fmid_contr & ',  k_contr = ' & $fk_contr & @CRLF)
 
-    ; Читаем адрес начала буфера в указателе
-    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-            'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
-    $startbuf = DllStructGetData($tBf, 1)
-    ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
-
-    $startBufRd = $startbuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
+    $startBufRd = $startBuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
     If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
         $lenPxl = @DesktopWidth * @DesktopHeight
         $lenXBite = $lenPxl * 4
