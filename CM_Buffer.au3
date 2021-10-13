@@ -131,9 +131,9 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
 
             DllStructSetData($tClrStruct, 1, $color, $addrWr)
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Next
+    DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
 
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)

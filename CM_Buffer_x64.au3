@@ -39,8 +39,8 @@ $startBuf = _CalculateBuffer()
 
 ; _ReadLinePXLs(0, 0, 1)  ; $startX, $startY, $lenXPxl
 _FillSquare(0, 0, 'RG')
-_FillSquare(260, 0, 'RB')
-_FillSquare(0, 260, 'GB')
+; _FillSquare(260, 0, 'RB')
+; _FillSquare(0, 260, 'GB')
 
 DllClose($hDLLkernel32)
 
@@ -131,9 +131,9 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
 
             DllStructSetData($tClrStruct, 1, $color, $addrWr)
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Next
+    DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
 
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
