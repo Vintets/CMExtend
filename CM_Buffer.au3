@@ -4,7 +4,7 @@
 ; Title:            CM_Buffer
 ; Filename:         CM_Buffer.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.4
+; Version:          1.0.5
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -21,10 +21,13 @@
 #include <Constants.au3>
 #EndRegion **** Includes ****
 
+Opt('MustDeclareVars', 1)
+
 Global $repeated = False
 Global $CM_name = 'Clickermann_'
 Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
-Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
+Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
+Global $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
 Global $startBuf
 Global $aDesk = WinGetPos('Program Manager')
@@ -33,7 +36,6 @@ Global $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
 
 
 _WaitCM()
-ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
 
 $startBuf = _CalculateBuffer()
 
@@ -50,6 +52,8 @@ Func _ReadLinePXLs($startX, $startY, $lenXPxl)
     Local $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $hProcess
     Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - $startY)) * 4) + ($startX * 4)
+    Local $x, $addrRd
+    Local $color, $R, $G, $B, $A
 
     ; ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
     ; 0x0             ; последняя строка
@@ -87,10 +91,11 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $hProcess
     Local $yFull, $addrWr
+    Local $color, $R, $G, $B, $A
     Local $lenXPxl = 256, $lenYPxl = 256
     Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - ($startY + ($lenYPxl - 1)))) * 4) + ($startX * 4)
 
-    ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
+    ; ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
     ; 0x0             ; последняя строка
     ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
 
@@ -107,7 +112,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
 
     $lenPxl = (($lenYPxl - 1) * $DesktopWidth) + $lenXPxl
     $lenXBite = $lenPxl * 4
-    ConsoleWrite('$lenXBite ' & $lenXBite  & @CRLF)
+    ; ConsoleWrite('$lenXBite ' & $lenXBite  & @CRLF)
     $tagSTRUCT = 'DWORD[' & $lenPxl &']'
     $tClrStruct = DllStructCreate($tagSTRUCT)
     $pClrStruct = DllStructGetPtr($tClrStruct)
@@ -117,10 +122,8 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
 
     For $y = 0 To $lenYPxl - 1
         $yFull = $y * $DesktopWidth
-        ; ConsoleWrite($y & @CRLF)
         For $x = 0 To $lenXPxl - 1
             $addrWr = $yFull + $x + 1
-            ; ConsoleWrite($x & @CRLF)
             If $colorCombination = 'RG' Then
                 $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100  ; + $x*0x10000 + (255-$y)*0x100 + 0
             ElseIf $colorCombination = 'RB' Then
@@ -130,7 +133,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
             ElseIf $colorCombination = 'R' Then
                 $color = 0xFF*0x1000000 + $x*0x10000
             Else
-                $color = 0
+                $color = 0xFF*0x1000000
             EndIf
 
             DllStructSetData($tClrStruct, 1, $color, $addrWr)
@@ -193,6 +196,7 @@ EndFunc   ;==>_CalculateBuffer
 
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
+    $repeated = False
     If Not _IsWinCM() Then
         MsgBox(16+4096, 'Внимание!', 'Окно Clickermann не найдено.' & @CRLF & 'Дополнительный функционал не подключен!', 3)
         Exit
@@ -209,14 +213,44 @@ Func _IsWinCM()
 
             $iPidCM = WinGetProcess($hWndCM)
             ; ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+
+            _GetVersionCM()
         EndIf
         $repeated = True
         return True
     Else
-        Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
+        $hWndCMM = ''
+        $hWndCM = ''
+        $hWndCMR = ''
+        $iPidCM = ''
         return False
     EndIf
 EndFunc   ;==>_IsWinCM
+
+Func _GetVersionCM()
+    Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
+    Local $pathFileCM = _WinAPI_GetProcessFileName($iPidCM)
+    ; Local $pathFileCM = _WinAPI_GetWindowFileName($hWndCMM)
+    Local $FileSize = FileGetSize($pathFileCM)
+    Local $FileVersion = FileGetVersion($pathFileCM)
+    Local $bitness
+
+    Switch $FileSize
+        Case 1773568
+            $bitness = 'x32'
+        Case 2554368
+            $bitness = 'x64'
+        Case Else
+            $bitness = ''
+    EndSwitch
+    $versionFullCM = $versionCMself & $bitness
+    IniWrite($fileini, 'clickermann', 'versionCMfull', $versionFullCM)
+
+    ; ConsoleWrite($pathFileCM & @CRLF)
+    ; ConsoleWrite('Размер файла в байтах ' & $FileSize & @CRLF)  ;2554368
+    ; ConsoleWrite('Version ' & $FileVersion & @CRLF)  ;4.13.0.0
+    ConsoleWrite('Version Full CM ' & $versionFullCM & @CRLF & @CRLF)
+EndFunc   ;==>_GetVersionCM
 
 Func _GetWin($type, $data)
     Local $hWndt = WinGetHandle($data), $text

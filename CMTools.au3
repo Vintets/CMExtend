@@ -4,7 +4,7 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.2.2
+; Version:          1.2.3
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -22,13 +22,13 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.2.2
+#AutoIt3Wrapper_Res_Fileversion=1.2.3
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.2.2
+#AutoIt3Wrapper_Res_Field=Version|1.2.3
 #AutoIt3Wrapper_Res_Field=Build|2021.10.13
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -47,6 +47,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region    **** Includes ****
 #include <WinAPI.au3>
+#include <WinAPIEx.au3>
 #include <SendMessage.au3>
 #include <Misc.au3>
 #include <MouseOnEvent.au3>
@@ -58,13 +59,13 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.2.2'
+Global $CMToolsVersion = '1.2.3'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
 Global $CM_title = ''
-Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
-Global $fileini = @ScriptDir & '\settings_cme.ini'
+Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
+Global $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
 Global $repeated = False
 Global $startBuf
 Global $WM_CMCOMMAND
@@ -496,6 +497,7 @@ EndFunc   ;==>_CheckINI
 
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
+    $repeated = False
     If Not _IsWinCM() Then
         MsgBox(16+4096, 'Внимание!', 'Окно Clickermann не найдено.' & @CRLF & 'Дополнительный функционал не подключен!', 3)
         Exit
@@ -512,14 +514,44 @@ Func _IsWinCM()
 
             $iPidCM = WinGetProcess($hWndCM)
             ; ConsoleWrite('Идентификатор PID ' & $iPidCM & @CRLF)
+
+            _GetVersionCM()
         EndIf
         $repeated = True
         return True
     Else
-        Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = ''
+        $hWndCMM = ''
+        $hWndCM = ''
+        $hWndCMR = ''
+        $iPidCM = ''
         return False
     EndIf
 EndFunc   ;==>_IsWinCM
+
+Func _GetVersionCM()
+    Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
+    Local $pathFileCM = _WinAPI_GetProcessFileName($iPidCM)
+    ; Local $pathFileCM = _WinAPI_GetWindowFileName($hWndCMM)
+    Local $FileSize = FileGetSize($pathFileCM)
+    Local $FileVersion = FileGetVersion($pathFileCM)
+    Local $bitness
+
+    Switch $FileSize
+        Case 1773568
+            $bitness = 'x32'
+        Case 2554368
+            $bitness = 'x64'
+        Case Else
+            $bitness = ''
+    EndSwitch
+    $versionFullCM = $versionCMself & $bitness
+    IniWrite($fileini, 'clickermann', 'versionCMfull', $versionFullCM)
+
+    ; ConsoleWrite($pathFileCM & @CRLF)
+    ; ConsoleWrite('Размер файла в байтах ' & $FileSize & @CRLF)  ;2554368
+    ; ConsoleWrite('Version ' & $FileVersion & @CRLF)  ;4.13.0.0
+    ConsoleWrite('Version Full CM ' & $versionFullCM & @CRLF & @CRLF)
+EndFunc   ;==>_GetVersionCM
 
 Func _WM_CLOSE($hWnd, $iMsg, $iwParam, $ilParam)
     GUIDelete($hGUImain)
@@ -566,7 +598,6 @@ Func _CalculateBuffer()
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
     Local $iAddressCM, $offset
-    Local $versionCM
 
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
@@ -575,8 +606,7 @@ Func _CalculateBuffer()
         Return
     EndIf
 
-    $versionCM = IniRead($fileini, 'clickermann', 'version_CM', '')
-    If $versionCM == '4.13.014' Then
+    If $versionFullCM = '4.13.014x64' Then
         $iAddressCM = 0x00655BB8
         $offset = 0x1C
         ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)

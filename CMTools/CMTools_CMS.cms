@@ -1,6 +1,6 @@
 ﻿#name "CMTools_CMS"
 // Author: Vint
-// Version: 1.1.1 (08.10.2021)
+// Version: 1.1.2 (13.10.2021)
 // Скрипт для Clickermann v4.13.014
 // подключение CMTools_CMS:
 // #include "CMTools\CMTools_CMS.cms"
@@ -521,7 +521,7 @@ END_SUB
 EXECUTE("CMTools\CMTools.exe")
 WAITMS(500)
 getHWND_CMTools()
-INIWRITE($main_ini, "version_CM", $_ver_self, "clickermann")
+INIWRITE($main_ini, "versionCM", $_ver_self, "clickermann")
 clear_message_queue()
 SETTHREAD(CME_GetResponse, 1)
 
