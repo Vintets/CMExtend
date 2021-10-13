@@ -27,12 +27,12 @@ Global $repeated = False
 Global $CM_name = 'Clickermann_'
 Global $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
-Global $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
+Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
 Global $hDLLkernel32 = DllOpen('kernel32.dll')
 Global $startBuf
-Global $aDesk = WinGetPos('Program Manager')
-Global $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
-Global $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
+Global Const $aDesk = WinGetPos('Program Manager')
+Global Const $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
+Global Const $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
 
 
 _WaitCM()
@@ -48,8 +48,8 @@ DllClose($hDLLkernel32)
 
 
 Func _ReadLinePXLs($startX, $startY, $lenXPxl)
-    Local $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $hProcess
+    Local $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - $startY)) * 4) + ($startX * 4)
     Local $x, $addrRd
     Local $color, $R, $G, $B, $A
@@ -86,20 +86,23 @@ Func _ReadLinePXLs($startX, $startY, $lenXPxl)
     Next
 EndFunc   ;==>_ReadLinePXLs
 
-Func _FillSquare($startX, $startY, $colorCombination = 'RG')
-    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+Func _FillSquare($fx1, $fy1, $colorCombination = 'RG')
     Local $hProcess
-    Local $yFull, $addrWr
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $yFull, $addrWrStruct
     Local $color, $R, $G, $B, $A
-    Local $lenXPxl = 256, $lenYPxl = 256
-    Local $startBufRd = $startBuf + (($DesktopWidth * ($yMax - ($startY + ($lenYPxl - 1)))) * 4) + ($startX * 4)
+    Local $fx2 = $fx1 + 255, $fy2 = $fy1 + 255
+    Local $lenXPxl = $fx2 - $fx1 + 1, $lenYPxl = $fy2 - $fy1 + 1
+    Local $startBufRd = $startBuf + _
+                (($DesktopWidth * ($yMax - $fy2)) * 4) + _
+                ($fx1 * 4)
 
     ; ConsoleWrite('startBufRd  ' & Hex($startBufRd, 8) & @CRLF)
     ; 0x0             ; последняя строка
     ; 0x0039F440 * 4  ; первая строка   ($DesktopWidth * ($DesktopHeight - 1)) * 4
 
     Local $hTimer = TimerInit()
-    If ($startY < 0) Or ($startY > $yMax) Or ($startX < 0) Or ($startX > $xMax) Then
+    If ($fy1 < 0) Or ($fy1 > $yMax) Or ($fx1 < 0) Or ($fx1 > $xMax) Then
         Return
     EndIf
 
@@ -122,7 +125,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
     For $y = 0 To $lenYPxl - 1
         $yFull = $y * $DesktopWidth
         For $x = 0 To $lenXPxl - 1
-            $addrWr = $yFull + $x + 1
+            $addrWrStruct = $yFull + $x + 1
             If $colorCombination = 'RG' Then
                 $color = 0xFF*0x1000000 + $x*0x10000 + (255-$y)*0x100  ; + $x*0x10000 + (255-$y)*0x100 + 0
             ElseIf $colorCombination = 'RB' Then
@@ -135,7 +138,7 @@ Func _FillSquare($startX, $startY, $colorCombination = 'RG')
                 $color = 0xFF*0x1000000
             EndIf
 
-            DllStructSetData($tClrStruct, 1, $color, $addrWr)
+            DllStructSetData($tClrStruct, 1, $color, $addrWrStruct)
         Next
     Next
     DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
@@ -228,7 +231,6 @@ EndFunc   ;==>_OpenProcess
 Func _CalculateBuffer()
     Local $hProcess
     Local $pointer
-    Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
     Local $iAddressCM, $offset
