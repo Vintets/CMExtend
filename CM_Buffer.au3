@@ -4,7 +4,7 @@
 ; Title:            CM_Buffer
 ; Filename:         CM_Buffer.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          2.0.0
+; Version:          2.0.1
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -36,8 +36,7 @@ Global $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
 
 
 _WaitCM()
-
-$startBuf = _CalculateBuffer()
+_CalculateBuffer()
 
 ; _ReadLinePXLs(0, 0, 1)  ; $startX, $startY, $lenXPxl
 _FillSquare(0, 0, 'RG')
@@ -296,6 +295,5 @@ Func _CalculateBuffer()
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
-    Return $startBuf
 EndFunc   ;==>_CalculateBuffer
 
