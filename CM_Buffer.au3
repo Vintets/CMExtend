@@ -1,10 +1,10 @@
 #Region Header
 ;===================================================================================================
 ;
-; Title:            CM_Buffer_x64
-; Filename:         CM_Buffer_x64.au3
+; Title:            CM_Buffer
+; Filename:         CM_Buffer.au3
 ; Description:      Работа с буфером Clickermann
-; Version:          1.0.6
+; Version:          2.0.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -241,7 +241,31 @@ Func _CalculateBuffer()
         Return
     EndIf
 
-    If $versionFullCM = '4.13.014x64' Then
+    If $versionFullCM = '4.13.014x32' Then
+        $iAddressCM = 0x00655BB8
+        $offset = 0x1C
+
+        #cs
+        iAddressCM  00655BB8
+        pointer  034CFCC0
+        startBuf  057B0000
+        Screen 1 line  0662D100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 034CFCC0
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
+    ElseIf $versionFullCM = '4.13.014x64' Then
         $iAddressCM = 0x007CC6F0
         $offset = 0x24
 
@@ -265,6 +289,8 @@ Func _CalculateBuffer()
                 'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
+    Else
+        $startBuf = 0
     EndIf
 
     If ProcessExists($iPidCM) Then
