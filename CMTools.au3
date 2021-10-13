@@ -4,7 +4,7 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.2.3
+; Version:          1.3.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             13.10.2021
@@ -22,13 +22,13 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.2.3
+#AutoIt3Wrapper_Res_Fileversion=1.3.0
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.2.3
+#AutoIt3Wrapper_Res_Field=Version|1.3.0
 #AutoIt3Wrapper_Res_Field=Build|2021.10.13
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -59,7 +59,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.2.3'
+Global $CMToolsVersion = '1.3.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -606,9 +606,18 @@ Func _CalculateBuffer()
         Return
     EndIf
 
-    If $versionFullCM = '4.13.014x64' Then
+    If $versionFullCM = '4.13.014x32' Then
         $iAddressCM = 0x00655BB8
         $offset = 0x1C
+
+        #cs
+        iAddressCM  00655BB8
+        pointer  034CFCC0
+        startBuf  057B0000
+        Screen 1 line  0662D100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
         ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
 
         ; Читаем адрес начала буфера в указателе
@@ -621,6 +630,32 @@ Func _CalculateBuffer()
                 'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 057B0000
+    ElseIf $versionFullCM = '4.13.014x64' Then
+        $iAddressCM = 0x007CC6F0
+        $offset = 0x24
+
+        #cs
+        iAddressCM  007CC6F0
+        pointer  0298D730
+        startBuf  05130000
+        Screen 1 line  05FAD100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 0298D730
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
+    Else
+        $startBuf = 0
     EndIf
 
     If ProcessExists($iPidCM) Then
