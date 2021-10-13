@@ -708,7 +708,7 @@ Func _ToggleMonitor($hwnd, $OnOff)
 EndFunc   ;==>_ToggleMonitor
 
 Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
-    Local $ah_Handle, $hProcess
+    Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
     Local $gray_canal
@@ -728,17 +728,15 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     EndIf
     If Not _IsWinCM() Then Return
 
-    $ah_Handle = DllOpen('kernel32.dll')
-
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
-    $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
         Return
     EndIf
 
     ; Читаем адрес начала буфера в указателе
-    DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
             'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
@@ -750,7 +748,7 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
         $tagSTRUCT = 'DWORD[' & $lenPxl &']'
         $tClrStruct = DllStructCreate($tagSTRUCT)
         $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
         For $x = 1 To $lenPxl
             $color = DllStructGetData($tClrStruct, 1, $x)
@@ -767,7 +765,7 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
-        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Else
         $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
@@ -775,7 +773,7 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
         $tagSTRUCT = 'DWORD[' & $lenPxl &']'
         $tClrStruct = DllStructCreate($tagSTRUCT)
         $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
         For $y = 0 To $fy2 - $fy1
             $yFull = $y * @DesktopWidth
@@ -796,19 +794,18 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
                 DllStructSetData($tClrStruct, 1, $color, $addrRd)
             Next
         Next
-        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     EndIf
 
     If ProcessExists($iPidCM) Then
-        DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
-    DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_ColormodeGreyscale_5
 
 Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
-    Local $ah_Handle, $hProcess
+    Local $hProcess
     Local $iRead, $iWrite, $startbuf, $startBufRd, $addrRd
     Local $color, $R, $G, $B, $A
     Local Const $DesktopWidthSize = @DesktopWidth * 4
@@ -827,10 +824,8 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     EndIf
     If Not _IsWinCM() Then Return
 
-    $ah_Handle = DllOpen('kernel32.dll')
-
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
-    $hProcess = _OpenProcess($ah_Handle, $PROCESS_ALL_ACCESS, 0, $iPidCM)
+    $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
         Return
@@ -840,7 +835,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                 'mid_contr = ' & $fmid_contr & ',  k_contr = ' & $fk_contr & @CRLF)
 
     ; Читаем адрес начала буфера в указателе
-    DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
             'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
     $startbuf = DllStructGetData($tBf, 1)
     ;ConsoleWrite('startbuf  ' & $startbuf & @CRLF)
@@ -852,7 +847,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
         $tagSTRUCT = 'DWORD[' & $lenPxl &']'
         $tClrStruct = DllStructCreate($tagSTRUCT)
         $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
         For $x = 1 To $lenPxl
             $color = DllStructGetData($tClrStruct, 1, $x)
@@ -913,7 +908,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
-        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Else
         $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
@@ -921,7 +916,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
         $tagSTRUCT = 'DWORD[' & $lenPxl &']'
         $tClrStruct = DllStructCreate($tagSTRUCT)
         $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($ah_Handle, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
         For $y = 0 To $fy2 - $fy1
             $yFull = $y * @DesktopWidth
@@ -986,14 +981,13 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                 DllStructSetData($tClrStruct, 1, $color, $addrRd)
             Next
         Next
-        DllCall($ah_Handle, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
                 'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     EndIf
 
     If ProcessExists($iPidCM) Then
-        DllCall($ah_Handle, 'bool', 'CloseHandle', 'handle', $hProcess)
+        DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
-    DllClose($ah_Handle)
     ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_ColormodeDramContrast
 
