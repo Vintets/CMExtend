@@ -69,6 +69,7 @@ Global $CM_name = ''
 Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
 Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
+Global $DesktopWidth, $DesktopHeight, $xMin , $yMin, $xMax, $yMax
 Global $repeated = False
 Global $startBuf
 Global $WM_CMCOMMAND
@@ -543,11 +544,14 @@ Func _DefinitionMonitors()
     If $__MonitorList[0][0] == 0 Then
         _GetMonitors()
         ; Local $aDesk = WinGetPos('Program Manager')
-        ; Global Const $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
-        ; Global Const $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
-        Global Const $DesktopWidth = $__MonitorList[0][5], $DesktopHeight = $__MonitorList[0][6]
-        Global Const $xMin = $__MonitorList[0][1], $yMin = $__MonitorList[0][2]
-        Global Const $xMax = $__MonitorList[0][3] - 1, $yMax = $__MonitorList[0][4] - 1
+        ; $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
+        ; $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
+        $DesktopWidth = $__MonitorList[0][5]
+        $DesktopHeight = $__MonitorList[0][6]
+        $xMin = $__MonitorList[0][1]
+        $yMin = $__MonitorList[0][2]
+        $xMax = $__MonitorList[0][3] - 1
+        $yMax = $__MonitorList[0][4] - 1
 
         ConsoleWrite('Desktop' & @CRLF)
         ConsoleWrite('    Min ' & $xMin & 'x' & $yMin & @CRLF)
