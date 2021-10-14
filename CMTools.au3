@@ -32,7 +32,8 @@
 #AutoIt3Wrapper_Res_Field=Build|2021.10.14
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
-#AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
+#AutoIt3Wrapper_Res_Field=AutoIt Version|3.3.14.5
+; #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 #Region    **** AutoItSetOption ****
