@@ -159,7 +159,7 @@ Func _COMMAND_555($hWnd, $iMsg, $iwParam, $ilParam)
     $iLW = BitAND($iwParam, 0xFFFF) ; младшее слово
     $iHW = BitShift($iwParam, 16) ; старшее слово
 
-    _SendCM(0x555, 1)
+    _SendCM(0x555, 1)  ; Ok
     ;Switch $hWndFrom
     ;    Case $hGUImain
     ;        Switch $iCode
@@ -430,7 +430,16 @@ Func _COMMAND_AI_SETREGION($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 '(' & $x1 & ', ' & $y1 & ', ' & $x2 & ', ' & $y2 & ')' & _
                 @CRLF)
-    _SendCM(1, 0xC420)
+    If $x2 < $x1 Or $y2 < $y1 Or _
+            $x1 > $xMax Or $x2 > $xMax Or _
+            $y1 > $yMax Or $y2 > $yMax Or _
+            $x1 < $xMin Or $x2 < $xMin Or _
+            $y1 < $yMin Or $y2 < $yMin Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        _SendCM(0xC420, 2)
+        Return
+    EndIf
+    _SendCM(0xC420, 1)  ; O
 EndFunc   ;==>_COMMAND_AI_SETREGION
 
 Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
@@ -448,8 +457,24 @@ Func _COMMAND_AI_GREYSCALE($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 '(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')' & _
                 @CRLF)
+
+    If Not _IsWinCM() Or $startBuf = 0 Or _
+            $fx2 < $fx1 Or $fy2 < $fy1 Or _
+            $fx1 > $xMax Or $fx2 > $xMax Or _
+            $fy1 > $yMax Or $fy2 > $yMax Or _
+            $fx1 < $xMin Or $fx2 < $xMin Or _
+            $fy1 < $yMin Or $fy2 < $yMin Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        _SendCM(0xC421, 2)
+        Return
+    EndIf
+
     _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
-    _SendCM(1, 0xC421)  ; Ok
+    If @error Then
+        _SendCM(0xC421, 2)
+        Return
+    EndIf
+    _SendCM(0xC421, 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_GREYSCALE
 
 Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
@@ -462,8 +487,24 @@ Func _COMMAND_AI_DRAMCONTRAST($hWnd, $iMsg, $iwParam, $ilParam)
                 $ilParam & '    ' & _
                 'mid_contr = ' & $mid_contr & ',    k_contr = ' & $k_contr & _
                 @CRLF)
+
+    If Not _IsWinCM() Or $startBuf = 0 Or _
+            $x2 < $x1 Or $y2 < $y1 Or _
+            $x1 > $xMax Or $x2 > $xMax Or _
+            $y1 > $yMax Or $y2 > $yMax Or _
+            $x1 < $xMin Or $x2 < $xMin Or _
+            $y1 < $yMin Or $y2 < $yMin Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
+        _SendCM(0xC422, 2)
+        Return
+    EndIf
+
     _ColormodeDramContrast($x1, $y1, $x2, $y2, $mid_contr, $k_contr)
-    _SendCM(1, 0xC422)  ; Ok
+    If @error Then
+        _SendCM(0xC422, 2)
+        Return
+    EndIf
+    _SendCM(0xC422, 1)  ; Ok
 EndFunc   ;==>_COMMAND_AI_DRAMCONTRAST
 
 #EndRegion **** COMMANDS function ****
@@ -760,18 +801,11 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
-    If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
-            ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
-            $fx2 < $fx1 Or $fy2 < $fy1 Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
-        Return
-    EndIf
-    If Not _IsWinCM() Then Return
-
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        SetError(1)
         Return
     EndIf
 
@@ -850,18 +884,11 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $iAddressCM
 
     ;Local $hTimer = TimerInit()
-    If ($fx1+1) > @DesktopWidth Or ($fx2+1) > @DesktopWidth Or _
-            ($fy1+1) > @DesktopHeight Or ($fy2+1) > @DesktopHeight Or _
-            $fx2 < $fx1 Or $fy2 < $fy1 Then
-        ConsoleWrite('Неправильные координаты' & @CRLF)
-        Return
-    EndIf
-    If Not _IsWinCM() Then Return
-
     ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        SetError(1)
         Return
     EndIf
 
