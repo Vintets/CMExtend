@@ -898,15 +898,17 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     ConsoleWrite('(' & $fx1 & ', ' & $fy1 & ', ' & $fx2 & ', ' & $fy2 & ')   ' & _
                 'mid_contr = ' & $fmid_contr & ',  k_contr = ' & $fk_contr & @CRLF)
 
-    $startBufRd = $startBuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
-    If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
-        $lenPxl = @DesktopWidth * @DesktopHeight
-        $lenXBite = $lenPxl * 4
-        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
-        $tClrStruct = DllStructCreate($tagSTRUCT)
-        $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    $lenPxl = (($lenYPxl - 1) * $DesktopWidth) + $lenXPxl
+    $lenXBite = $lenPxl * 4
+    $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+    $tClrStruct = DllStructCreate($tagSTRUCT)
+    $pClrStruct = DllStructGetPtr($tClrStruct)
+    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+
+    If $fx1 = $xMin And $fy1 = $yMin And $fx2 = $xMax And $fy2 = $yMax Then $bFullScreen = True
+    If $bFullScreen Then
+        ; ConsoleWrite('Весь экран' & @CRLF)
         For $x = 1 To $lenPxl
             $color = DllStructGetData($tClrStruct, 1, $x)
             $B = BitAND($color, 0xFF)
@@ -915,7 +917,7 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-            #Region    ************ Обработка ************
+            #Region    ************ Обработка DramContrast ************
             If (($R + $G + $B) / 3) > $fmid_contr Then
                 $R = $R + $fk_contr
                 $G = $G + $fk_contr
@@ -961,26 +963,18 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                     $B = 0
                 EndIf
             EndIf
-            $color = $R*65536 + $G*256 + $B
-            #EndRegion ************ Обработка ************
+            $color = 0xFF*0x1000000 + $R*0x10000 + $G*0x100 + $B
+            #EndRegion ************ Обработка DramContrast ************
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Else
-        $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
-        $lenXBite = $lenPxl * 4
-        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
-        $tClrStruct = DllStructCreate($tagSTRUCT)
-        $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
-        For $y = 0 To $fy2 - $fy1
-            $yFull = $y * @DesktopWidth
-            For $x = 1 To $lenXPxl
-                $addrRd = $yFull + $x
-                $color = DllStructGetData($tClrStruct, 1, $addrRd)
+        ; ConsoleWrite('Построчно' & @CRLF)
+        For $y = 0 To $lenYPxl - 1
+            $yFull = $y * $DesktopWidth
+            For $x = 0 To $lenXPxl - 1
+                $addrWrStruct = $yFull + $x + 1
+                $color = DllStructGetData($tClrStruct, 1, $addrWrStruct)
                 $B = BitAND($color, 0xFF)
                 $G = BitAND(BitShift($color, 8), 0xFF)
                 $R = BitAND(BitShift($color, 16), 0xFF)
@@ -1033,15 +1027,15 @@ Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
                         $B = 0
                     EndIf
                 EndIf
-                $color = $R*65536 + $G*256 + $B
+                $color = 0xFF*0x1000000 + $R*0x10000 + $G*0x100 + $B
                 #EndRegion ************ Обработка ************
 
-                DllStructSetData($tClrStruct, 1, $color, $addrRd)
+                DllStructSetData($tClrStruct, 1, $color, $addrWrStruct)
             Next
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     EndIf
+    DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
 
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
