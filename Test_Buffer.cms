@@ -1,0 +1,70 @@
+﻿#name "Test_Buffer"
+// Author: Vint
+// Version: 1.0.0 (14.10.2021)
+// Скрипт для Clickermann v4.13.014
+
+LOGCLEAR
+
+// подключение CMTools_CMS:
+//#include "CMTools_CMS.cms"
+//#include "CMTools\CMTools_CMS.cms"
+
+//                              Настройки
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// показывать окно лога. Глубина 0, 1, 2
+$log = 2
+
+
+//##############################################################################
+
+WAITMS(300)
+log_show()
+
+// 100х100
+$x1 = 750
+$y1 = 426
+$x2 = 849
+$y2 = 525
+
+// Full Screen
+//$x1 = 0
+//$y1 = 0
+//$x2 = $_xmax
+//$y2 = $_ymax
+
+GETSCREEN
+//HALT
+
+//SCREENSHOT
+//HALT
+
+
+$timer1 = $_ms
+
+//--- Тестирование функций -----------------------------------------------------
+
+//print("Test CME_SETREGION")
+//CME_SETREGION($x1, $y1, $x2, $y2)
+//print("")
+
+print("Test CME_GREYSCALE")
+CME_GREYSCALE($x1, $y1, $x2, $y2)
+print("")
+
+//print("Test CME_DRAMCONTRAST 1")
+//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 147, 25)
+//print("")
+
+//print("Test CME_DRAMCONTRAST 2")
+//CME_DRAMCONTRAST($x1, $y1, $x2, $y2, 160, 255)
+//print("")
+
+// =============================================================================
+
+print_timeaction("тест 1", $_ms - $timer1)
+
+SCREENSHOTEX($x1-1, $y1-1, $x2+1, $y2+1, "screen_100x100_", 0)
+
+HALT
+

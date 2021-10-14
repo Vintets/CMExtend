@@ -4,7 +4,7 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.3.2
+; Version:          1.4.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             14.10.2021
@@ -22,13 +22,13 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.3.2
+#AutoIt3Wrapper_Res_Fileversion=1.4.0
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.3.2
+#AutoIt3Wrapper_Res_Field=Version|1.4.0
 #AutoIt3Wrapper_Res_Field=Build|2021.10.14
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -62,7 +62,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.3.2'
+Global $CMToolsVersion = '1.4.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -91,6 +91,7 @@ _MainLoop()
 ;~ Local $hTimer = TimerInit()
 ;~ _ColormodeGreyscale_OLD4(750, 426, 849, 525)
 ;~ _ColormodeGreyscale(750, 426, 849, 525)
+;~ _ColormodeGreyscale(0, 0, 3519, 1079) ; 32878.3704 ms  35612.6536 ms
 ;~ ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 ;~ _SendCM(123, 456)
 
@@ -800,18 +801,17 @@ EndFunc   ;==>_ToggleMonitor
 
 Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
     Local $hProcess
-    Local $startBufRd, $addrRd
+    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
+    Local $yFull, $addrWrStruct
     Local $color, $R, $G, $B, $A
     Local $gray_canal
-    Local Const $DesktopWidthSize = @DesktopWidth * 4
-    Local $lenXPxl = ($fx2 - $fx1 + 1)
-    Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
-    Local $tBf = DllStructCreate('DWORD')
-    Local $yFull
-    Local $iAddressCM
+    Local $bFullScreen = False
+    Local $lenXPxl = $fx2 - $fx1 + 1, $lenYPxl = $fy2 - $fy1 + 1
+    Local $startBufRd = $startBuf + _
+                (($DesktopWidth * ($yMax - $fy2)) * 4) + _
+                ($fx1 * 4)
 
-    ;Local $hTimer = TimerInit()
-    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
+    ; Local $hTimer = TimerInit()
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
@@ -819,15 +819,17 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
         Return
     EndIf
 
-    $startBufRd = $startBuf + ($fy1 * $DesktopWidthSize) + ($fx1*4)
-    If $fx1 = 0 And $fy1 = 0 And ($fx2+1) = @DesktopWidth And ($fy2+1) = @DesktopHeight Then
-        $lenPxl = @DesktopWidth * @DesktopHeight
-        $lenXBite = $lenPxl * 4
-        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
-        $tClrStruct = DllStructCreate($tagSTRUCT)
-        $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+    $lenPxl = (($lenYPxl - 1) * $DesktopWidth) + $lenXPxl
+    $lenXBite = $lenPxl * 4
+    $tagSTRUCT = 'DWORD[' & $lenPxl &']'
+    $tClrStruct = DllStructCreate($tagSTRUCT)
+    $pClrStruct = DllStructGetPtr($tClrStruct)
+    DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
+
+    If $fx1 = $xMin And $fy1 = $yMin And $fx2 = $xMax And $fy2 = $yMax Then $bFullScreen = True
+    If $bFullScreen Then
+        ; ConsoleWrite('Весь экран' & @CRLF)
         For $x = 1 To $lenPxl
             $color = DllStructGetData($tClrStruct, 1, $x)
             $B = BitAND($color, 0xFF)
@@ -836,28 +838,20 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
             ;ConsoleWrite('color  ' & $color & '   RGB  ' & _
             ;            $R & '  ' & $G & '  ' & $B & '  ' & @CRLF)
 
-            #Region    ************ Обработка ************
+            #Region    ************ Обработка Greyscale ************
             $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
-            $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
-            #EndRegion ************ Обработка ************
+            $color = 0xFF*0x1000000 + $gray_canal*0x10000 + $gray_canal*0x100 + $gray_canal
+            #EndRegion ************ Обработка Greyscale ************
 
             DllStructSetData($tClrStruct, 1, $color, $x)
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     Else
-        $lenPxl = (($fy2 - $fy1) * @DesktopWidth) + $lenXPxl
-        $lenXBite = $lenPxl * 4
-        $tagSTRUCT = 'DWORD[' & $lenPxl &']'
-        $tClrStruct = DllStructCreate($tagSTRUCT)
-        $pClrStruct = DllStructGetPtr($tClrStruct)
-        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
-        For $y = 0 To $fy2 - $fy1
-            $yFull = $y * @DesktopWidth
-            For $x = 1 To $lenXPxl
-                $addrRd = $yFull + $x
-                $color = DllStructGetData($tClrStruct, 1, $addrRd)
+        ; ConsoleWrite('Построчно' & @CRLF)
+        For $y = 0 To $lenYPxl - 1
+            $yFull = $y * $DesktopWidth
+            For $x = 0 To $lenXPxl - 1
+                $addrWrStruct = $yFull + $x + 1
+                $color = DllStructGetData($tClrStruct, 1, $addrWrStruct)
                 $B = BitAND($color, 0xFF)
                 $G = BitAND(BitShift($color, 8), 0xFF)
                 $R = BitAND(BitShift($color, 16), 0xFF)
@@ -866,35 +860,34 @@ Func _ColormodeGreyscale($fx1, $fy1, $fx2, $fy2)
 
                 #Region    ************ Обработка ************
                 $gray_canal = Int(0.299*$R + 0.587*$G + 0.114*$B)
-                $color = $gray_canal*65536 + $gray_canal*256 + $gray_canal
+                $color = 0xFF*0x1000000 + $gray_canal*0x10000 + $gray_canal*0x100 + $gray_canal
                 #EndRegion ************ Обработка ************
 
-                DllStructSetData($tClrStruct, 1, $color, $addrRd)
+                DllStructSetData($tClrStruct, 1, $color, $addrWrStruct)
             Next
         Next
-        DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
-                'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
     EndIf
+    DllCall($hDLLkernel32, 'bool', 'WriteProcessMemory', 'handle', $hProcess, _
+            'ptr', $startBufRd, 'ptr', $pClrStruct, 'ulong_ptr', $lenXBite, 'ulong_ptr*', 0)
 
     If ProcessExists($iPidCM) Then
         DllCall($hDLLkernel32, 'bool', 'CloseHandle', 'handle', $hProcess)
     EndIf
-    ;ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
+    ; ConsoleWrite('Время выполнения  ' & TimerDiff($hTimer) & ' ms' & @CRLF)
 EndFunc   ;==>_ColormodeGreyscale_5
 
 Func _ColormodeDramContrast($fx1, $fy1, $fx2, $fy2, $fmid_contr, $fk_contr)
     Local $hProcess
-    Local $startBufRd, $addrRd
-    Local $color, $R, $G, $B, $A
-    Local Const $DesktopWidthSize = @DesktopWidth * 4
-    Local $lenXPxl = ($fx2 - $fx1 + 1)
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
-    Local $tBf = DllStructCreate('DWORD')
-    Local $yFull
-    Local $iAddressCM
+    Local $yFull, $addrWrStruct
+    Local $color, $R, $G, $B, $A
+    Local $bFullScreen = False
+    Local $lenXPxl = $fx2 - $fx1 + 1, $lenYPxl = $fy2 - $fy1 + 1
+    Local $startBufRd = $startBuf + _
+                (($DesktopWidth * ($yMax - $fy2)) * 4) + _
+                ($fx1 * 4)
 
     ;Local $hTimer = TimerInit()
-    ;$hProcess = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, 0, $iPidCM)
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
