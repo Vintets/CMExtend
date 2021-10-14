@@ -68,13 +68,18 @@ Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
 Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
-Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
 Global $DesktopWidth, $DesktopHeight, $xMin , $yMin, $xMax, $yMax
 Global $repeated = False
 Global $startBuf
 Global $WM_CMCOMMAND
 Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 Global $hDLLkernel32
+
+If @Compiled Then
+    Global Const $fileini = @ScriptDir & '\settings_cme.ini'
+Else
+    Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
+EndIf
 
 #EndRegion Global Constants and Variables
 
@@ -586,6 +591,7 @@ Func _WaitCM()
     $repeated = False
     If Not _IsWinCM() Then
         MsgBox(16+4096, 'Внимание!', 'Окно Clickermann не найдено.' & @CRLF & 'Дополнительный функционал не подключен!', 3)
+        SetError(1)
         Exit
     EndIf
 EndFunc   ;==>WaitCM
@@ -688,6 +694,7 @@ Func _CalculateBuffer()
     $hProcess = _OpenProcess($hDLLkernel32, $PROCESS_ALL_ACCESS, 0, $iPidCM)
     If Not $hProcess Then
         ConsoleWrite('Не удалось открыть память тестовой программы' & @CRLF)
+        SetError(1)
         Return
     EndIf
 
