@@ -7,7 +7,7 @@ LOGCLEAR
 
 // подключение CMTools_CMS:
 //#include "CMTools_CMS.cms"
-//#include "CMTools\CMTools_CMS.cms"
+#include "CMTools\CMTools_CMS.cms"
 
 //                              Настройки
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
