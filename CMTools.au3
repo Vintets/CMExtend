@@ -67,6 +67,7 @@ Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
 Global $CM_title = ''
+Global $fileini = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
 Global $DesktopWidth, $DesktopHeight, $xMin , $yMin, $xMax, $yMax
 Global $repeated = False
@@ -74,12 +75,6 @@ Global $startBuf
 Global $WM_CMCOMMAND
 Global $MouseWheelScrollEvent_Tooltip, $MouseMoveEvent_Tooltip
 Global $hDLLkernel32
-
-If @Compiled Then
-    Global Const $fileini = @ScriptDir & '\settings_cme.ini'
-Else
-    Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
-EndIf
 
 #EndRegion Global Constants and Variables
 
@@ -521,6 +516,10 @@ Func _Init()
         FileInstall('CMTools\settings_cme_default.ini', @ScriptDir & '\settings_cme.ini', 0)
         FileInstall('CMTools\logger.cms', @ScriptDir & '\logger.cms', 0)
         FileInstall('CMTools\CMTools_CMS.cms', @ScriptDir & '\CMTools_CMS.cms', 0)
+
+        $fileini = @ScriptDir & '\settings_cme.ini'
+    Else
+        $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
     EndIf
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
