@@ -90,10 +90,10 @@ THREAD(CME_GetResponse, 0) //--- получение сообщений ---------
             $CME_command = $lPar
             $CME_return = $wPar
             login_message()
-            IF(($CME_command == AI_MouseWheelScrollEvent) | ($CME_command == AI_MouseWheelScrollEventUpDown))
+            IF(($CME_command == 0xC407) | ($CME_command == 0xC408))
                 $WheelScrollEvent = $CME_return
             END_IF
-            IF($CME_command == AI_MouseMoveEvent)
+            IF($CME_command == 0xC409)
                 $MouseMoveEvent = $CME_return
             END_IF
         END_IF
