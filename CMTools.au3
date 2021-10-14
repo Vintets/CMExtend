@@ -4,10 +4,10 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.3.0
+; Version:          1.3.2
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             13.10.2021
+; Date:             14.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -22,14 +22,14 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.3.0
+#AutoIt3Wrapper_Res_Fileversion=1.3.2
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.3.0
-#AutoIt3Wrapper_Res_Field=Build|2021.10.13
+#AutoIt3Wrapper_Res_Field=Version|1.3.2
+#AutoIt3Wrapper_Res_Field=Build|2021.10.14
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -46,6 +46,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 #EndRegion **** AutoItSetOption ****
 
 #Region    **** Includes ****
+#include-Once
 #include <WinAPI.au3>
 #include <WinAPIEx.au3>
 #include <SendMessage.au3>
@@ -55,17 +56,19 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 #include <WindowsConstants.au3>
 #include <Constants.au3>
 #include <GUIConstantsEx.au3>
+#include <MultiMon.au3>
+#include <Array.au3>
 #EndRegion **** Includes ****
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.3.0'
+Global $CMToolsVersion = '1.3.2'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
 Global $CM_title = ''
 Global $hWndCMM = '', $hWndCM = '', $hWndCMR = '', $iPidCM = '', $versionFullCM = ''
-Global $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
+Global Const $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
 Global $repeated = False
 Global $startBuf
 Global $WM_CMCOMMAND
@@ -374,7 +377,6 @@ EndFunc   ;==>_COMMAND_AI_MouseMoveEvent
 
 
 ; ToDo
-
 #CS
 ToolTip Создаёт всплывающую подсказку в любом месте экрана
     https://autoit-script.ru/docs/functions/tooltip.htm
@@ -411,7 +413,6 @@ ControlGetText Возвращает текст из элемента
 ControlSetText Устанавливает текст в элемент
 ControlListView Высылает команду элементу ListView32
 #CE
-
 
 
 
@@ -482,6 +483,7 @@ Func _Init()
 
     $MouseWheelScrollEvent_Tooltip = Int(IniRead($fileini, 'other', 'MouseWheelScrollEvent_Tooltip', 0))
     $MouseMoveEvent_Tooltip = Int(IniRead($fileini, 'other', 'MouseMoveEvent_Tooltip', 0))
+    _DefinitionMonitors()
 EndFunc   ;==>_Init
 
 Func _CheckINI()
@@ -494,6 +496,45 @@ Func _CheckINI()
         Exit
     EndIf
 EndFunc   ;==>_CheckINI
+
+Func _DefinitionMonitors()
+    Local $Desktop, $sDataMonitor
+    If $__MonitorList[0][0] == 0 Then
+        _GetMonitors()
+        ; Local $aDesk = WinGetPos('Program Manager')
+        ; Global Const $DesktopWidth = $aDesk[2], $DesktopHeight = $aDesk[3]
+        ; Global Const $xMax = $DesktopWidth - 1, $yMax = $DesktopHeight - 1
+        Global Const $DesktopWidth = $__MonitorList[0][5], $DesktopHeight = $__MonitorList[0][6]
+        Global Const $xMin = $__MonitorList[0][1], $yMin = $__MonitorList[0][2]
+        Global Const $xMax = $__MonitorList[0][3] - 1, $yMax = $__MonitorList[0][4] - 1
+
+        ConsoleWrite('Desktop' & @CRLF)
+        ConsoleWrite('    Min ' & $xMin & 'x' & $yMin & @CRLF)
+        ConsoleWrite('    Max ' & $xMax & 'x' & $yMax & @CRLF)
+        ConsoleWrite('    Width/Height ' & $DesktopWidth & 'x' & $DesktopHeight & @CRLF)
+
+        For $mon = 1 To 4
+            IniDelete($fileini, 'main' , 'monitor_' & $mon)
+        Next
+
+        $Desktop = ''
+        For $i = 0 To 6
+            if $i > 0 Then $Desktop &= ':'
+            $Desktop &= $__MonitorList[0][$i]
+        Next
+        IniWrite($fileini, 'main', 'desktop', $Desktop)
+
+        For $mon = 1 To $__MonitorList[0][0]
+            $sDataMonitor = ''
+            For $i = 0 To 6
+                if $i > 0 Then $sDataMonitor &= ':'
+                $sDataMonitor &= $__MonitorList[$mon][$i]
+            Next
+            IniWrite($fileini, 'main', 'monitor_' & $mon, $sDataMonitor)
+        Next
+        ; _ArrayDisplay($__MonitorList, 'Monitors', Default, Default, '|', 'hMonitor|left|top|right|bottom|width|height')
+    EndIf
+EndFunc   ;==>_DefinitionMonitors
 
 Func _WaitCM()
     $hWndCM = WinWait($CM_title, '', 3)
@@ -594,7 +635,6 @@ EndFunc   ;==>_OpenProcess
 Func _CalculateBuffer()
     Local $hProcess
     Local $pointer
-    Local Const $DesktopWidthSize = @DesktopWidth * 4
     Local $lenPxl, $lenXBite, $tagSTRUCT, $tClrStruct, $pClrStruct
     Local $tBf = DllStructCreate('DWORD')
     Local $iAddressCM, $offset

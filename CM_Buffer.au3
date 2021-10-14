@@ -103,6 +103,7 @@ Func _FillSquare($fx1, $fy1, $colorCombination = 'RG')
 
     Local $hTimer = TimerInit()
     If ($fy1 < 0) Or ($fy1 > $yMax) Or ($fx1 < 0) Or ($fx1 > $xMax) Then
+        ConsoleWrite('Неправильные координаты' & @CRLF)
         Return
     EndIf
 
