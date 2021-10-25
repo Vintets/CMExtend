@@ -4,10 +4,10 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.4.0
+; Version:          1.4.1
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             14.10.2021
+; Date:             25.10.2021
 ;
 ;===================================================================================================
 #EndRegion Header
@@ -22,14 +22,14 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.4.0
+#AutoIt3Wrapper_Res_Fileversion=1.4.1
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.4.0
-#AutoIt3Wrapper_Res_Field=Build|2021.10.14
+#AutoIt3Wrapper_Res_Field=Version|1.4.1
+#AutoIt3Wrapper_Res_Field=Build|2021.10.25
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 #AutoIt3Wrapper_Res_Field=AutoIt Version|3.3.14.5
@@ -63,7 +63,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.4.0'
+Global $CMToolsVersion = '1.4.1'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -622,22 +622,20 @@ Func _IsWinCM()
 EndFunc   ;==>_IsWinCM
 
 Func _GetVersionCM()
-    Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
+    ; Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
     Local $pathFileCM = _WinAPI_GetProcessFileName($iPidCM)
     ; Local $pathFileCM = _WinAPI_GetWindowFileName($hWndCMM)
     Local $FileSize = FileGetSize($pathFileCM)
     Local $FileVersion = FileGetVersion($pathFileCM)
-    Local $bitness
 
     Switch $FileSize
         Case 1773568
-            $bitness = 'x32'
+            $versionFullCM = '4.13.014x32'
         Case 2554368
-            $bitness = 'x64'
+            $versionFullCM = '4.13.014x64'
         Case Else
-            $bitness = ''
+            $versionFullCM = ''
     EndSwitch
-    $versionFullCM = $versionCMself & $bitness
     IniWrite($fileini, 'clickermann', 'versionCMfull', $versionFullCM)
 
     ; ConsoleWrite($pathFileCM & @CRLF)
