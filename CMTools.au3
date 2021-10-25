@@ -4,7 +4,7 @@
 ; Title:            CMTools
 ; Filename:         CMTools.au3
 ; Description:      Дополнительные команды для Clickermann
-; Version:          1.4.1
+; Version:          1.5.0
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
 ; Date:             25.10.2021
@@ -22,13 +22,13 @@
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_UseUpx=y
 
-#AutoIt3Wrapper_Res_Fileversion=1.4.1
+#AutoIt3Wrapper_Res_Fileversion=1.5.0
 #AutoIt3Wrapper_Res_LegalCopyright=(c)2021 Vint
 #AutoIt3Wrapper_Res_Description=additional functionality for Clickermann
 #AutoIt3Wrapper_Res_Comment=CMTools
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=highestAvailable ; None, asInvoker (как родительский), highestAvailable (наивысшими доступными текущему пользователю) или requireAdministrator (с правами администратора)
-#AutoIt3Wrapper_Res_Field=Version|1.4.1
+#AutoIt3Wrapper_Res_Field=Version|1.5.10
 #AutoIt3Wrapper_Res_Field=Build|2021.10.25
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
@@ -63,7 +63,7 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 
 #Region Global Constants and Variables
 
-Global $CMToolsVersion = '1.4.1'
+Global $CMToolsVersion = '1.5.0'
 Global $hGUImain
 Global $x1, $y1, $x2, $y2
 Global $CM_name = ''
@@ -633,6 +633,8 @@ Func _GetVersionCM()
             $versionFullCM = '4.13.014x32'
         Case 2554368
             $versionFullCM = '4.13.014x64'
+        Case 2002432
+            $versionFullCM = '4.14.003bx32'
         Case Else
             $versionFullCM = ''
     EndSwitch
@@ -745,6 +747,30 @@ Func _CalculateBuffer()
                 'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
+    ElseIf $versionFullCM = '4.14.003bx32' Then
+        $iAddressCM = 0x0065FC20
+        $offset = 0x1C
+
+        #cs
+        iAddressCM  0065FC20
+        pointer  0296FCC0
+        startBuf  05090000
+        Screen 1 line  0662D100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 0296FCC0
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05090000
     Else
         $startBuf = 0
     EndIf

@@ -185,22 +185,22 @@ Func _IsWinCM()
 EndFunc   ;==>_IsWinCM
 
 Func _GetVersionCM()
-    Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
+    ; Local $versionCMself = IniRead($fileini, 'clickermann', 'versionCM', '')  ; '4.13.014'
     Local $pathFileCM = _WinAPI_GetProcessFileName($iPidCM)
     ; Local $pathFileCM = _WinAPI_GetWindowFileName($hWndCMM)
     Local $FileSize = FileGetSize($pathFileCM)
     Local $FileVersion = FileGetVersion($pathFileCM)
-    Local $bitness
 
     Switch $FileSize
         Case 1773568
-            $bitness = 'x32'
+            $versionFullCM = '4.13.014x32'
         Case 2554368
-            $bitness = 'x64'
+            $versionFullCM = '4.13.014x64'
+        Case 2002432
+            $versionFullCM = '4.14.003bx32'
         Case Else
-            $bitness = ''
+            $versionFullCM = ''
     EndSwitch
-    $versionFullCM = $versionCMself & $bitness
     IniWrite($fileini, 'clickermann', 'versionCMfull', $versionFullCM)
 
     ; ConsoleWrite($pathFileCM & @CRLF)
@@ -291,6 +291,30 @@ Func _CalculateBuffer()
                 'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
         $startBuf = DllStructGetData($tBf, 1)
         ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05130000
+    ElseIf $versionFullCM = '4.14.003bx32' Then
+        $iAddressCM = 0x0065FC20
+        $offset = 0x1C
+
+        #cs
+        iAddressCM  0065FC20
+        pointer  0296FCC0
+        startBuf  05090000
+        Screen 1 line  0662D100
+        color  FFFA0000   RGB  250  0  0
+        #ce
+
+        ConsoleWrite('iAddressCM  ' & Hex($iAddressCM, 8) & @CRLF)
+
+        ; Читаем адрес начала буфера в указателе
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $iAddressCM, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $pointer = DllStructGetData($tBf, 1)
+        ConsoleWrite('pointer  ' & Hex($pointer, 8) & @CRLF)  ; 0296FCC0
+
+        DllCall($hDLLkernel32, 'bool', 'ReadProcessMemory', 'handle', $hProcess, _
+                'ptr', $pointer + $offset, 'ptr', DllStructGetPtr($tBf), 'ulong_ptr', 4, 'ulong_ptr*', 0)
+        $startBuf = DllStructGetData($tBf, 1)
+        ConsoleWrite('startBuf  ' & Hex($startBuf, 8) & @CRLF)  ; 05090000
     Else
         $startBuf = 0
     EndIf
