@@ -44,6 +44,8 @@ Opt('WinSearchChildren', 1)  ; Поиск окон верхнего уровня
 #include <WindowsConstants.au3>
 #include <GUIConstants.au3>
 #include <GUIConstantsEx.au3>
+
+#Include <Skin.au3>
 #EndRegion ************ Includes ************
 
 
@@ -54,28 +56,79 @@ Global $CM_name = ''
 Global $CM_title = ''
 Global $repeated = False
 Global $aWindows2D[3][14], $k = 0
+Global $hGuiExMain
 Global $path = ''
+Global $aIcons[2][3], $ahIcons[2]
+Global $bRegion, $bDistance
+Global $nMsg
 
 
 _Init()
 _Starting()
 _LogPos()
+; _CreateExWindowMain()
+_CreateExWindowEditor()
 
-
-Global $hGuiDummyMain
-; $hGuiDummyMain = GUICreate('dummy_main', $aPosCM[2]-6, $aPosCM[3]-30*2, 0, 30, BitOR($WS_POPUP, $WS_BORDER))
-$hGuiDummyMain = GUICreate('dummy_main', $aPosCM[2]-6, $aPosCM[3]-30-29, 0, 30, $WS_POPUP)
-GUISetBkColor(0xD7EAE2)
-_WinAPI_SetParent($hGuiDummyMain, $hWndCM)
-GUISetState(@SW_SHOW, $hGuiDummyMain)
-; Sleep(10000)
 
 
 While 1
-    ; _CheckAvailable()
-    Sleep(500)
+    _Skin_Helper($hGuiExMain)
+    $nMsg = GUIGetMsg()
+    Switch $nMsg
+        Case $GUI_EVENT_CLOSE
+            _Skin_DeleteButton($bRegion)
+            _Skin_DeleteButton($bDistance)
+            Exit
+    Case $bDistance
+        ConsoleWrite('Distance' & @CR)
+    Case $bRegion
+        ConsoleWrite('Region' & @CR)
+    EndSwitch
+    Sleep(20)
 WEnd
 
+Func _CreateExWindowEditor()
+    Local $w = 126, $h = 200
+    Local $hPng, $hBitmap
+
+    $hGuiExMain = GUICreate('CME_ExMain', $w, $h, 1, 430, $WS_POPUP)
+    GUISetBkColor(0xF0F0F0)  ; 0xF8F8FF   0xD7EAE2
+    _WinAPI_SetParent($hGuiExMain, $hWndCMR)
+    GUICtrlSetState($hGuiExMain, $GUI_DISABLE)
+    GUICtrlCreateGroup('', 1, -5, $w-2, $h+5)
+
+
+    #CS
+    #Include <ButtonConstants.au3>
+    #Include <GDIPlus.au3>
+    #Include <WinAPIEx.au3>
+    $bDistance = GUICtrlCreateButton('', 2, 2, 16, 14, BitOR($BS_BITMAP, $BS_FLAT))
+    ; GUICtrlSetImage($bDistance, $aIcons[0])
+
+    _GDIPlus_Startup()
+    $hPng = _GDIPlus_ImageLoadFromFile($aIcons[0])
+    $hBitmap = _GDIPlus_BitmapCreateDIBFromBitmap($hPng)
+    _GDIPlus_ImageDispose($hPng)
+    _GDIPlus_ShutDown()
+    ;GUICtrlSendMsg(-1, $BM_SETIMAGE, $IMAGE_BITMAP, $hBitmap)
+    GUICtrlSendMsg(-1, 0x00F7, 0, $hBitmap)
+    #CE
+
+    $bRegion = _Skin_AddButton(3, 3, 16, 14, $aIcons[0][0], $aIcons[0][1], $aIcons[0][2], $aIcons[0][0], 'alpha.png', 1, 'Прямоугольная область')
+    $bDistance = _Skin_AddButton(21, 3, 16, 14, $aIcons[1][0], $aIcons[1][1], $aIcons[1][2], $aIcons[1][0], 'alpha.png', 1, 'Расстояние между точками')
+
+    GUISetState(@SW_SHOW, $hGuiExMain)
+EndFunc   ;==>_CreateExWindowEditor
+
+Func _CreateExWindowMain()
+    Local $hGuiDummyMain
+    ; $hGuiDummyMain = GUICreate('dummy_main', $aPosCM[2]-6, $aPosCM[3]-30*2, 0, 30, BitOR($WS_POPUP, $WS_BORDER))
+    $hGuiDummyMain = GUICreate('dummy_main', $aPosCM[2]-6, $aPosCM[3]-30-29, 0, 30, $WS_POPUP)
+    GUISetBkColor(0xD7EAE2)
+    _WinAPI_SetParent($hGuiDummyMain, $hWndCM)
+    GUISetState(@SW_SHOW, $hGuiDummyMain)
+    ; Sleep(10000)
+EndFunc   ;==>_CreateExWindowMain
 
 Func _Init()
     If @Compiled Then
@@ -84,6 +137,7 @@ Func _Init()
         $path = @ScriptDir & '\CMTools'
     EndIf
     $fileini = $path & '\settings_cme.ini'
+    Global $aIcons[2][3] = [[$path & '\region.png', $path & '\region_hover.png', $path & '\region_click.png'], [$path & '\distance.png', $path & '\distance_hover.png', $path & '\distance_click.png']]
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
