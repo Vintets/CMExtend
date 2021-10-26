@@ -4,10 +4,10 @@
 ; Title:            CMExtend
 ; Filename:         CMTools.au3
 ; Description:      CMExtend
-; Version:          0.0.3
+; Version:          0.0.4
 ; Requirement(s):   Autoit 3.3.14.5
 ; Author(s):        Vint
-; Date:             21.10.2021
+; Date:             25.10.2021
 ;
 ;===============================================================================
 #EndRegion Header
@@ -16,12 +16,12 @@
 #AutoIt3Wrapper_Icon=cmex.ico
 #AutoIt3Wrapper_Compression=4
 #AutoIt3Wrapper_Res_Comment=CMExtend
-#AutoIt3Wrapper_Res_Fileversion=0.0.3
+#AutoIt3Wrapper_Res_Fileversion=0.0.4
 #AutoIt3Wrapper_Res_LegalCopyright=Vint
 #AutoIt3Wrapper_Res_Language=1049
 #AutoIt3Wrapper_Res_requestedExecutionLevel=None
-#AutoIt3Wrapper_Res_Field=Version|0.0.3
-#AutoIt3Wrapper_Res_Field=Build|2021.10.21
+#AutoIt3Wrapper_Res_Field=Version|0.0.4
+#AutoIt3Wrapper_Res_Field=Build|2021.10.25
 #AutoIt3Wrapper_Res_Field=Coded by|Vint
 #AutoIt3Wrapper_Res_Field=Compile date|%longdate% %time%
 ; #AutoIt3Wrapper_Res_Field=AutoIt Version|%AutoItVer%
@@ -147,11 +147,6 @@ Func _ReadPosCM($type)
     EndIf
 EndFunc   ;==>_ReadPosCM
 
-Func _SetPosCM($type)
-;~     WinMove("title", "text", x, y , width , height)
-;~     _WinAPI_MoveWindow($hWnd, 10, 10, 200, 300)
-EndFunc   ;==>_SetPosCM
-
 Func _CheckINI()
     Local $temp
     $temp = IniRead($fileini, 'clickermann', 'program_name', 0)
@@ -162,6 +157,23 @@ Func _CheckINI()
         Exit
     EndIf
 EndFunc   ;==>_CheckINI
+
+Func _LogPos()
+    Local $text
+    $text = 'CM_X ' & $aPosCM[0] & '  CM_Y ' & $aPosCM[1]
+    $text &= '  CM_W ' & $aPosCM[2] & '  CM_H ' & $aPosCM[3] & @CRLF
+    $text &= 'CMR_X ' & $aPosCMR[0] & '  CMR_Y ' & $aPosCMR[1]
+    $text &= '  CMR_W ' & $aPosCMR[2] & '  CMR_H ' & $aPosCMR[3] & @CRLF
+    ConsoleWrite($text)
+EndFunc   ;==>_LogPos
+
+
+
+
+Func _SetPosCM($type)
+;~     WinMove("title", "text", x, y , width , height)
+;~     _WinAPI_MoveWindow($hWnd, 10, 10, 200, 300)
+EndFunc   ;==>_SetPosCM
 
 Func _AllWindInfo()
     Local $aWindows, $s = Chr(1)
@@ -186,7 +198,7 @@ Func _AllWindInfo()
     _AddWinInfo(2, $hWndCMR)
     _ArrayDisplay($aWindows2D, 'Окна', Default, 0, $s, $s, $colnames)
     ConsoleWrite('Мы здесь' & @CRLF)
-EndFunc   ;==>_AllWindInf
+EndFunc   ;==>_AllWindInfo
 
 Func _AddWinInfo($num, $hWndt)
     Local $aPos = WinGetPos($hWndt)
@@ -223,17 +235,7 @@ Func _AddWinInfo($num, $hWndt)
 
     $aWindows2D[$num][13] = WinGetProcess($hWndt)
     ;$aWindows2D[$num][100] = WinGetText($hWndt)
-EndFunc   ;==>_WinInfo
-
-Func _LogPos()
-    Local $text
-    $text = 'CM_X ' & $aPosCM[0] & '  CM_Y ' & $aPosCM[1]
-    $text &= '  CM_W ' & $aPosCM[2] & '  CM_H ' & $aPosCM[3] & @CRLF
-    $text &= 'CMR_X ' & $aPosCMR[0] & '  CMR_Y ' & $aPosCMR[1]
-    $text &= '  CMR_W ' & $aPosCMR[2] & '  CMR_H ' & $aPosCMR[3] & @CRLF
-    ConsoleWrite($text)
-EndFunc   ;==>_LogPos
-
+EndFunc   ;==>_AddWinInfo
 
 Func _Restart()
     Local $sAutoIt_File = @TempDir & "\~Au3_ScriptRestart_TempFile.au3"
