@@ -104,7 +104,7 @@ Func _WaitCM()
 EndFunc   ;==>WaitCM
 
 Func _IsWinCM()
-    $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:' & $CM_name & '; W:0; H:0]')
+    $hWndCMM = _GetWin('базовое', '[CLASS:TApplication; TITLE:' & $CM_name & ']')  ; ; W:0; H:0
     $hWndCM = _GetWin('главное', $CM_title)
     If $hWndCMM And $hWndCM Then
         if Not $repeated Then
