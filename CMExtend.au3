@@ -54,6 +54,7 @@ Global $CM_name = ''
 Global $CM_title = ''
 Global $repeated = False
 Global $aWindows2D[3][14], $k = 0
+Global $path = ''
 
 
 _Init()
@@ -78,10 +79,11 @@ WEnd
 
 Func _Init()
     If @Compiled Then
-        $fileini = @ScriptDir & '\settings_cme.ini'
+        $path = @ScriptDir
     Else
-        $fileini = @ScriptDir & '\CMTools\settings_cme.ini'
+        $path = @ScriptDir & '\CMTools'
     EndIf
+    $fileini = $path & '\settings_cme.ini'
     _CheckINI()
     $CM_name = IniRead($fileini, 'clickermann', 'program_name', 'Clickermann')
     $CM_title = '[TITLE:' & $CM_name & '; W:310; H:194]'
